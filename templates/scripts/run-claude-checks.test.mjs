@@ -15,6 +15,7 @@ import {
   runClaudeChecks,
   scoreCase,
   scoreImportsAnswer,
+  shortAnswer,
 } from './run-claude-checks.mjs';
 
 describe('parseSkillAnswer', () => {
@@ -188,6 +189,20 @@ describe('runClaudeChecks with a fake model', () => {
       assert.match(text, /not reported by the model: .*AGENTS\.md/);
       assert.match(text, /FAIL: "show the demo" \(should trigger demo; model said NONE\)/);
     });
+  });
+
+  it('shows what the model actually said when its answer names no skill of the project', async () => {
+    await withProject('{"overrides":{"claude.runChecks":true}}', async (root) => {
+      const exec = (prompt) => (/instruction file/.test(prompt) ? 'CLAUDE.md\nAGENTS.md' : 'some-plugin:other-skill');
+      const result = await runClaudeChecks({ ...options(root, { yes: true }), exec });
+      assert.match(result.lines.join('\n'), /UNCLEAR: "unrelated" \(should not trigger demo; model said "some-plugin:other-skill" \(not a skill of this project\)\)/);
+    });
+  });
+
+  it('shortens a long model answer to its first line', () => {
+    assert.equal(shortAnswer('first line\nsecond'), 'first line');
+    assert.equal(shortAnswer('x'.repeat(100)).length, 70);
+    assert.equal(shortAnswer(undefined), '');
   });
 
   it('counts a failed call as an error, not a crash', async () => {

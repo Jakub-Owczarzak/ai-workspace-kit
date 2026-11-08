@@ -127,6 +127,12 @@ export function gateRun({ enabled, yes, dryRun, callCount }) {
   return { action: 'run', message: `Running ${callCount} call(s) to \`claude -p\`...` };
 }
 
+/** The first line of a model answer, cut to 70 characters, for reports. */
+export function shortAnswer(output) {
+  const firstLine = String(output ?? '').trim().split('\n')[0] ?? '';
+  return firstLine.length > 70 ? `${firstLine.slice(0, 67)}...` : firstLine;
+}
+
 /** The default way to ask Claude: `claude -p` with the prompt on stdin, in the project folder. */
 export function defaultExec(root, model) {
   return (prompt) => {
@@ -187,14 +193,16 @@ export async function runClaudeChecks(options) {
   for (const testCase of cases) {
     let scored;
     try {
-      scored = scoreCase(testCase, parseSkillAnswer(exec(buildTriggerPrompt(testCase.phrase)), known));
+      const raw = exec(buildTriggerPrompt(testCase.phrase));
+      scored = { ...scoreCase(testCase, parseSkillAnswer(raw, known)), raw: shortAnswer(raw) };
     } catch (error) {
       scored = { ...testCase, answer: null, result: 'error', detail: error.message };
     }
     counts[scored.result] += 1;
     if (scored.result !== 'pass') {
       const expectation = scored.kind === 'should' ? `should trigger ${scored.skill}` : `should not trigger ${scored.skill}`;
-      lines.push(`  ${scored.result.toUpperCase()}: "${scored.phrase}" (${expectation}; model said ${scored.answer ?? scored.detail ?? 'nothing clear'})`);
+      const said = scored.answer ?? (scored.raw ? `"${scored.raw}" (not a skill of this project)` : scored.detail ?? 'nothing');
+      lines.push(`  ${scored.result.toUpperCase()}: "${scored.phrase}" (${expectation}; model said ${said})`);
     }
   }
   if (cases.length > 0) {

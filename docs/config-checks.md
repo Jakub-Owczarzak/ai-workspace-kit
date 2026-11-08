@@ -78,6 +78,12 @@ control `claude.runChecks`) and no hook or CI job runs it.
    (one per fixture phrase, plus one for imports) and stops.
 3. Run it with `--yes`. Add `--model haiku` for a cheaper model, or `--triggers` / `--imports` to run one part.
 
+One run is one sample: the model's answers can differ between runs (a phrase that came back unclear once
+came back as a different, correct answer when asked again). Run it again before trusting a single failure,
+and treat a phrase that fails repeatedly as the real signal. The report shows what the model said when its
+answer named none of the project's skills (often another installed or plugin skill, which is fine for a
+"shouldNot" phrase).
+
 For each phrase it sends `claude -p` a request like "Which skill would you load first for: <phrase>? Reply with
 only the skill name or NONE", and compares the answer with the fixture. The answers are model reports, so treat
 a failure as a pointer, not a verdict. The tests for the runner use a fake model and never call Claude.
