@@ -14,6 +14,7 @@ sync.
 | `skills/` | Procedures used on demand (below) | No (used when the task matches) |
 | `templates/` | Starting files: `AGENTS.md`, `CLAUDE.md`, `BACKLOG.md`, `PLAN.md`, `FIGMA-SYNC.md`, `CHANGELOG.md`, `hooks/`, `workflows/` | Copied once, then edited |
 | `adapters/` | Where each piece goes for Claude Code, Cline, Cursor, and `AGENTS.md` readers | Reference |
+| `docs/` | Reference docs. `workflow-profiles.md`: the `solo` / `team` / `org` profiles and the per-control switches (`.claude/workflow.json`) | Read when choosing how strict a project's workflow should be |
 | `stacks/` | One folder per framework (now: `expo-react-native`): routing rows for its skills plus its always-on rule, with no project facts | Optional; installed when the project uses that framework |
 
 ### Skills

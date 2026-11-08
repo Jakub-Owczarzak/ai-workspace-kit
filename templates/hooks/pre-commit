@@ -11,8 +11,9 @@ set -e
 <TEST COMMAND>            # for example: npm test
 
 # Docs-fresh check (optional): warns when source changed but AGENTS.md is not part of the commit.
-# Copy check-docs-fresh.mjs next to your scripts and fix the path. Warning only by default;
-# DOCS_CHECK=strict blocks, DOCS_SKIP=1 skips one commit, DOCS_SOURCE_DIRS / DOCS_FILES adapt it.
+# Copy check-docs-fresh.mjs AND workflow-config.mjs next to your scripts and fix the path. The mode comes
+# from the workflow profile (.claude/workflow.json: solo = warn, org = strict); DOCS_CHECK=strict|warn|off
+# overrides it for one commit, DOCS_SKIP=1 skips one commit, DOCS_SOURCE_DIRS / DOCS_FILES adapt it.
 node <SCRIPTS DIR>/check-docs-fresh.mjs   # for example: node scripts/check-docs-fresh.mjs
 
 CHANGELOG_SCRIPT=<SKILLS DIR>/changelog-bump/scripts/changelog.mjs   # for example .claude/skills/...

@@ -81,6 +81,10 @@ Use `adapters/<tool>.md` for the exact locations per tool. In short:
    system by appending the changelog block and the project's lint, type and test commands (do not replace
    an existing hook). Adapt `templates/workflows/release_bump.yaml` (branch, paths, version files) and
    show it before writing.
+5b. **Workflow profile** (always): ask which profile fits (`solo`, `team`, `org`; default `solo`, see
+   `<KIT>/docs/workflow-profiles.md`), copy `templates/workflow.json` to `.claude/workflow.json` with that
+   profile, and copy `templates/hooks/workflow-config.mjs` next to the project's other scripts. Install
+   `check-docs-fresh.mjs` only together with `workflow-config.mjs`.
 6. **Stack pack** (only if chosen): paste the rows of `<KIT>/stacks/<stack>/router-rows.md` into the router's
    section 2.2 (drop rows for skills the project will not have; use the `expo:` names for the plugin, the
    `.agents/skills/` paths for a repo-local copy), and add the pack's `rules/*.md` to the always-on file like

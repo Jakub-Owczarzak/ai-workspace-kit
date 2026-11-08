@@ -1,0 +1,5 @@
+{
+  "_comment": "Workflow profile for this project: solo, team or org. Per-control overrides go in \"overrides\", for example {\"docs.check\": \"strict\"}. See .claude/workspace-kit/docs/workflow-profiles.md. Run: node scripts/workflow-config.mjs",
+  "profile": "solo",
+  "overrides": {}
+}
