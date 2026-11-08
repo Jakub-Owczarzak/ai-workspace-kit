@@ -1,0 +1,71 @@
+name: Release Bump
+
+# Template for GitHub Actions. Replace every <...> and delete what does not apply.
+#
+# Every push to <PROTECTED BRANCH> bumps the version (at least patch) and folds the Unreleased section of
+# CHANGELOG.md. The result goes to one long-lived branch, release/next, and a pull request is opened or
+# updated for it. Merging that pull request is the release. Its own push back to <PROTECTED BRANCH> is
+# skipped by the guard below.
+#
+# Note: pushes made with GITHUB_TOKEN do not start other workflows, so required checks will not run on the
+# release pull request unless you use a token that can trigger workflows.
+
+on:
+  push:
+    branches: [<PROTECTED BRANCH>]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: release-bump
+  cancel-in-progress: false
+
+jobs:
+  release-bump:
+    name: Bump version and open release PR
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    if: >-
+      !contains(github.event.head_commit.message, 'release/next') &&
+      !startsWith(github.event.head_commit.message, 'Release v')
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Bump version and update CHANGELOG.md
+        # working-directory: <PROJECT DIR>   # only if the manifest is in a subfolder
+        run: |
+          VERSION=$(node <SKILLS DIR>/changelog-bump/scripts/changelog.mjs release \
+            --changelog CHANGELOG.md \
+            --version-file <FILE>:<KEY> \
+            | tail -n 1)
+          # One --version-file per file that holds the version, e.g. package.json:version
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+
+      - name: Commit to release/next and open or update the PR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -B release/next
+          git add <VERSION FILES> CHANGELOG.md
+          git commit -m "Release v$VERSION"
+          git push --force origin release/next
+
+          PR=$(gh pr list --head release/next --state open --json number --jq '.[0].number')
+          BODY="Version bump and changelog for the changes merged to <PROTECTED BRANCH>. Merging this PR is the release."
+          if [ -z "$PR" ]; then
+            gh pr create --base <PROTECTED BRANCH> --head release/next \
+              --title "Release v$VERSION" \
+              --body "$BODY"
+          else
+            gh pr edit "$PR" --title "Release v$VERSION"
+          fi

@@ -1,0 +1,8 @@
+# Pre-push hook template: block direct pushes to the protected branch.
+# Replace <PROTECTED BRANCH> (main or master). Append to an existing hook; do not overwrite it.
+while read -r local_ref local_sha remote_ref remote_sha; do
+  if [ "$remote_ref" = "refs/heads/<PROTECTED BRANCH>" ]; then
+    echo "Pushing to <PROTECTED BRANCH> is blocked. Push a branch and open a pull request."
+    exit 1
+  fi
+done

@@ -1,0 +1,37 @@
+# Pre-commit hook template (works with husky or a plain .git/hooks/pre-commit).
+# Replace every <...>. Append to an existing hook; do not overwrite it.
+#
+# 1. Checks first. A failing check blocks the commit.
+# 2. Then one changelog entry per commit (skipped for merges and non-behaviour commits).
+set -e
+
+# cd <PROJECT DIR>        # only if the manifest is in a subfolder
+<LINT COMMAND>            # for example: npx lint-staged
+<TYPECHECK COMMAND>       # for example: npm run typecheck   (remove if the language has none)
+<TEST COMMAND>            # for example: npm test
+
+# Docs-fresh check (optional): warns when source changed but AGENTS.md is not part of the commit.
+# Copy check-docs-fresh.mjs next to your scripts and fix the path. Warning only by default;
+# DOCS_CHECK=strict blocks, DOCS_SKIP=1 skips one commit, DOCS_SOURCE_DIRS / DOCS_FILES adapt it.
+node <SCRIPTS DIR>/check-docs-fresh.mjs   # for example: node scripts/check-docs-fresh.mjs
+
+CHANGELOG_SCRIPT=<SKILLS DIR>/changelog-bump/scripts/changelog.mjs   # for example .claude/skills/...
+
+if node "$CHANGELOG_SCRIPT" should-skip; then
+  :
+else
+  # Git hooks run Node without a terminal, so the prompt is read here from /dev/tty and passed on as
+  # environment variables. Non-terminal commits (assistants, GUI clients, CI) must set the variables.
+  if [ -z "$CHANGELOG_BUMP" ] || [ -z "$CHANGELOG_ENTRY" ]; then
+    if { : < /dev/tty; } 2>/dev/null; then
+      printf 'Bump type (patch/minor/major) [patch]: ' > /dev/tty
+      # Husky runs this with `sh -e`, so a failed read must not stop the script here.
+      read -r CHANGELOG_BUMP < /dev/tty || true
+      CHANGELOG_BUMP=${CHANGELOG_BUMP:-patch}
+      printf 'Changelog entry (one line): ' > /dev/tty
+      read -r CHANGELOG_ENTRY < /dev/tty || true
+      export CHANGELOG_BUMP CHANGELOG_ENTRY
+    fi
+  fi
+  node "$CHANGELOG_SCRIPT" add --changelog CHANGELOG.md
+fi
