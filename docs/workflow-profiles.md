@@ -30,12 +30,12 @@ line when the project grows.
 |---|---|---|---|---|---|---|
 | `planning.gates` | off, anchor, full | off | anchor | full | The planner is used on request (off); no code before the Intent Anchor is approved (anchor); plus success measurements (full). A solo owner is the shared record; many developers need one | planned: planner reads it |
 | `docs.check` | off, warn, strict | warn | warn | strict | Commit hook: source changed but the overview (`AGENTS.md`) did not. Strict blocks the commit | **wired** (`check-docs-fresh.mjs`) |
-| `docs.sizeWarnChars` | number, 0 = off | 40000 | 40000 | 40000 | Warn when the always-loaded instruction files are larger than this. Cheap and informational at every scale | planned: doc-size report |
+| `docs.sizeWarnChars` | number, 0 = off | 40000 | 40000 | 40000 | Warn when the always-loaded instruction files are larger than this. Cheap and informational at every scale | **wired** (`doc-size.mjs`) |
 | `tests.guard` | off, on | off | on | on | Block edits to test files that exist in git while a bug fix is in progress, so a fix cannot weaken its own proof | planned: guard hook |
 | `review.mode` | off, advisory, required | off | advisory | required | Independent review by a reviewer subagent against `REVIEW.md`: optional, run it, or merge needs it | planned: review gate |
 | `branchProtection.check` | off, report, required | report | report | required | Read the default branch's protection from GitHub; required fails when it is missing | planned: review gate |
-| `claude.runChecks` | true, false | false | false | false | Allow checks that run `claude -p` locally (the `@` import check, the skill trigger runner). They use Claude usage, so they are opt-in and never run by hooks or CI | planned: config checks |
-| `static.checks` | true, false | true | true | true | Cheap checks that need no Claude: skill lint, `@` import resolver | planned: config checks |
+| `claude.runChecks` | true, false | false | false | false | Allow checks that run `claude -p` locally (the `@` import check, the skill trigger runner). They use Claude usage, so they are opt-in and never run by hooks or CI | **wired** (`run-claude-checks.mjs`) |
+| `static.checks` | true, false | true | true | true | Cheap checks that need no Claude: skill lint, `@` import resolver | **wired** (`check-config.mjs`) |
 
 "Planned" controls exist in the resolver and have defaults, but nothing reads them until the piece that uses
 them is installed. Setting them now is harmless.
@@ -75,6 +75,6 @@ and read its output.
 | File | Purpose |
 |---|---|
 | `templates/workflow.json` | The file a project copies to `.claude/workflow.json` |
-| `templates/hooks/workflow-config.mjs` | The resolver, its CLI, and the tables (copy it next to the other scripts, for example `scripts/`) |
-| `templates/hooks/workflow-config.test.mjs` | Tests for the resolver |
-| `templates/hooks/check-docs-fresh.mjs` | The first control that reads the profile |
+| `templates/scripts/workflow-config.mjs` | The resolver, its CLI, and the tables (copy it next to the other scripts, for example `scripts/`) |
+| `templates/scripts/workflow-config.test.mjs` | Tests for the resolver |
+| `templates/scripts/check-docs-fresh.mjs` | The first control that reads the profile |

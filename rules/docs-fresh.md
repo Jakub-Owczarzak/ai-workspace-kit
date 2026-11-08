@@ -14,7 +14,7 @@ same turn. Do not wait to be asked.
 Do this for navigation, state, data, theme, error handling, file layout, build, release and repository
 setup. If a change makes a statement in a document false, fixing the document is part of the change.
 
-A commit hook can back this up: `templates/hooks/check-docs-fresh.mjs` warns when source changed but the
+A commit hook can back this up: `templates/scripts/check-docs-fresh.mjs` warns when source changed but the
 overview is not part of the commit (`DOCS_CHECK=strict` blocks). It cannot tell whether the overview
 needed a change, so a warning is a prompt to check, not proof of a stale document.
 

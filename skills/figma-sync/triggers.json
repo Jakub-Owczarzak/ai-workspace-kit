@@ -1,0 +1,13 @@
+{
+  "should": [
+    "Update the Figma design to match the screens we changed today",
+    "Sync our UI changes into Figma before I commit",
+    "The Figma file has drifted from the app, align it",
+    "There are pending rows in FIGMA-SYNC.md, draw them in Figma"
+  ],
+  "shouldNot": [
+    "Change the button color in the app's stylesheet",
+    "Write the pull request description for this branch",
+    "Add a changelog entry for this commit"
+  ]
+}

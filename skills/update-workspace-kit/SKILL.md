@@ -69,9 +69,10 @@ If it fails a test, tell the user why and leave it in the project.
 
 | Piece | Goes to |
 |---|---|
-| A procedure for one kind of task | `<KIT>/skills/<name>/` (with `SKILL.md`, references, scripts and their tests) |
+| A procedure for one kind of task | `<KIT>/skills/<name>/` (with `SKILL.md`, references, scripts and their tests, and a `triggers.json` of phrases that should and should not trigger it) |
 | A short always-on rule | `<KIT>/rules/<name>.md` |
-| A commit-hook or CI script, workflow YAML | `<KIT>/templates/hooks/` or `<KIT>/templates/workflows/` (with its test beside it) |
+| A script a project runs (a check, a resolver, a hook's logic) | `<KIT>/templates/scripts/` (with its `.test.mjs` beside it) |
+| A git hook wrapper, CI workflow YAML | `<KIT>/templates/hooks/` or `<KIT>/templates/workflows/` |
 | A starting file for a project (overview, plan, backlog, design-sync file) | `<KIT>/templates/` |
 | Where a piece goes for one assistant tool | `<KIT>/adapters/<tool>.md` |
 | Routing rows or a rule for one framework | `<KIT>/stacks/<stack>/` |
@@ -99,6 +100,8 @@ Keep: the method, the steps, the checks, the honesty rules, the tests. Keep the 
 
 - In the working copy, create a branch named `port/<short-description>` from the default branch.
 - Write the files. Add or update the piece's test and run it (for a Node script: `node --test <file>`).
+  For a skill, add its `triggers.json`, then run `node templates/scripts/check-skills.mjs --skills-dir skills`
+  in the working copy: it must report no errors.
 - Update `<KIT>/README.md` (the tables of what is inside) and, if the piece is installable,
   `<KIT>/skills/setup-workspace/SKILL.md` (which pieces it offers and where they go).
 - If the piece changes how the kit is installed or imported, update the template files that carry it

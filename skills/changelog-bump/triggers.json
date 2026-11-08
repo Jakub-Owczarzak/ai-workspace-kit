@@ -1,0 +1,13 @@
+{
+  "should": [
+    "Add a changelog entry for this commit",
+    "Bump the version for the release",
+    "Set up changelog entries and automatic version bumps in this project",
+    "When a PR is merged to main it should publish a new version, set that up"
+  ],
+  "shouldNot": [
+    "Write the pull request description for this branch",
+    "Write a marketing blog post announcing our new features",
+    "Update the README with installation instructions"
+  ]
+}

@@ -83,8 +83,12 @@ Use `adapters/<tool>.md` for the exact locations per tool. In short:
    show it before writing.
 5b. **Workflow profile** (always): ask which profile fits (`solo`, `team`, `org`; default `solo`, see
    `<KIT>/docs/workflow-profiles.md`), copy `templates/workflow.json` to `.claude/workflow.json` with that
-   profile, and copy `templates/hooks/workflow-config.mjs` next to the project's other scripts. Install
-   `check-docs-fresh.mjs` only together with `workflow-config.mjs`.
+   profile, and copy `templates/scripts/workflow-config.mjs` next to the project's other scripts. Install
+   `check-docs-fresh.mjs` only together with `workflow-config.mjs`. Offer the config checks
+   (`check-config.mjs`, `check-skills.mjs`, `check-imports.mjs`, `doc-size.mjs`, `run-claude-checks.mjs`,
+   from `templates/scripts/`; copy the scripts, not their tests, into the project's `scripts/` folder) and
+   a `check:config` shortcut in the manifest; see `<KIT>/docs/config-checks.md`. Each installed skill keeps
+   its `triggers.json` beside its `SKILL.md`.
 6. **Stack pack** (only if chosen): paste the rows of `<KIT>/stacks/<stack>/router-rows.md` into the router's
    section 2.2 (drop rows for skills the project will not have; use the `expo:` names for the plugin, the
    `.agents/skills/` paths for a repo-local copy), and add the pack's `rules/*.md` to the always-on file like
