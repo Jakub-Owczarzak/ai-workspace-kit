@@ -45,7 +45,7 @@ what order things are true. Fill the tables in section 2 for this project (the s
 | `pr-description` | Writing the pull request text from the real diff (never opens the PR) |
 | `changelog-bump` | A commit needs a changelog entry, or a release should bump the version |
 | `figma-sync` | UI changes are pending in the design-sync file, or the user asks to align the design with the app |
-| `update-workspace-kit` | A change added or improved something reusable (skill, rule, hook script, template), or the user asks to update the kit or check drift |
+| `update-workspace-kit` | A change added or improved something reusable (skill, rule, hook script, template), or the user asks to update the kit, pull the latest kit, or check drift |
 
 ### 2.2 Project skills (add rows for this project)
 

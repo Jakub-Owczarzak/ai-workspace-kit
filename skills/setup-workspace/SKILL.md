@@ -50,8 +50,9 @@ Detect and note, without asking:
    rules (readable code, repo tidiness, docs fresh, commit gate, verification),
    router, changelog and version bump (with hook and release workflow),
    planner, PR description, fix plan, code review, design sync (only if the project has a UI and Figma),
-   and `update-workspace-kit` (to port later improvements back into the kit; its Settings table needs the
-   kit's path and any other copies, so ask for them when it is chosen).
+   and `update-workspace-kit` (to push later improvements to the kit and pull updates from it; its
+   Settings table needs the kit repository URL, so ask for it when it is chosen, and record the kit commit
+   you installed from in `<project copy of the kit>/.kit-version`).
 3. For the changelog: which files hold the version (for example `package.json:version`), and do you want
    the commit hook and the release workflow, or only the skill?
 4. Any commands or branch names I detected wrongly?

@@ -28,7 +28,7 @@ sync.
 | `readable-fix-plan` | Turn findings or bugs into one scannable plan with verified links |
 | `pr-description` | Write the pull request text from the real diff (never opens the PR) |
 | `figma-sync` | Keep a Figma design aligned with the app: UI changes are flagged as they happen and drawn before the commit |
-| `update-workspace-kit` | The reverse of setup: port a reusable skill, rule, hook script or template from a project back into the kit (generalized, asked first), keep other kit copies in sync, check drift |
+| `update-workspace-kit` | Keeps a project and the kit repository in step: PUSH ports a reusable skill, rule, hook script or template from the project into the kit (generalized, on a branch, asked first); PULL refreshes the project's kit snapshot and installed skills from the kit's latest version; checks drift |
 
 ## How to use it
 
@@ -80,7 +80,15 @@ keeps the kit together; the setup step puts each piece where it is actually used
 
 ## Updating the kit
 
-Improve a skill in a project, then bring the better version back here with the `update-workspace-kit`
-skill: it checks the piece is reusable, removes project facts, shows the plan, asks, writes to the kit,
-and syncs other copies. Install it in a project like any other skill (copy `skills/update-workspace-kit/`
-to `.claude/skills/` and fill its Settings table). Keep project facts out of the kit.
+This kit is a **git repository** (`https://github.com/Jakub-Owczarzak/workspace-kit`), so no project
+depends on one machine's folder. The `update-workspace-kit` skill moves changes both ways:
+
+- **Push** (project → kit): it checks a piece is reusable, removes project facts, shows the plan, asks,
+  writes it to a branch of the kit, runs the piece's test, and asks before pushing or opening a pull request.
+- **Pull** (kit → project): "pull the latest kit" refreshes the project's `.claude/workspace-kit/` snapshot
+  and offers to update the installed skills that are behind, without overwriting project facts. The snapshot
+  records the kit commit it was taken from in `.claude/workspace-kit/.kit-version`, so drift can be measured.
+
+Install it in a project like any other skill (copy `skills/update-workspace-kit/` to `.claude/skills/` and
+fill its Settings table: repository URL, optional local clone, the project's copy of the kit, kit-origin and
+project-only pieces). Keep project facts out of the kit.
