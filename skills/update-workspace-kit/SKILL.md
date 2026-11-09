@@ -139,7 +139,20 @@ is behind.
    - project is newer: list it as a candidate to push.
    Apply each only after the user approves. Rules imported from the project's copy (for example from
    `CLAUDE.md`) are already current after step 3.
-6. **Report**: what changed, what was skipped and why, and what is not verified.
+6. **New kit pieces this project does not have yet.** Compare what the kit offers with what the project has
+   installed, and list the missing ones with one line of why each matters:
+   - scripts in `<KIT>/templates/scripts/` (the `*.mjs` files, not their tests) that are not in the project's
+     `scripts/` folder, and scripts that differ from the kit's copy;
+   - `.claude/workflow.json` (copy `<KIT>/templates/workflow.json`, profile `solo` unless told otherwise);
+   - rules in `<KIT>/rules/` that the project's `CLAUDE.md` does not import (add the import line);
+   - hook wiring a script needs in `.claude/settings.json` (for example the test-edit guard; merge into the
+     existing file, never replace it);
+   - lines the scripts need in `.gitignore` (`.claude/state/`) and shortcuts in the manifest
+     (`check:config`).
+   Show the whole list, ask once, then install only what the user accepts, additively: never overwrite a
+   different existing file without showing the diff first. A project that declines a piece is not asked again
+   for it in the same pull.
+7. **Report**: what changed, what was skipped and why, and what is not verified.
 
 ## Drift check (when asked, or before a larger change)
 
