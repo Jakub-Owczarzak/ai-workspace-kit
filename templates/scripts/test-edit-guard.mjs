@@ -130,11 +130,16 @@ function isTrackedInGit(root, relativePath) {
   }
 }
 
-function projectRoot(startFolder) {
+/**
+ * The project root: the git top-level folder of `startFolder`. A start folder that does not exist (for
+ * example a POSIX-style path from a shell that Node cannot use) falls back to the process's own folder.
+ */
+export function projectRoot(startFolder) {
+  const folder = startFolder && existsSync(startFolder) ? startFolder : process.cwd();
   try {
-    return git(startFolder, ['rev-parse', '--show-toplevel']).trim();
+    return git(folder, ['rev-parse', '--show-toplevel']).trim();
   } catch {
-    return startFolder;
+    return folder;
   }
 }
 

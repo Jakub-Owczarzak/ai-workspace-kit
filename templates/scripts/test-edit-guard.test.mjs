@@ -216,6 +216,19 @@ describe('the real hook in a throw-away git repo', () => {
     });
   });
 
+  it('falls back to its own folder when the hook input names a folder that does not exist', () => {
+    inRepo('{"overrides":{"tests.guard":"on"}}', (root) => {
+      script(root, 'start');
+      const result = spawnSync('node', ['scripts/test-edit-guard.mjs'], {
+        cwd: root,
+        encoding: 'utf8',
+        input: JSON.stringify({ tool_name: 'Edit', cwd: '/c/no/such/posix/folder', tool_input: { file_path: join(root, 'src/a.test.ts') } }),
+        env: { ...process.env, ALLOW_TEST_EDITS: '', CLAUDE_PROJECT_DIR: '' },
+      });
+      assert.equal(result.status, 2);
+    });
+  });
+
   it('reports status', () => {
     inRepo('{"overrides":{"tests.guard":"on"}}', (root) => {
       assert.match(script(root, 'status').stdout, /Fix mode: off/);
