@@ -47,7 +47,9 @@ Detect and note, without asking:
 
 1. Which AI tools does the team use? (Claude Code, Cline, Cursor, Codex or other `AGENTS.md` readers.)
 2. Which pieces to install? Default all except the ones that do not apply:
-   rules (readable code, repo tidiness, docs fresh, commit gate, verification),
+   rules (readable code, repo tidiness, docs fresh, commit gate, verification, test discipline; for the
+   test-edit guard also copy `templates/scripts/test-edit-guard.mjs`, add `.claude/state/` to `.gitignore`
+   and the PreToolUse hook from `docs/test-discipline.md` to `.claude/settings.json`),
    router, changelog and version bump (with hook and release workflow),
    planner, PR description, fix plan, code review, design sync (only if the project has a UI and Figma),
    and `update-workspace-kit` (to push later improvements to the kit and pull updates from it; its

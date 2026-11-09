@@ -15,7 +15,7 @@ about to change, before proposing or writing anything.
 <!-- workspace-kit:rules
 Paste the content of the kit's rules here, one heading per rule file, or import them:
   rules/readable-code.md, rules/repo-tidiness.md, rules/docs-fresh.md,
-  rules/commit-gate.md, rules/verification.md, rules/skill-routing.md
+  rules/commit-gate.md, rules/verification.md, rules/test-discipline.md, rules/skill-routing.md
 and, only for projects with a design file: rules/ui-change-flagging.md
 Remove this comment when done. -->
 

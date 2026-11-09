@@ -38,6 +38,13 @@ describe('profile tables', () => {
     assert.equal(PROFILES.org['review.mode'], 'required');
   });
 
+  it('make bug fixes test-first in every profile and all new logic test-first from team up', () => {
+    assert.equal(PROFILES.solo['tests.tdd'], 'bugs');
+    assert.equal(PROFILES.team['tests.tdd'], 'on');
+    assert.equal(PROFILES.org['tests.tdd'], 'on');
+    assert.equal(resolveControls({}, { TEST_TDD: 'off' }).controls['tests.tdd'].value, 'off');
+  });
+
   it('never turn on Claude-run checks by default, in any profile', () => {
     for (const profile of PROFILE_NAMES) assert.equal(PROFILES[profile]['claude.runChecks'], false);
   });

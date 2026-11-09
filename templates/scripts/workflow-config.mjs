@@ -50,6 +50,13 @@ export const CONTROL_SPECS = {
     env: 'TEST_GUARD',
     description: 'block edits to existing test files while a bug fix is in progress (fix mode)',
   },
+  'tests.tdd': {
+    type: 'choice',
+    allowed: ['off', 'bugs', 'on'],
+    env: 'TEST_TDD',
+    description:
+      'test-first policy (off = no rule, bugs = a bug fix starts with a failing test, on = new logic too); a bucket marked "TDD: yes" in the plan opts in even when this says bugs',
+  },
   'review.mode': {
     type: 'choice',
     allowed: ['off', 'advisory', 'required'],
@@ -84,6 +91,7 @@ export const PROFILES = {
     'docs.check': 'warn',
     'docs.sizeWarnChars': 40000,
     'tests.guard': 'off',
+    'tests.tdd': 'bugs',
     'review.mode': 'off',
     'branchProtection.check': 'report',
     'claude.runChecks': false,
@@ -94,6 +102,7 @@ export const PROFILES = {
     'docs.check': 'warn',
     'docs.sizeWarnChars': 40000,
     'tests.guard': 'on',
+    'tests.tdd': 'on',
     'review.mode': 'advisory',
     'branchProtection.check': 'report',
     'claude.runChecks': false,
@@ -104,6 +113,7 @@ export const PROFILES = {
     'docs.check': 'strict',
     'docs.sizeWarnChars': 40000,
     'tests.guard': 'on',
+    'tests.tdd': 'on',
     'review.mode': 'required',
     'branchProtection.check': 'required',
     'claude.runChecks': false,

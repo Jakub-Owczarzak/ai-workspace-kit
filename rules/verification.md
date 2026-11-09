@@ -5,6 +5,8 @@
   conversation for facts the repository can confirm.
 - **Say what was run.** Name the command and its result (type check, lint, tests with a count, build).
   If something was not run (a device, a browser, a platform, a real network), say so plainly.
+- **Show the output.** When you report a task done, include the output of the checks (the counts and the
+  exit status), not only "it passes". The reader should not have to rerun a command to believe it.
 - **Never say "tested", "works" or "fixed" for something that was only read or type-checked.** Say
   "type-checked", "to verify", or "not run".
 - **Mark guesses as guesses** ("inferred", "likely", "assumed"). Record assumptions where the reader will
