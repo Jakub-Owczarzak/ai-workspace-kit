@@ -1,0 +1,13 @@
+{
+  "should": [
+    "Turn these review findings into a fix plan",
+    "Make a plan to fix everything on this bug list",
+    "Combine these three plans into one",
+    "Make a fix plan with severity tags and file links"
+  ],
+  "shouldNot": [
+    "Plan a brand new feature from scratch, starting with a goal interview",
+    "Write the pull request description for this branch",
+    "Fix the bugs in the checkout code now"
+  ]
+}

@@ -1,6 +1,6 @@
 ---
 name: setup-workspace
-description: Install the workspace kit (clean-code rules, repo-tidiness and docs-fresh rules, commit gate, changelog and version bump, planner, PR description, fix plan, code review, design sync, router) into the current project, for whichever AI coding tools it uses. Use once per project, or again to update. Asks before changing any existing file.
+description: Install the workspace kit (clean-code rules, repo-tidiness and docs-fresh rules, commit gate, changelog and version bump, workflow profile and config checks, project overview, review gate, planner, PR description, fix plan, code review, design sync, router) into the current project, for whichever AI coding tools it uses. Use once per project, or again to update. Asks before changing any existing file.
 disable-model-invocation: true
 ---
 
@@ -47,11 +47,17 @@ Detect and note, without asking:
 
 1. Which AI tools does the team use? (Claude Code, Cline, Cursor, Codex or other `AGENTS.md` readers.)
 2. Which pieces to install? Default all except the ones that do not apply:
-   rules (readable code, repo tidiness, docs fresh, commit gate, verification),
+   rules (readable code, repo tidiness, docs fresh, commit gate, verification, test discipline; for the
+   test-edit guard also copy `templates/scripts/test-edit-guard.mjs`, add `.claude/state/` to `.gitignore`
+   and the PreToolUse hook from `docs/test-discipline.md` to `.claude/settings.json`),
+   the workflow profile (always installed; you choose `solo`, `team` or `org`, default `solo`; see
+   `docs/workflow-profiles.md`) with the config checks, the project overview skill (`write-project-overview`), the review gate (reviewer subagent,
+   `REVIEW.md`, pre-push check; see `docs/review-gate.md`),
    router, changelog and version bump (with hook and release workflow),
    planner, PR description, fix plan, code review, design sync (only if the project has a UI and Figma),
-   and `update-workspace-kit` (to port later improvements back into the kit; its Settings table needs the
-   kit's path and any other copies, so ask for them when it is chosen).
+   and `update-workspace-kit` (to push later improvements to the kit and pull updates from it; its
+   Settings table needs the kit repository URL, so ask for it when it is chosen, and record the kit commit
+   you installed from in `<project copy of the kit>/.kit-version`).
 3. For the changelog: which files hold the version (for example `package.json:version`), and do you want
    the commit hook and the release workflow, or only the skill?
 4. Any commands or branch names I detected wrongly?
@@ -80,6 +86,22 @@ Use `adapters/<tool>.md` for the exact locations per tool. In short:
    system by appending the changelog block and the project's lint, type and test commands (do not replace
    an existing hook). Adapt `templates/workflows/release_bump.yaml` (branch, paths, version files) and
    show it before writing.
+5b. **Workflow profile** (always): ask which profile fits (`solo`, `team`, `org`; default `solo`, see
+   `<KIT>/docs/workflow-profiles.md`), copy `templates/workflow.json` to `.claude/workflow.json` with that
+   profile, and copy `templates/scripts/workflow-config.mjs` next to the project's other scripts. Install
+   `check-docs-fresh.mjs` only together with `workflow-config.mjs`. Offer the config checks
+   (`check-config.mjs`, `check-skills.mjs`, `check-imports.mjs`, `doc-size.mjs`, `run-claude-checks.mjs`,
+   from `templates/scripts/`; copy the scripts, not their tests, into the project's `scripts/` folder) and
+   a `check:config` shortcut in the manifest; see `<KIT>/docs/config-checks.md`. Each installed skill keeps
+   its `triggers.json` beside its `SKILL.md`. When `AGENTS.md` does not exist yet, run the
+   `write-project-overview` skill (create mode) instead of filling the template by hand, and copy
+   `overview-check.mjs` next to the other scripts (see `<KIT>/docs/project-overview.md`). Offer the review
+   gate (see `<KIT>/docs/review-gate.md`): `templates/REVIEW.md` to the project root, `templates/agents/reviewer.md`
+   to `.claude/agents/`, `check-review-gate.mjs` to `scripts/`, the review-gate lines of `templates/hooks/pre-push`
+   appended to the pre-push hook, and `.claude/reviews/` added to `.gitignore`. When the profile is `team` or
+   `org`, also offer plan mode as the session default: merge `{"permissions": {"defaultMode": "plan"}}` into
+   `.claude/settings.json` (never overwrite it) and say it does not apply in the VS Code extension (see
+   `<KIT>/docs/workflow-profiles.md`).
 6. **Stack pack** (only if chosen): paste the rows of `<KIT>/stacks/<stack>/router-rows.md` into the router's
    section 2.2 (drop rows for skills the project will not have; use the `expo:` names for the plugin, the
    `.agents/skills/` paths for a repo-local copy), and add the pack's `rules/*.md` to the always-on file like
@@ -92,6 +114,10 @@ Use `adapters/<tool>.md` for the exact locations per tool. In short:
 - The skill folders exist where the tool reads them, each with a `SKILL.md`.
 - If the changelog was installed: `node <skills>/changelog-bump/scripts/changelog.mjs should-skip` runs;
   the tests pass (`node --test <skills>/changelog-bump/scripts/changelog.test.mjs`).
+- If the workflow profile and the check scripts were installed: `node scripts/workflow-config.mjs` prints the
+  chosen profile, and `node scripts/check-config.mjs` ends with no errors.
+- If the overview was written or the review gate installed: `node scripts/overview-check.mjs` reports only
+  lines you have looked at, and `node scripts/check-review-gate.mjs` prints a reminder or ok (not an error).
 - No leftover `<...>` placeholders in written files (search for them).
 - The identical copies match (`diff`).
 

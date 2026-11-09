@@ -1,10 +1,14 @@
 #!/usr/bin/env node
 // Commit-hook check for the "keep the docs fresh" rule: when source code is part of the commit but the
 // overview document (AGENTS.md) is not, say so. It cannot know whether the document NEEDS a change, so
-// by default it only warns; set DOCS_CHECK=strict to block the commit instead.
+// by default it only warns; strict mode blocks the commit instead.
+//
+// The mode comes from the workflow profile: control `docs.check` in .claude/workflow.json (solo = warn,
+// team = warn, org = strict; see workflow-config.mjs). It needs workflow-config.mjs next to this script;
+// without it the mode comes from DOCS_CHECK alone. If the check itself crashes it allows the commit.
 //
 // Environment:
-//   DOCS_CHECK=warn (default) | strict | off
+//   DOCS_CHECK=warn | strict | off   overrides the profile for one command (default without a profile: warn)
 //   DOCS_SKIP=1            skip this one commit
 //   DOCS_SOURCE_DIRS=src/,app/   comma-separated folders that count as source (default: src/)
 //   DOCS_FILES=AGENTS.md         comma-separated documents that count as "docs touched" (default: AGENTS.md)
@@ -80,8 +84,25 @@ function isMergeInProgress() {
   }
 }
 
-function main() {
-  const mode = parseMode(process.env.DOCS_CHECK);
+/**
+ * The mode for this commit: from the workflow profile (`.claude/workflow.json`, control `docs.check`, with
+ * the DOCS_CHECK environment variable still winning), or, when the resolver file is not next to this
+ * script or fails, from DOCS_CHECK alone as before.
+ */
+async function resolveMode() {
+  try {
+    const { loadWorkflowConfig } = await import('./workflow-config.mjs');
+    const projectRoot = git(['rev-parse', '--show-toplevel']).trim();
+    const resolved = loadWorkflowConfig(projectRoot, process.env);
+    for (const warning of resolved.warnings) console.error(`workflow: ${warning}`);
+    return resolved.controls['docs.check'].value;
+  } catch {
+    return parseMode(process.env.DOCS_CHECK);
+  }
+}
+
+async function main() {
+  const mode = await resolveMode();
   if (mode === 'off' || process.env.DOCS_SKIP === '1' || isMergeInProgress()) return 0;
 
   const sourceDirs = parseList(process.env.DOCS_SOURCE_DIRS, DEFAULT_SOURCE_DIRS);
@@ -100,5 +121,12 @@ function main() {
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
-  process.exit(main());
+  // A broken check must never block a commit: any unexpected error allows it, with a message.
+  main().then(
+    (code) => process.exit(code),
+    (error) => {
+      console.error(`docs-fresh: the check could not run (${error.message}); allowing the commit.`);
+      process.exit(0);
+    },
+  );
 }

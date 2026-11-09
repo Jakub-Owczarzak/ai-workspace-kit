@@ -1,0 +1,13 @@
+{
+  "should": [
+    "This project has no AGENTS.md yet, write an overview of it from the code",
+    "Create a project overview file so new sessions know the stack, folders and commands",
+    "Check whether our AGENTS.md is still accurate and refresh the stale lines",
+    "The architecture section of the overview looks outdated, update it"
+  ],
+  "shouldNot": [
+    "Explain how the folder structure of this repo is organised",
+    "Write the pull request description for this branch",
+    "Add a changelog entry for this commit"
+  ]
+}

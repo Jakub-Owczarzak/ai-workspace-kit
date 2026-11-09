@@ -1,0 +1,13 @@
+{
+  "should": [
+    "Which skill should I use for this task?",
+    "Before we change code in this project, check the routing rules",
+    "I am not sure which skill applies here, route this task",
+    "What is the commit order and the truth order for this project?"
+  ],
+  "shouldNot": [
+    "What is the weather like in Warsaw today?",
+    "Translate this sentence into Polish",
+    "Explain how a binary search works"
+  ]
+}

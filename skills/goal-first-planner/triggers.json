@@ -1,0 +1,13 @@
+{
+  "should": [
+    "Help me plan a new feature before we build it",
+    "I want to start a new project: interview me about the goal and split the work into small buckets",
+    "Plan this migration in small steps with checkpoints",
+    "Let's plan this app properly before writing any code"
+  ],
+  "shouldNot": [
+    "Fix the failing test in the checkout module",
+    "Rename this variable across the whole file",
+    "Combine these three review plans into one fix plan"
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "should": [
+    "Write a PR description for this branch",
+    "Draft the pull request body from the diff",
+    "Summarize my commits as a PR summary",
+    "Prepare the pull request text for the reviewers"
+  ],
+  "shouldNot": [
+    "Open the pull request and push the branch",
+    "Add a changelog entry for this commit",
+    "Review this diff and list the bugs"
+  ]
+}
