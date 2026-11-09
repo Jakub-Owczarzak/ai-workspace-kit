@@ -14,7 +14,7 @@ sync.
 | `skills/` | Procedures used on demand (below) | No (used when the task matches) |
 | `templates/` | Starting files: `AGENTS.md`, `CLAUDE.md`, `BACKLOG.md`, `PLAN.md`, `FIGMA-SYNC.md`, `CHANGELOG.md`, `workflow.json`, `hooks/` (git hook wrappers), `scripts/` (the checks and the profile resolver, with their tests), `workflows/` | Copied once, then edited |
 | `adapters/` | Where each piece goes for Claude Code, Cline, Cursor, and `AGENTS.md` readers | Reference |
-| `docs/` | Reference docs. `workflow-profiles.md`: the `solo` / `team` / `org` profiles and the per-control switches (`.claude/workflow.json`). `config-checks.md`: the skill lint, `@` import resolver, doc-size report and the opt-in `claude -p` runner. `test-discipline.md`: the test-first policy (`tests.tdd`) and the test-edit guard hook (`tests.guard`) | Read when choosing how strict a project's workflow should be, or when checking how the assistant is configured |
+| `docs/` | Reference docs. `workflow-profiles.md`: the `solo` / `team` / `org` profiles and the per-control switches (`.claude/workflow.json`). `config-checks.md`: the skill lint, `@` import resolver, doc-size report and the opt-in `claude -p` runner. `test-discipline.md`: the test-first policy (`tests.tdd`) and the test-edit guard hook (`tests.guard`). `project-overview.md`: how the overview skill and `overview-check.mjs` work | Read when choosing how strict a project's workflow should be, or when checking how the assistant is configured |
 | `stacks/` | One folder per framework (now: `expo-react-native`): routing rows for its skills plus its always-on rule, with no project facts | Optional; installed when the project uses that framework |
 
 ### Skills
@@ -24,6 +24,7 @@ sync.
 | `setup-workspace` | Once per project: installs the pieces you choose for the tools you use (asks first, never overwrites) |
 | `workspace-router` | Routes a task to the right skill or document; holds the standing workflow rules |
 | `goal-first-planner` | Starting a feature: find the real goal, agree an Intent Anchor, work in small buckets with checkpoints |
+| `write-project-overview` | Create the `AGENTS.md` overview from the code, or refresh it: a script (`overview-check.mjs`) lists the stale lines, you approve each edit |
 | `changelog-bump` | Every commit gets a changelog entry; a release bumps the version (script, tests, hook and workflow templates) |
 | `thermo-nuclear-code-quality-review` | A deliberately harsh maintainability review (only when asked) |
 | `readable-fix-plan` | Turn findings or bugs into one scannable plan with verified links |

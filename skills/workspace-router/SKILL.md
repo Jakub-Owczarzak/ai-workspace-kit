@@ -40,6 +40,7 @@ what order things are true. Fill the tables in section 2 for this project (the s
 | Skill | Use when |
 |---|---|
 | `goal-first-planner` | Starting a feature or project: find the real goal, agree an Intent Anchor, work in small buckets with checkpoints |
+| `write-project-overview` | The project has no `AGENTS.md` overview yet, or the overview may be stale and should be checked and refreshed |
 | `readable-fix-plan` | Turning review findings or a bug list into one scannable plan with verified links |
 | `thermo-nuclear-code-quality-review` | A deliberately harsh maintainability review: structure, size, spaghetti growth (only when asked) |
 | `pr-description` | Writing the pull request text from the real diff (never opens the PR) |

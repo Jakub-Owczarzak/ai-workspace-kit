@@ -90,7 +90,9 @@ Use `adapters/<tool>.md` for the exact locations per tool. In short:
    (`check-config.mjs`, `check-skills.mjs`, `check-imports.mjs`, `doc-size.mjs`, `run-claude-checks.mjs`,
    from `templates/scripts/`; copy the scripts, not their tests, into the project's `scripts/` folder) and
    a `check:config` shortcut in the manifest; see `<KIT>/docs/config-checks.md`. Each installed skill keeps
-   its `triggers.json` beside its `SKILL.md`.
+   its `triggers.json` beside its `SKILL.md`. When `AGENTS.md` does not exist yet, run the
+   `write-project-overview` skill (create mode) instead of filling the template by hand, and copy
+   `overview-check.mjs` next to the other scripts (see `<KIT>/docs/project-overview.md`).
 6. **Stack pack** (only if chosen): paste the rows of `<KIT>/stacks/<stack>/router-rows.md` into the router's
    section 2.2 (drop rows for skills the project will not have; use the `expo:` names for the plugin, the
    `.agents/skills/` paths for a repo-local copy), and add the pack's `rules/*.md` to the always-on file like
