@@ -39,6 +39,10 @@ list in the same change.
 - Component or screen: `<folder>/`. Business rule or service: `<folder>/`. Hook or helper: `<folder>/`.
 - Test: beside what it tests (`<name>.test.<ext>`). Script: `<folder>/`. Documentation: `<folder or file>`.
 
+**Sources of truth** (each artifact has one home; everything else holds a link, not a copy)
+- Plan: `PLAN.md`. Overview: this file. Versions and scripts: `<manifest>`.
+- <Tickets or specs: the tracker link or folder.> <Design: the link.>
+
 **Root config** (optional: one line per config file that is not obvious)
 - `<file>`: <what it controls>
 
@@ -49,6 +53,7 @@ list in the same change.
 
 **Known quirks** (documented, not yet fixed)
 - <Thing that surprises people, and why it is that way.>
+- Things the assistant gets wrong here: <add a correction the second time it is needed, not before.>
 
 **Repo, git and CI**
 - Default branch: `<main|master>`. Branches: `<pattern>`. Pull requests go to `<main|master>`.

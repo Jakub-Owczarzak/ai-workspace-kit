@@ -28,7 +28,7 @@ line when the project grows.
 
 | Control | Values | solo | team | org | What it does and why it scales this way | Status |
 |---|---|---|---|---|---|---|
-| `planning.gates` | off, anchor, full | off | anchor | full | The planner is used on request (off); no code before the Intent Anchor is approved (anchor); plus success measurements (full). A solo owner is the shared record; many developers need one | planned: planner reads it |
+| `planning.gates` | off, anchor, full | off | anchor | full | The planner is used on request (off); no code before the Intent Anchor is approved (anchor); plus success measurements (full). A solo owner is the shared record; many developers need one. A soft rule the assistant follows, with plan mode as an optional hard stop (see below) | **wired** (`CLAUDE.md` template line, `goal-first-planner`, `workspace-router`) |
 | `docs.check` | off, warn, strict | warn | warn | strict | Commit hook: source changed but the overview (`AGENTS.md`) did not. Strict blocks the commit | **wired** (`check-docs-fresh.mjs`) |
 | `docs.sizeWarnChars` | number, 0 = off | 40000 | 40000 | 40000 | Warn when the always-loaded instruction files are larger than this. Cheap and informational at every scale | **wired** (`doc-size.mjs`) |
 | `tests.guard` | off, on | off | on | on | Block edits to test files that exist in git while fix mode is on, so a fix cannot weaken its own proof | **wired** (`test-edit-guard.mjs`; see `test-discipline.md`) |
@@ -37,8 +37,28 @@ line when the project grows.
 | `claude.runChecks` | true, false | false | false | false | Allow checks that run `claude -p` locally (the `@` import check, the skill trigger runner). They use Claude usage, so they are opt-in and never run by hooks or CI | **wired** (`run-claude-checks.mjs`) |
 | `static.checks` | true, false | true | true | true | Cheap checks that need no Claude: skill lint, `@` import resolver | **wired** (`check-config.mjs`) |
 
-"Planned" controls exist in the resolver and have defaults, but nothing reads them until the piece that uses
-them is installed. Setting them now is harmless.
+A control marked "planned" would exist in the resolver and have defaults, but nothing would read it until the
+piece that uses it is installed. Setting it would be harmless. (None are planned now.)
+
+### `planning.gates` and plan mode
+
+`planning.gates` is a rule the assistant follows: with `anchor` or `full` it writes no production code for
+non-trivial work until the Intent Anchor in `PLAN.md` is approved. Routine work (a tight request, a small
+blast radius, code the tests already cover) is exempt. Nothing can detect "non-trivial", so this is advice,
+not a block. The playbook's own mechanism for a hard stop is Claude Code's **plan mode**, where Claude cannot
+edit files until the plan is accepted. For `team` and `org` the setup offers it as the project default:
+
+```json
+{ "permissions": { "defaultMode": "plan" } }
+```
+
+in the project's `.claude/settings.json`, merged with what is there. Limits, from the Claude Code docs as
+read on 2026-11-09 (not tried here):
+- Every session starts in plan mode, trivial ones included. Shift+Tab leaves it without approving a plan.
+- **Sessions started from the VS Code extension do not read the project's starting mode**, so it does not
+  apply there; the soft rule still does.
+- The docs do not say whether this key waits for the project-trust prompt. Check it on your machine before
+  relying on it.
 
 ## Precedence
 

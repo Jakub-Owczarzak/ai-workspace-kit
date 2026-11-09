@@ -32,6 +32,10 @@ what order things are true. Fill the tables in section 2 for this project (the s
 - **Commit order:** fix lint, type and test errors → run the review → run the design sync (when rows are
   pending) → commit → a human pushes. Details in the project's commit-gate rule.
 - **Report verification honestly:** say what was run and what was not.
+- **Planning gate:** when `planning.gates` is `anchor` or `full` (its value in `overrides` of
+  `.claude/workflow.json`, else the profile default: `solo` off, `team` anchor, `org` full), no production code
+  for non-trivial work until `PLAN.md` holds an approved Intent Anchor; `full` also needs the success
+  measurements. Routine work is exempt; say so when you rely on that.
 
 ## 2. Routing tables (fill in)
 

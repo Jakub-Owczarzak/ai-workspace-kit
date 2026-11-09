@@ -95,7 +95,10 @@ Use `adapters/<tool>.md` for the exact locations per tool. In short:
    `overview-check.mjs` next to the other scripts (see `<KIT>/docs/project-overview.md`). Offer the review
    gate (see `<KIT>/docs/review-gate.md`): `templates/REVIEW.md` to the project root, `templates/agents/reviewer.md`
    to `.claude/agents/`, `check-review-gate.mjs` to `scripts/`, the review-gate lines of `templates/hooks/pre-push`
-   appended to the pre-push hook, and `.claude/reviews/` added to `.gitignore`.
+   appended to the pre-push hook, and `.claude/reviews/` added to `.gitignore`. When the profile is `team` or
+   `org`, also offer plan mode as the session default: merge `{"permissions": {"defaultMode": "plan"}}` into
+   `.claude/settings.json` (never overwrite it) and say it does not apply in the VS Code extension (see
+   `<KIT>/docs/workflow-profiles.md`).
 6. **Stack pack** (only if chosen): paste the rows of `<KIT>/stacks/<stack>/router-rows.md` into the router's
    section 2.2 (drop rows for skills the project will not have; use the `expo:` names for the plugin, the
    `.agents/skills/` paths for a repo-local copy), and add the pack's `rules/*.md` to the always-on file like

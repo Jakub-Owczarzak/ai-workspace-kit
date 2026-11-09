@@ -7,7 +7,9 @@ description: "Use when the user wants to plan a project or task before building:
 
 Plan before building. First find the real goal, then break the work into small buckets, deliver one at a time, and stop at a checkpoint after each. Keep a written intent so the work never drifts from what the user actually wants.
 
-**Hard rule:** do not write production code or final content until the Intent Anchor and the Bucket Map are approved by the user.
+**Hard rule:** once this skill is in use (the user asked for a plan, or the gate below applies), do not write production code or final content until the Intent Anchor and the Bucket Map are approved by the user.
+
+**When this applies:** find the value of `planning.gates`: the one in `overrides` of `.claude/workflow.json` if it sets it, otherwise the profile's default (`solo` off, `team` anchor, `org` full; a missing file means `solo`). `node scripts/workflow-config.mjs` prints it. `off`: you plan when the user asks. `anchor`: non-trivial work needs an approved Intent Anchor in `PLAN.md` before any production code, even if the user did not ask for a plan. `full`: the same, plus success measurements. Routine work is exempt (a tight request, a small blast radius, code the tests already cover); say when you rely on that.
 
 ---
 
@@ -40,8 +42,9 @@ Write this short block and ask the user to confirm or edit it:
 ## Intent Anchor
 Goal: <1–2 sentences>
 Success criteria: <bullets, observable>
+Success measurements: <only when planning.gates is full: metric, baseline → target, how measured>
 Non-goals: <bullets>
-Constraints: <bullets>
+Constraints: <bullets — the user's own words, copied, not paraphrased>
 Assumptions: <bullets — things we're treating as true but haven't verified>
 Top risks/unknowns: <bullets>
 ```
@@ -69,11 +72,16 @@ Steps: <numbered, concrete; in code: files to touch>
 Output: <what the user will be able to see/run>
 Done when: <acceptance criteria>
 Verify by: <test, command, demo, or review method>
+TDD: <yes | no — yes when the acceptance criteria are fixed here and a mistake is costly; see the test-discipline rule when the project has it>
+Review focus: <optional — failure modes this plan implies that no step tests>
+Consumes / Produces: <optional — what this bucket needs from earlier ones and hands to later ones>
 Risks / open questions: <bullets>
 Key decisions in this bucket: <each with chosen option + 1-line why + alternative>
 ```
 
-Ask the user to approve or adjust any key decision explicitly. Then execute the bucket.
+Check the plan twice before presenting it: could an engineer who has never seen this conversation implement the change from the plan alone? And, for a plan of code work, is it shorter than the code it describes? (A plan longer than the code has written the code.)
+
+Ask the user to approve or adjust any key decision explicitly. When approved, copy this block into the "Current bucket" section of `PLAN.md` (the `reviewer` subagent compares the change with its "Done when"), then execute the bucket.
 
 ## Phase 5 — Checkpoint (after every bucket)
 
@@ -100,7 +108,7 @@ If a later request contradicts a logged decision or the Intent Anchor, point it 
 
 ## Persistence
 
-- **Claude Code:** keep the Intent Anchor, Bucket Map (with status), and Decision Log in `PLAN.md` at the project root (or the path the user prefers). Update it at every checkpoint so a new session can resume from it. On resume, read `PLAN.md` first and summarize where things stand.
+- **Claude Code:** keep the Intent Anchor, Bucket Map (with status), and Decision Log in `PLAN.md` at the project root (or the path the user prefers). Update it at every checkpoint so a new session can resume from it, and put the update in the same commit as the work it describes (status, decisions, changed steps), not in a later one. The `reviewer` subagent reads this file. On resume, read `PLAN.md` first and summarize where things stand.
 - **Claude chat:** keep the three blocks in the conversation; if the plan is long or will be shared, offer to put it in a doc.
 
 ## Style

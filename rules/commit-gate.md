@@ -4,8 +4,9 @@ The order before every commit:
 
 1. **Fix lint, type and test errors.** Never commit with any of them failing. Run them once per finished
    step, not after every edit.
-2. **Run the review** and resolve every blocking finding. How strict comes from `review.mode` in
-   `.claude/workflow.json` (a missing file means `solo`, which is `advisory`; see the workflow profiles).
+2. **Run the review** and resolve every blocking finding. How strict comes from `review.mode`: its value in
+   `overrides` of `.claude/workflow.json`, else the profile default (`solo` and `team` advisory, `org`
+   required; no file means `solo`). `node scripts/workflow-config.mjs` prints it.
    - `off`: review only when asked.
    - `advisory` or `required`: stage the change and run `node scripts/check-review-gate.mjs --staged`. If it
      reports a clean record (its output contains a line starting `review-gate: ok`; its exit code is 0 for a

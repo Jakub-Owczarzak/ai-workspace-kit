@@ -43,7 +43,7 @@ Checks run: <command: result, with counts>   (or "not run: reason")
 Blocking findings
 1. <file:line>  <what is wrong>. Why: <...>. Suggested fix: <...>.
 
-Other findings
+Other findings (at most five, most useful first; then "and N more")
 1. <file:line>  <...>
 
 Not checked: <what you could not or did not verify>

@@ -32,6 +32,10 @@ verification (nothing is called "tested" that was only read).
 - **Not blocking:** naming and structure improvements, optional cleanups, style the linter does not enforce.
   Report them, ranked after the blocking ones.
 
+**How many to report**
+- List every blocking finding. Report at most five non-blocking points ("nits"), most useful first, and give
+  the rest as a count ("and 7 more style points"). Do not pad: a review with no findings says so.
+
 **Ignore**
 - Formatting that the commit hook already fixes. Generated and vendored files. Code the change did not touch.
 
