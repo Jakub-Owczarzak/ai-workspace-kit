@@ -4,7 +4,9 @@ A portable set of working rules, skills and templates, taken from the PRINTROOM 
 made independent of its language, framework and assistant tool. Copy it into any project, run one setup
 skill, and the project gets the same workflow: clean code, a tidy repository, honest verification, a
 commit gate with changelog and version bump, planning, review, pull request text, and optional design
-sync.
+sync. How strict it is comes from one setting per project (`solo`, `team` or `org`, in
+`.claude/workflow.json`). It follows Anthropic's AI-native SDLC playbook; `docs/playbook-mapping.md` says,
+practice by practice, what is covered, what differs on purpose, and how each piece was checked.
 
 ## What is inside
 
@@ -14,7 +16,7 @@ sync.
 | `skills/` | Procedures used on demand (below) | No (used when the task matches) |
 | `templates/` | Starting files: `AGENTS.md`, `CLAUDE.md`, `BACKLOG.md`, `PLAN.md`, `FIGMA-SYNC.md`, `CHANGELOG.md`, `REVIEW.md` (the reviewer's checklist), `workflow.json`, `agents/` (the `reviewer` subagent), `hooks/` (git hook wrappers), `scripts/` (the checks and the profile resolver, with their tests), `workflows/` | Copied once, then edited |
 | `adapters/` | Where each piece goes for Claude Code, Cline, Cursor, and `AGENTS.md` readers | Reference |
-| `docs/` | Reference docs. `workflow-profiles.md`: the `solo` / `team` / `org` profiles and the per-control switches (`.claude/workflow.json`). `config-checks.md`: the skill lint, `@` import resolver, doc-size report and the opt-in `claude -p` runner. `test-discipline.md`: the test-first policy (`tests.tdd`) and the test-edit guard hook (`tests.guard`). `project-overview.md`: how the overview skill and `overview-check.mjs` work. `review-gate.md`: the `reviewer` subagent, the review record and the pre-push gate (`review.mode`) | Read when choosing how strict a project's workflow should be, or when checking how the assistant is configured |
+| `docs/` | Reference docs. `workflow-profiles.md`: the `solo` / `team` / `org` profiles and the per-control switches (`.claude/workflow.json`). `config-checks.md`: the skill lint, `@` import resolver, doc-size report and the opt-in `claude -p` runner. `test-discipline.md`: the test-first policy (`tests.tdd`) and the test-edit guard hook (`tests.guard`). `project-overview.md`: how the overview skill and `overview-check.mjs` work. `review-gate.md`: the `reviewer` subagent, the review record and the pre-push gate (`review.mode`). `playbook-mapping.md`: the playbook mapped to the kit's pieces, with a status and how each was checked | Read when choosing how strict a project's workflow should be, or when checking how the assistant is configured |
 | `stacks/` | One folder per framework (now: `expo-react-native`): routing rows for its skills plus its always-on rule, with no project facts | Optional; installed when the project uses that framework |
 
 ### Skills
@@ -64,6 +66,8 @@ keeps the kit together; the setup step puts each piece where it is actually used
 - **Plain markdown first.** Nothing depends on one tool. The adapters only say where files go.
 - **Ask before changing, never overwrite.** Installing is additive and shows what it will change.
 - **Report honestly.** Verification statements say what was run and what was not.
+- **Strictness is a setting.** The workflow profile turns controls on or off per project; the default
+  (`solo`) is light, and no control blocks work unless the profile or an override says so.
 
 ## What is NOT in the kit
 
@@ -71,13 +75,23 @@ keeps the kit together; the setup step puts each piece where it is actually used
   app rules and the Expo code review. The Expo routing rows and rule ARE here, as the stack pack in
   `stacks/expo-react-native/`. Add your project's own skills to the router's project table.
 - Personal settings (`settings.local.json`) and secrets.
+- By decision: Claude in CI (evals, pull request review), managed settings, worktrees and parallel
+  sessions, Maintain-stage plays, and reading GitHub branch protection (see `docs/playbook-mapping.md`).
 
 ## Status and checks
 
-- `changelog-bump` is copied unchanged and its 22 tests pass from this folder
-  (`node --test skills/changelog-bump/scripts/changelog.test.mjs`).
-- The other pieces are generalized from skills that run in PRINTROOM. They have not yet been installed
-  into a second project; the first real install is the test, so expect small fixes.
+- All kit tests pass from this folder, none of them calls Claude:
+  `node --test templates/scripts/*.test.mjs skills/changelog-bump/scripts/*.test.mjs` (217 tests on 2026-11-09,
+  22 of them for `changelog-bump`). The skill lint is clean:
+  `node templates/scripts/check-config.mjs --root . --skills-dir skills` (10 skills).
+- The pieces are generalized from skills that run in PRINTROOM. One other project, the React Native starter,
+  has had a real pull of the kit, at commit `f76d0a6` (its `.claude/workspace-kit/.kit-version`; applied in its
+  working tree and not committed there); the overview
+  skill, the review gate and the planner changes came after it and are not in the starter yet. PRINTROOM has
+  not been pulled.
+- Not yet run: plan mode, a real `git push` through the pre-push hook, and `setup-workspace` with the newest
+  pieces. Model-reported checks (`claude -p`) are one sample each. `docs/playbook-mapping.md` lists what was
+  checked and how, piece by piece.
 - `figma-sync` needs the Figma connector and, for first use, a copy of the design file.
 
 ## Updating the kit

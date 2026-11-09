@@ -1,6 +1,6 @@
 ---
 name: setup-workspace
-description: Install the workspace kit (clean-code rules, repo-tidiness and docs-fresh rules, commit gate, changelog and version bump, planner, PR description, fix plan, code review, design sync, router) into the current project, for whichever AI coding tools it uses. Use once per project, or again to update. Asks before changing any existing file.
+description: Install the workspace kit (clean-code rules, repo-tidiness and docs-fresh rules, commit gate, changelog and version bump, workflow profile and config checks, project overview, review gate, planner, PR description, fix plan, code review, design sync, router) into the current project, for whichever AI coding tools it uses. Use once per project, or again to update. Asks before changing any existing file.
 disable-model-invocation: true
 ---
 
@@ -50,6 +50,9 @@ Detect and note, without asking:
    rules (readable code, repo tidiness, docs fresh, commit gate, verification, test discipline; for the
    test-edit guard also copy `templates/scripts/test-edit-guard.mjs`, add `.claude/state/` to `.gitignore`
    and the PreToolUse hook from `docs/test-discipline.md` to `.claude/settings.json`),
+   the workflow profile (always installed; you choose `solo`, `team` or `org`, default `solo`; see
+   `docs/workflow-profiles.md`) with the config checks, the project overview skill (`write-project-overview`), the review gate (reviewer subagent,
+   `REVIEW.md`, pre-push check; see `docs/review-gate.md`),
    router, changelog and version bump (with hook and release workflow),
    planner, PR description, fix plan, code review, design sync (only if the project has a UI and Figma),
    and `update-workspace-kit` (to push later improvements to the kit and pull updates from it; its
@@ -111,6 +114,10 @@ Use `adapters/<tool>.md` for the exact locations per tool. In short:
 - The skill folders exist where the tool reads them, each with a `SKILL.md`.
 - If the changelog was installed: `node <skills>/changelog-bump/scripts/changelog.mjs should-skip` runs;
   the tests pass (`node --test <skills>/changelog-bump/scripts/changelog.test.mjs`).
+- If the workflow profile and the check scripts were installed: `node scripts/workflow-config.mjs` prints the
+  chosen profile, and `node scripts/check-config.mjs` ends with no errors.
+- If the overview was written or the review gate installed: `node scripts/overview-check.mjs` reports only
+  lines you have looked at, and `node scripts/check-review-gate.mjs` prints a reminder or ok (not an error).
 - No leftover `<...>` placeholders in written files (search for them).
 - The identical copies match (`diff`).
 
