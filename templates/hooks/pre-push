@@ -1,8 +1,29 @@
-# Pre-push hook template: block direct pushes to the protected branch.
+# Pre-push hook template: block direct pushes to the protected branch, then run the review gate.
 # Replace <PROTECTED BRANCH> (main or master). Append to an existing hook; do not overwrite it.
+pushed_commits=""
 while read -r local_ref local_sha remote_ref remote_sha; do
   if [ "$remote_ref" = "refs/heads/<PROTECTED BRANCH>" ]; then
     echo "Pushing to <PROTECTED BRANCH> is blocked. Push a branch and open a pull request."
     exit 1
   fi
+  # A branch deletion sends an all-zero commit id (any length); there is nothing to review in it.
+  # Any id with a non-zero digit is a real commit.
+  case "$local_sha" in
+    *[!0]*) pushed_commits="$pushed_commits $local_sha" ;;
+  esac
 done
+
+# Review gate (workflow control review.mode): off = silent, advisory = a reminder, required = blocks the push
+# when the content at the tip of a pushed ref has no clean review record. Needs scripts/check-review-gate.mjs and
+# workflow-config.mjs, and node on the PATH; without them nothing runs. Remove these lines if the project does
+# not use the review gate.
+if [ -f scripts/check-review-gate.mjs ]; then
+  if command -v node >/dev/null 2>&1; then
+    for pushed_commit in $pushed_commits; do
+      node scripts/check-review-gate.mjs --commit "$pushed_commit" || exit 1
+    done
+  else
+    # Git clients that run hooks without node on the PATH land here: say so, because the gate did not run.
+    echo "review-gate: node was not found on the PATH, so the review gate was skipped."
+  fi
+fi

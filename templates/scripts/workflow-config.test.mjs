@@ -45,6 +45,16 @@ describe('profile tables', () => {
     assert.equal(resolveControls({}, { TEST_TDD: 'off' }).controls['tests.tdd'].value, 'off');
   });
 
+  it('run the reviewer as advice in solo and team and require it in org', () => {
+    assert.equal(PROFILES.solo['review.mode'], 'advisory');
+    assert.equal(PROFILES.team['review.mode'], 'advisory');
+    assert.equal(PROFILES.org['review.mode'], 'required');
+  });
+
+  it('have no GitHub branch-protection control (the pre-push hook is the gate)', () => {
+    assert.equal('branchProtection.check' in CONTROL_SPECS, false);
+  });
+
   it('never turn on Claude-run checks by default, in any profile', () => {
     for (const profile of PROFILE_NAMES) assert.equal(PROFILES[profile]['claude.runChecks'], false);
   });

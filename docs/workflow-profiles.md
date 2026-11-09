@@ -18,7 +18,7 @@ Print the resolved settings, and where each value came from, with `node scripts/
 |---|---|---|
 | `solo` | One owner who reads every diff and approves every step | Light: warnings, no gates. Nothing blocks a commit. |
 | `team` | A few developers, shared repository | The guard that protects test files is on, review runs as advice, the Intent Anchor is required before code |
-| `org` | Many developers shipping in parallel, policies that must hold | Strict: the docs check blocks, review and branch protection are required, success measurements are recorded |
+| `org` | Many developers shipping in parallel, policies that must hold | Strict: the docs check blocks, a clean review record is required to push, success measurements are recorded |
 
 Pick the smallest profile that fits. A control that blocks work costs time every day; turn one on when the
 risk it removes is real for your project, not because it exists. Start in `solo`, and move up by editing one
@@ -33,8 +33,7 @@ line when the project grows.
 | `docs.sizeWarnChars` | number, 0 = off | 40000 | 40000 | 40000 | Warn when the always-loaded instruction files are larger than this. Cheap and informational at every scale | **wired** (`doc-size.mjs`) |
 | `tests.guard` | off, on | off | on | on | Block edits to test files that exist in git while fix mode is on, so a fix cannot weaken its own proof | **wired** (`test-edit-guard.mjs`; see `test-discipline.md`) |
 | `tests.tdd` | off, bugs, on | bugs | on | on | Test-first policy: `bugs` = a bug fix starts with a failing test; `on` = new logic too. A bucket marked `TDD: yes` in the plan opts in under any value except `off` | **wired as a rule** (`rules/test-discipline.md`, read by the assistant) |
-| `review.mode` | off, advisory, required | off | advisory | required | Independent review by a reviewer subagent against `REVIEW.md`: optional, run it, or merge needs it | planned: review gate |
-| `branchProtection.check` | off, report, required | report | report | required | Read the default branch's protection from GitHub; required fails when it is missing | planned: review gate |
+| `review.mode` | off, advisory, required | advisory | advisory | required | Independent review by the `reviewer` subagent against `REVIEW.md` before a commit. `off` = only when asked; `advisory` = run it, and the pre-push hook reminds when there is no record; `required` = the pre-push hook blocks a push whose content has no clean review record. Even a solo owner gets a second reader that checks the change against the plan | **wired** (`check-review-gate.mjs`, `rules/commit-gate.md`; see `review-gate.md`) |
 | `claude.runChecks` | true, false | false | false | false | Allow checks that run `claude -p` locally (the `@` import check, the skill trigger runner). They use Claude usage, so they are opt-in and never run by hooks or CI | **wired** (`run-claude-checks.mjs`) |
 | `static.checks` | true, false | true | true | true | Cheap checks that need no Claude: skill lint, `@` import resolver | **wired** (`check-config.mjs`) |
 

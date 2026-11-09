@@ -62,14 +62,7 @@ export const CONTROL_SPECS = {
     allowed: ['off', 'advisory', 'required'],
     env: 'REVIEW_MODE',
     description:
-      'independent review by a reviewer subagent against REVIEW.md (off = optional, advisory = run it, required = merge needs it)',
-  },
-  'branchProtection.check': {
-    type: 'choice',
-    allowed: ['off', 'report', 'required'],
-    env: 'BRANCH_PROTECTION_CHECK',
-    description:
-      'read the default branch protection from GitHub (off = skip, report = show it, required = fail when missing)',
+      'independent review by the reviewer subagent against REVIEW.md before a commit (off = only on request, advisory = run it and remind at push, required = the pre-push hook blocks a push whose content has no clean review record)',
   },
   'claude.runChecks': {
     type: 'boolean',
@@ -92,8 +85,7 @@ export const PROFILES = {
     'docs.sizeWarnChars': 40000,
     'tests.guard': 'off',
     'tests.tdd': 'bugs',
-    'review.mode': 'off',
-    'branchProtection.check': 'report',
+    'review.mode': 'advisory',
     'claude.runChecks': false,
     'static.checks': true,
   },
@@ -104,7 +96,6 @@ export const PROFILES = {
     'tests.guard': 'on',
     'tests.tdd': 'on',
     'review.mode': 'advisory',
-    'branchProtection.check': 'report',
     'claude.runChecks': false,
     'static.checks': true,
   },
@@ -115,7 +106,6 @@ export const PROFILES = {
     'tests.guard': 'on',
     'tests.tdd': 'on',
     'review.mode': 'required',
-    'branchProtection.check': 'required',
     'claude.runChecks': false,
     'static.checks': true,
   },
