@@ -16,8 +16,8 @@ Print the resolved settings, and where each value came from, with `node scripts/
 
 | Profile | For | In short |
 |---|---|---|
-| `solo` | One owner who reads every diff and approves every step | Light: warnings, no gates. Nothing blocks a commit. |
-| `team` | A few developers, shared repository | The guard that protects test files is on, review runs as advice, the Intent Anchor is required before code |
+| `solo` | One owner who reads every diff and approves every step | Light: warnings and advice. The Intent Anchor is agreed before non-trivial work. Nothing blocks a commit except the hooks you install. |
+| `team` | A few developers, shared repository | Adds the guard that protects test files and test-first for new logic; review runs as advice |
 | `org` | Many developers shipping in parallel, policies that must hold | Strict: the docs check blocks, a clean review record is required to push, success measurements are recorded |
 
 Pick the smallest profile that fits. A control that blocks work costs time every day; turn one on when the
@@ -28,7 +28,7 @@ line when the project grows.
 
 | Control | Values | solo | team | org | What it does and why it scales this way | Status |
 |---|---|---|---|---|---|---|
-| `planning.gates` | off, anchor, full | off | anchor | full | The planner is used on request (off); no code before the Intent Anchor is approved (anchor); plus success measurements (full). A solo owner is the shared record; many developers need one. A soft rule the assistant follows, with plan mode as an optional hard stop (see below) | **wired** (`CLAUDE.md` template line, `goal-first-planner`, `workspace-router`) |
+| `planning.gates` | off, anchor, full | anchor | anchor | full | The planner is used only on request (off); no code for non-trivial work before the Intent Anchor is approved (anchor, the default for solo and team); plus success measurements (full). Even a solo owner gets the goal agreed and written down before building; many developers also need the record to be shared. A soft rule the assistant follows, with plan mode as an optional hard stop (see below) | **wired** (`CLAUDE.md` template line, `goal-first-planner`, `workspace-router`) |
 | `docs.check` | off, warn, strict | warn | warn | strict | Commit hook: source changed but the overview (`AGENTS.md`) did not. Strict blocks the commit | **wired** (`check-docs-fresh.mjs`) |
 | `docs.sizeWarnChars` | number, 0 = off | 40000 | 40000 | 40000 | Warn when the always-loaded instruction files are larger than this. Cheap and informational at every scale | **wired** (`doc-size.mjs`) |
 | `tests.guard` | off, on | off | on | on | Block edits to test files that exist in git while fix mode is on, so a fix cannot weaken its own proof | **wired** (`test-edit-guard.mjs`; see `test-discipline.md`) |

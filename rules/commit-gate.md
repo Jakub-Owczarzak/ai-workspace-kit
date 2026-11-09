@@ -16,7 +16,7 @@ The order before every commit:
      Review again after a fix, because changed content needs a new record. If blocking findings remain that
      you decide not to fix, record the real number (never 0) and tell the user. In `required` mode the
      pre-push hook blocks a push whose content has no clean record.
-   - Other reviews (the thermo-nuclear review, a code review skill) are extra; they do not replace the record.
+   - Other reviews (the ultra code quality review, a code review skill) are extra; they do not replace the record.
    The review is read-only and never commits.
 3. **Run the design sync** if the pending-changes list has rows (see `figma-sync`).
 4. **Commit.** Every commit that changes behaviour or UI carries a changelog entry (see `changelog-bump`).

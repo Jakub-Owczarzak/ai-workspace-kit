@@ -33,7 +33,7 @@ what order things are true. Fill the tables in section 2 for this project (the s
   pending) → commit → a human pushes. Details in the project's commit-gate rule.
 - **Report verification honestly:** say what was run and what was not.
 - **Planning gate:** when `planning.gates` is `anchor` or `full` (its value in `overrides` of
-  `.claude/workflow.json`, else the profile default: `solo` off, `team` anchor, `org` full), no production code
+  `.claude/workflow.json`, else the profile default: `solo` and `team` anchor, `org` full), no production code
   for non-trivial work until `PLAN.md` holds an approved Intent Anchor; `full` also needs the success
   measurements. Routine work is exempt; say so when you rely on that.
 
@@ -46,7 +46,7 @@ what order things are true. Fill the tables in section 2 for this project (the s
 | `goal-first-planner` | Starting a feature or project: find the real goal, agree an Intent Anchor, work in small buckets with checkpoints |
 | `write-project-overview` | The project has no `AGENTS.md` overview yet, or the overview may be stale and should be checked and refreshed |
 | `readable-fix-plan` | Turning review findings or a bug list into one scannable plan with verified links |
-| `thermo-nuclear-code-quality-review` | A deliberately harsh maintainability review: structure, size, spaghetti growth (only when asked) |
+| `ultra-code-quality-review` | A deliberately harsh maintainability review: structure, size, spaghetti growth (only when asked) |
 | `pr-description` | Writing the pull request text from the real diff (never opens the PR) |
 | `changelog-bump` | A commit needs a changelog entry, or a release should bump the version |
 | `figma-sync` | UI changes are pending in the design-sync file, or the user asks to align the design with the app |

@@ -1,4 +1,0 @@
-interface:
-  display_name: "Thermo-Nuclear Code Quality Review"
-  short_description: "Extremely strict maintainability audit — abstraction quality, file-size discipline, spaghetti-condition growth, and code-judo restructuring."
-  default_prompt: "Use $thermo-nuclear-code-quality-review to run a deep code quality audit of the current branch's changes with an extremely strict maintainability review and code-judo structural push."

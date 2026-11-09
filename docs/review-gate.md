@@ -74,7 +74,7 @@ A person can still push once with `REVIEW_MODE=off git push`. Assistants do not 
   files after the review, the committed content is not the reviewed content and the record is stale. Run lint
   and formatting before the review (commit-gate step 1 does), or review once more after the commit and run
   `record` again (with nothing staged it records the commit's content).
-- **The thermo-nuclear review is separate.** It judges structure; it does not check the change against the
+- **The ultra code quality review is separate.** It judges structure; it does not check the change against the
   plan, and it does not leave a record.
 
 ## Install

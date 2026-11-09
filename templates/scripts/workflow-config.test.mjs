@@ -51,6 +51,14 @@ describe('profile tables', () => {
     assert.equal(PROFILES.org['review.mode'], 'required');
   });
 
+  it('gather intent before non-trivial work in every profile, and add success measurements in org', () => {
+    assert.equal(PROFILES.solo['planning.gates'], 'anchor');
+    assert.equal(PROFILES.team['planning.gates'], 'anchor');
+    assert.equal(PROFILES.org['planning.gates'], 'full');
+    assert.equal(resolveControls({}, {}).controls['planning.gates'].value, 'anchor');
+    assert.equal(resolveControls({ overrides: { 'planning.gates': 'off' } }, {}).controls['planning.gates'].value, 'off');
+  });
+
   it('have no GitHub branch-protection control (the pre-push hook is the gate)', () => {
     assert.equal('branchProtection.check' in CONTROL_SPECS, false);
   });

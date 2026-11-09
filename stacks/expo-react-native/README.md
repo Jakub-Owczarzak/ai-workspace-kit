@@ -1,7 +1,7 @@
 # Stack pack: Expo / React Native
 
-The framework-specific part of the workflow, kept separate from the generic kit. It is the reusable idea
-behind PRINTROOM's `rn-workspace` skill, without any app facts.
+The framework-specific part of the workflow, kept separate from the generic kit: routing rows for the
+framework's skills and its always-on rule, without any app facts.
 
 ## What a stack pack is
 

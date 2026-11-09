@@ -28,7 +28,7 @@ A row's status is the weakest honest word for it: if one step of a practice diff
 
 | Playbook practice | In this kit | Status | How it was checked |
 |---|---|---|---|
-| Capture the intent in the repository: problem, outcome, users, constraints, open questions | `templates/PLAN.md` (the Intent Anchor), `skills/goal-first-planner/SKILL.md` | Covered (one file, other field names) | claude -p trigger run on the starter; planning-gate check, 4 cases, one sample each |
+| Capture the intent in the repository: problem, outcome, users, constraints, open questions | `templates/PLAN.md` (the Intent Anchor), `skills/goal-first-planner/SKILL.md` | Covered (one file, other field names) | claude -p trigger run on an installed copy; planning-gate check, 5 cases, one sample each |
 | A person reviews and corrects the intent before it is committed | The planner asks the user to approve the Intent Anchor; control `planning.gates` | Partly: a rule the assistant follows, not a block | claude -p planning-gate check; plan mode not tried |
 | Measure whether capturing intent got faster | The "Success measurements" field, needed when `planning.gates` is `full` | Partly: the field exists, nothing measures it | read only |
 | Requirements and design decisions recorded next to the intent (`spec.md`) | The decision log and the key decisions of each bucket in `PLAN.md` | Differs by decision: one `PLAN.md`, no separate spec file | read only |
@@ -42,9 +42,9 @@ A row's status is the weakest honest word for it: if one step of a practice diff
 | Update the plan in the same commit when the work departs from it | The planner's Persistence section, `rules/docs-fresh.md` | Partly: a rule; the playbook also suggests a hook, which is not built | read only |
 | Auto mode for routine work | The routine-work exemption in the planning gate | Partly: the exemption exists; the kit does not set a permission mode | read only |
 | One source of truth per artifact; everything else links to it | `rules/docs-fresh.md`, the "Sources of truth" list in `templates/AGENTS.md` | Partly: covered for the repository; not covered: writing results back to an outside system | read only |
-| A short CLAUDE.md: commands, conventions, things Claude gets wrong | `templates/AGENTS.md`, `templates/CLAUDE.md`, `skills/write-project-overview/SKILL.md`, `templates/scripts/overview-check.mjs`, `templates/scripts/doc-size.mjs` | Differs by decision on size (see below) | unit tests; a scratch project; a refresh of the starter's overview; claude -p trigger run |
+| A short CLAUDE.md: commands, conventions, things Claude gets wrong | `templates/AGENTS.md`, `templates/CLAUDE.md`, `skills/write-project-overview/SKILL.md`, `templates/scripts/overview-check.mjs`, `templates/scripts/doc-size.mjs` | Differs by decision on size (see below) | unit tests; a scratch project; a refresh of an existing overview; claude -p trigger run |
 | Skills as institutional knowledge, with a test that they trigger | `skills/`, the `triggers.json` in each model-invocable skill (8 of the 10; the two hand-started skills have none by design), `templates/scripts/check-skills.mjs`, `templates/scripts/run-claude-checks.mjs` | Covered | unit tests; lint of the 10 kit skills; claude -p trigger runs |
-| Hooks as build-time guardrails; a block explains itself | `templates/scripts/test-edit-guard.mjs`, `templates/scripts/check-docs-fresh.mjs`, `templates/hooks/pre-commit` | Covered | unit tests; the guard blocked a real edit in the starter |
+| Hooks as build-time guardrails; a block explains itself | `templates/scripts/test-edit-guard.mjs`, `templates/scripts/check-docs-fresh.mjs`, `templates/hooks/pre-commit` | Covered | unit tests; the guard blocked a real edit in a real project |
 | Subagents checked in under `.claude/agents/` | `templates/agents/reviewer.md` | Partly: one subagent, the reviewer | review (below) |
 | Parallel sessions and worktrees | none | Out of scope by decision | not tried |
 
@@ -52,23 +52,23 @@ A row's status is the weakest honest word for it: if one step of a practice diff
 
 | Playbook practice | In this kit | Status | How it was checked |
 |---|---|---|---|
-| A feedback loop: tests, build, lint; paste the output | `rules/verification.md`, `rules/test-discipline.md`, `rules/commit-gate.md` | Covered | read only (the rules are text); the starter's pre-commit hook runs lint-staged, type check and tests (read, not re-run) |
-| A bug fix starts with a failing test and never edits it; a hook blocks edits to tests | `rules/test-discipline.md`, `templates/scripts/test-edit-guard.mjs` (control `tests.guard`) | Partly: the failing-test-first rule and the edit-blocking hook exist; the failing test is not committed first (decision 17) | unit tests; a live block in the starter |
+| A feedback loop: tests, build, lint; paste the output | `rules/verification.md`, `rules/test-discipline.md`, `rules/commit-gate.md` | Covered | read only (the rules are text); a real project's pre-commit hook runs lint-staged, type check and tests (read, not re-run) |
+| A bug fix starts with a failing test and never edits it; a hook blocks edits to tests | `rules/test-discipline.md`, `templates/scripts/test-edit-guard.mjs` (control `tests.guard`) | Partly: the failing-test-first rule and the edit-blocking hook exist; the failing test is not committed first (decision 17) | unit tests; a live block in a real project |
 | Test-first for new logic | Control `tests.tdd`, and `TDD: yes` in a bucket | A kit addition: the playbook asks for it only for bug fixes | read only |
 | Evals in CI when CLAUDE.md, skills or hooks change | none | Out of scope by decision (no Claude in CI) | not tried |
-| Regression-test the configuration itself, here run locally | `templates/scripts/check-config.mjs` (skill lint, `@` imports, doc size) and the opt-in `templates/scripts/run-claude-checks.mjs` | Partly: the static checks always run; the Claude-run checks are opt-in and model-reported | unit tests; one claude -p run on the starter |
+| Regression-test the configuration itself, here run locally | `templates/scripts/check-config.mjs` (skill lint, `@` imports, doc size) and the opt-in `templates/scripts/run-claude-checks.mjs` | Partly: the static checks always run; the Claude-run checks are opt-in and model-reported | unit tests; one claude -p run on an installed copy |
 
 ## Deploy
 
 | Playbook practice | In this kit | Status | How it was checked |
 |---|---|---|---|
-| An AI review of every change, findings ranked by severity | `templates/agents/reviewer.md`, `templates/REVIEW.md`, `docs/review-gate.md` | Partly: it runs locally before a commit, not on GitHub pull requests | three reviews by fresh subagents (two on the review gate, one on the planner changes), one sample each |
+| An AI review of every change, findings ranked by severity | `templates/agents/reviewer.md`, `templates/REVIEW.md`, `docs/review-gate.md` | Partly: it runs locally before a commit, not on GitHub pull requests | five reviews by fresh subagents (two on the review gate, one each on the planner changes, this page and the README), one sample each |
 | `REVIEW.md` defines what blocks and what does not, what to skip, and a nit cap | `templates/REVIEW.md` | Covered | read only; the reviews above used it as their checklist |
 | The agent that wrote the code cannot approve it | `templates/scripts/check-review-gate.mjs` | Differs by decision: the record is an attestation the same assistant can write | unit tests |
 | Branch protection with a human approval | none; `templates/hooks/pre-push` blocks direct pushes to the protected branch on this machine | Out of scope by decision (21): GitHub offers no protection for private repositories on the free plan, and the kit does not read it | not tried |
 | Hooks as approval gates | `templates/hooks/pre-push` and `check-review-gate.mjs` (control `review.mode`) | Partly: local, and fails open | unit tests, including the hook template run with `sh`; a real `git push` through it is not yet run |
 | Managed settings for an enterprise | none | Out of scope by decision | not tried |
-| CI/CD and deployment | `templates/workflows/release_bump.yaml`, `skills/changelog-bump/SKILL.md` | Partly: a version bump and changelog only, no deploy pipeline | unit tests (changelog); the starter's history shows release pull requests from `release/next` (v0.1.2) |
+| CI/CD and deployment | `templates/workflows/release_bump.yaml`, `skills/changelog-bump/SKILL.md` | Partly: a version bump and changelog only, no deploy pipeline | unit tests (changelog); a real project's history shows release pull requests from `release/next` (v0.1.2) |
 
 ## Maintain
 
@@ -80,7 +80,7 @@ A row's status is the weakest honest word for it: if one step of a practice diff
 
 1. **Size of the overview.** The playbook says: "Keep it under a page, because Claude reads all of it at the
    start of a session." The kit only warns above 40,000 characters (`docs.sizeWarnChars`) and never trims, and
-   PRINTROOM's `AGENTS.md` is far over that (81,749 characters when measured). Decision 8: a generator and a
+   a real overview of 81,749 characters was far over that and was kept, not trimmed. Decision 8: a generator and a
    measurement, not a cut.
 2. **Test-first for new logic** is the kit's addition (`tests.tdd`); the playbook requires it for bug fixes.
 3. **The failing test is not committed first.** The playbook says "Commit that test"; the kit's commit hook
@@ -98,15 +98,15 @@ A row's status is the weakest honest word for it: if one step of a practice diff
 The workflow profile (`.claude/workflow.json`, `docs/workflow-profiles.md`), `update-workspace-kit` (push and
 pull between a project and the kit), `write-project-overview` with `overview-check.mjs`, the stack pack for
 Expo, `figma-sync`, `changelog-bump`, `pr-description`, `readable-fix-plan`, and the harsh
-`thermo-nuclear-code-quality-review`.
+`ultra-code-quality-review`.
 
 ## What this page does not claim
 
 - That any of this improves results; it shows what exists and how it was checked.
 - That a model-reported answer will repeat; each is one sample.
 - Pieces not yet run: plan mode, a real `git push` through the pre-push hook, the `setup-workspace` skill with
-  the newest pieces, and the pull into PRINTROOM. The starter holds the kit as of its last pull
-  (`.claude/workspace-kit/.kit-version`).
+  the newest pieces, and a pull into a project that already has its own overview and skills. A project that
+  has pulled the kit holds it as of its last pull (`.claude/workspace-kit/.kit-version`).
 
 ## Keeping it true
 

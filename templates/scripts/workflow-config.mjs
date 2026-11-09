@@ -30,7 +30,7 @@ export const CONTROL_SPECS = {
     allowed: ['off', 'anchor', 'full'],
     env: 'PLANNING_GATES',
     description:
-      'off = the planner is used on request; anchor = no code before the Intent Anchor is approved; full = anchor plus success measurements',
+      'off = the planner is used only on request; anchor = no code for non-trivial work before the Intent Anchor is approved (the default in every profile); full = anchor plus success measurements',
   },
   'docs.check': {
     type: 'choice',
@@ -80,7 +80,7 @@ export const CONTROL_SPECS = {
 /** The default value of every control for each profile. `solo` matches how the kit worked before profiles. */
 export const PROFILES = {
   solo: {
-    'planning.gates': 'off',
+    'planning.gates': 'anchor',
     'docs.check': 'warn',
     'docs.sizeWarnChars': 40000,
     'tests.guard': 'off',

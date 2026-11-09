@@ -13,7 +13,7 @@
 Notes:
 
 - `disable-model-invocation: true` in a skill's header means it only runs when you call it by name
-  (`setup-workspace`, `thermo-nuclear-code-quality-review`).
+  (`setup-workspace`, `ultra-code-quality-review`).
 - The changelog hook calls the script by path (`.claude/skills/changelog-bump/scripts/changelog.mjs`).
   Keep that path in the hook and in the release workflow.
 - Skills in `.claude/skills/` are listed in every session by name and description, so install only the

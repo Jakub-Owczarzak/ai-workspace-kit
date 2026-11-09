@@ -9,7 +9,7 @@ Plan before building. First find the real goal, then break the work into small b
 
 **Hard rule:** once this skill is in use (the user asked for a plan, or the gate below applies), do not write production code or final content until the Intent Anchor and the Bucket Map are approved by the user.
 
-**When this applies:** find the value of `planning.gates`: the one in `overrides` of `.claude/workflow.json` if it sets it, otherwise the profile's default (`solo` off, `team` anchor, `org` full; a missing file means `solo`). `node scripts/workflow-config.mjs` prints it. `off`: you plan when the user asks. `anchor`: non-trivial work needs an approved Intent Anchor in `PLAN.md` before any production code, even if the user did not ask for a plan. `full`: the same, plus success measurements. Routine work is exempt (a tight request, a small blast radius, code the tests already cover); say when you rely on that.
+**When this applies:** find the value of `planning.gates`: the one in `overrides` of `.claude/workflow.json` if it sets it, otherwise the profile's default (`solo` anchor, `team` anchor, `org` full; a missing file means `solo`). `node scripts/workflow-config.mjs` prints it. `off`: you plan when the user asks. `anchor`: non-trivial work needs an approved Intent Anchor in `PLAN.md` before any production code, even if the user did not ask for a plan. `full`: the same, plus success measurements. Routine work is exempt (a tight request, a small blast radius, code the tests already cover); say when you rely on that.
 
 ---
 
