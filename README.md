@@ -616,8 +616,8 @@ pieces). Keep project facts out of the kit.
   not committed there); the test-edit guard blocked a real edit there. The overview skill, the review gate and
   the planner changes came after that pull and are not in that project yet. No other project has been updated.
 - **Reviews:** five reviews by fresh subagents given the `reviewer` instructions (not the registered agent): the
-  review gate (twice), the planner changes, the mapping page and this README. The dated runs behind the numbers
-  above are recorded in `PLAN-workflow-playbook.md`.
+  review gate (twice), the planner changes, the mapping page and this README. All the runs above were made on
+  2026-11-09; the numbers are from that day and will change as the kit does.
 - **Not yet run:** plan mode, a real `git push` through the pre-push hook, `setup-workspace` with the newest
   pieces, and a pull into a project that already has its own overview and skills.
 

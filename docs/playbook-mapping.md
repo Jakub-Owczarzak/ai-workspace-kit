@@ -53,7 +53,7 @@ A row's status is the weakest honest word for it: if one step of a practice diff
 | Playbook practice | In this kit | Status | How it was checked |
 |---|---|---|---|
 | A feedback loop: tests, build, lint; paste the output | `rules/verification.md`, `rules/test-discipline.md`, `rules/commit-gate.md` | Covered | read only (the rules are text); a real project's pre-commit hook runs lint-staged, type check and tests (read, not re-run) |
-| A bug fix starts with a failing test and never edits it; a hook blocks edits to tests | `rules/test-discipline.md`, `templates/scripts/test-edit-guard.mjs` (control `tests.guard`) | Partly: the failing-test-first rule and the edit-blocking hook exist; the failing test is not committed first (decision 17) | unit tests; a live block in a real project |
+| A bug fix starts with a failing test and never edits it; a hook blocks edits to tests | `rules/test-discipline.md`, `templates/scripts/test-edit-guard.mjs` (control `tests.guard`) | Partly: the failing-test-first rule and the edit-blocking hook exist; the failing test is not committed first | unit tests; a live block in a real project |
 | Test-first for new logic | Control `tests.tdd`, and `TDD: yes` in a bucket | A kit addition: the playbook asks for it only for bug fixes | read only |
 | Evals in CI when CLAUDE.md, skills or hooks change | none | Out of scope by decision (no Claude in CI) | not tried |
 | Regression-test the configuration itself, here run locally | `templates/scripts/check-config.mjs` (skill lint, `@` imports, doc size) and the opt-in `templates/scripts/run-claude-checks.mjs` | Partly: the static checks always run; the Claude-run checks are opt-in and model-reported | unit tests; one claude -p run on an installed copy |
@@ -65,7 +65,7 @@ A row's status is the weakest honest word for it: if one step of a practice diff
 | An AI review of every change, findings ranked by severity | `templates/agents/reviewer.md`, `templates/REVIEW.md`, `docs/review-gate.md` | Partly: it runs locally before a commit, not on GitHub pull requests | five reviews by fresh subagents (two on the review gate, one each on the planner changes, this page and the README), one sample each |
 | `REVIEW.md` defines what blocks and what does not, what to skip, and a nit cap | `templates/REVIEW.md` | Covered | read only; the reviews above used it as their checklist |
 | The agent that wrote the code cannot approve it | `templates/scripts/check-review-gate.mjs` | Differs by decision: the record is an attestation the same assistant can write | unit tests |
-| Branch protection with a human approval | none; `templates/hooks/pre-push` blocks direct pushes to the protected branch on this machine | Out of scope by decision (21): GitHub offers no protection for private repositories on the free plan, and the kit does not read it | not tried |
+| Branch protection with a human approval | none; `templates/hooks/pre-push` blocks direct pushes to the protected branch on this machine | Out of scope by decision: GitHub offers no protection for private repositories on the free plan, and the kit does not read it | not tried |
 | Hooks as approval gates | `templates/hooks/pre-push` and `check-review-gate.mjs` (control `review.mode`) | Partly: local, and fails open | unit tests, including the hook template run with `sh`; a real `git push` through it is not yet run |
 | Managed settings for an enterprise | none | Out of scope by decision | not tried |
 | CI/CD and deployment | `templates/workflows/release_bump.yaml`, `skills/changelog-bump/SKILL.md` | Partly: a version bump and changelog only, no deploy pipeline | unit tests (changelog); a real project's history shows release pull requests from `release/next` (v0.1.2) |
@@ -80,11 +80,11 @@ A row's status is the weakest honest word for it: if one step of a practice diff
 
 1. **Size of the overview.** The playbook says: "Keep it under a page, because Claude reads all of it at the
    start of a session." The kit only warns above 40,000 characters (`docs.sizeWarnChars`) and never trims, and
-   a real overview of 81,749 characters was far over that and was kept, not trimmed. Decision 8: a generator and a
-   measurement, not a cut.
+   a real overview of 81,749 characters was far over that and was kept, not trimmed: the kit
+   gives a generator and a measurement, not a cut.
 2. **Test-first for new logic** is the kit's addition (`tests.tdd`); the playbook requires it for bug fixes.
 3. **The failing test is not committed first.** The playbook says "Commit that test"; the kit's commit hook
-   runs the tests, so a failing test cannot be committed (decision 17). The guard's `lock` command protects it.
+   runs the tests, so a failing test cannot be committed. The guard's `lock` command protects it.
 4. **One `PLAN.md`** instead of an `intent/` folder with files per change.
 5. **Approval.** The playbook: "the agent that wrote the code has no way to approve it". The kit's review
    record is written by the assistant, so it catches forgetting, not cheating (`docs/review-gate.md`).
