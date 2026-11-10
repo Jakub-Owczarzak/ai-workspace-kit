@@ -491,45 +491,161 @@ Pick the smallest profile that fits. A control that blocks costs time every day;
 removes is real, not because it exists. Skills are installed or not at setup; the profile changes how strictly
 the workflow requires them.
 
-### What each step does in each profile
+### The flow in each profile: what is automated, what needs you
 
-Legend: **[off]** not applied. **[soft]** a rule or a warning; the assistant follows it, nothing stops you.
-**[HARD]** something blocks (a hook exit code or a tool). It exists only where the hook is installed, and a person
-can bypass it on purpose (`--no-verify`, `REVIEW_MODE=off`).
+Every step is tagged with **who acts** and **how it is enforced**:
 
 ```text
- SOLO (default)
-   1 plan     [soft]  non-trivial work needs an approved Intent Anchor in PLAN.md (the planner runs: interview,
-                      Intent Anchor, buckets, checkpoints); routine work is exempt; plan mode is not offered
-   2 build    rules always on; test-edit guard [off]; new-logic test-first only for a bucket marked TDD: yes
-   3 verify   [soft]  show the real output
-   4 review   [soft]  advisory: the assistant runs the reviewer before a commit
-   5 commit   checks + changelog [HARD, if you installed the commit hook]; docs-fresh [soft] warning
-   6 push     protected branch [HARD, if you installed the push hook]; review gate [soft] reminder
-   7 pr       pr-description when you ask
+   WHO ACTS    YOU   a person decides or acts: approves, asks, types, pushes, merges   <-- human in the loop
+               AI    the assistant, working under the always-on rules and skills
+               RUN   a script, a git hook or a CI job; no assistant and no person needed
 
- TEAM
-   1 plan     [soft]  non-trivial work needs an approved Intent Anchor in PLAN.md; routine work is exempt;
-                      plan mode (a real stop in the terminal) is offered at setup
-   2 build    rules always on; test-edit guard [HARD in fix mode]; new logic test-first [soft]
-   3 verify   [soft]
-   4 review   [soft]  advisory
-   5 commit   checks + changelog [HARD]; docs-fresh [soft] warning
-   6 push     protected branch [HARD]; review gate [soft] reminder
-   7 pr       pr-description when you ask
-
- ORG
-   1 plan     [soft]  the Intent Anchor AND success measurements before non-trivial code; plan mode offered
-   2 build    rules always on; test-edit guard [HARD in fix mode]; new logic test-first [soft]
-   3 verify   [soft]
-   4 review   [soft]  the assistant must run the reviewer and record the result
-   5 commit   checks + changelog [HARD]; docs-fresh [HARD]: the commit is blocked when source changed
-              but AGENTS.md did not
-   6 push     protected branch [HARD]; review gate [HARD]: blocked without a clean review record
-   7 pr       pr-description when you ask
+   ENFORCED    soft  a rule or a warning: the assistant follows it, nothing stops you
+               HARD  something blocks (a hook exit code or a tool). It exists only where it is installed,
+                     and a person can bypass it on purpose (--no-verify, REVIEW_MODE=off)
+               off   not applied in this profile
 ```
 
-The same, as a table:
+The kit is a **human-in-the-loop** workflow. In no profile does anything push, open a pull request or merge by
+itself. The profile changes how much is blocked by a machine, not whether a person decides.
+
+#### Solo: one owner who reads every diff and approves every step
+
+```text
+   YOU   ask for a change
+    |
+    v
+ 1 PLAN     AI    gathers context, interviews you, drafts the Intent Anchor        planning.gates = anchor, soft
+    |       YOU   approve the Intent Anchor, then the bucket map, then each bucket's plan
+    |             (a tight, small, already-tested change is exempt; plan mode is not offered)
+    v
+ 2 BUILD    AI    router picks the skill; the always-on rules shape the change                  soft
+    |             a bug fix starts with a failing test; new logic is test-first only when a bucket says TDD: yes
+    |       off   test-edit guard: nothing stops an edit to an existing test; the rule says never weaken one
+    |       YOU   answer "proceed, adjust or stop?" after each bucket
+    v
+ 3 VERIFY   AI    runs lint, types and tests, shows the real output, says what was not checked   soft
+    v
+ 4 REVIEW   AI    starts the reviewer subagent on the staged change, fixes its blocking   review.mode = advisory, soft
+    |             findings; a blocking finding sends it back to step 2, then review again
+    v
+ 5 COMMIT   YOU   ask for the commit (assistants commit when asked)
+    |       RUN   pre-commit hook, if you installed it: lint, types, tests                                  HARD
+    |       RUN   docs-fresh check: source changed but AGENTS.md did not                   docs.check = warn, soft
+    |       YOU   changelog: the bump type and one line, typed in the terminal (or the assistant supplies the
+    |             two values when it commits for you)
+    v
+ 6 PUSH     YOU   push. Assistants never push
+    |       RUN   pre-push hook, if installed: refuses the protected branch you named                       HARD
+    |       RUN   review gate: a reminder if this content has no clean review record                 soft (reminder)
+    v
+ 7 PR       AI    pr-description drafts the text from the real diff
+            YOU   open the pull request, let your own CI run, merge
+            RUN   release workflow (optional): opens a release PR after the merge;  YOU merge it = the release
+```
+
+#### Team: a few developers on a shared repository
+
+Same as solo, plus a real stop on planning, and a guard that protects tests during a bug fix.
+
+```text
+   YOU   ask for a change
+    |
+    v
+ 1 PLAN     AI    interviews you, drafts the Intent Anchor                         planning.gates = anchor, soft
+    |       YOU   approve the Intent Anchor, the bucket map, each bucket's plan
+    |       RUN   plan mode, offered at setup: the terminal session cannot edit any file until
+    |       YOU   accept the plan                                                                          HARD
+    v
+ 2 BUILD    AI    router, always-on rules; NEW LOGIC IS TEST-FIRST                         tests.tdd = on, soft
+    |
+    |       a BUG FIX goes through fix mode (tests.guard = on):
+    |          AI    writes a test that reproduces the bug and shows it FAILING for the right reason
+    |          AI    node scripts/test-edit-guard.mjs start, then lock (the assistant starts fix mode)
+    |          RUN   from here an Edit, Write or MultiEdit on an existing test file is refused               HARD
+    |          AI    changes the code only; runs the test, then the whole suite; then stop
+    |
+    |       YOU   answer "proceed, adjust or stop?" after each bucket
+    v
+ 3 VERIFY   AI    lint, types, tests, real output                                                       soft
+    v
+ 4 REVIEW   AI    reviewer subagent on the staged change; fixes blocking findings            review.mode = advisory
+    v
+ 5 COMMIT   YOU   ask for the commit; type the changelog bump and line (or the assistant supplies them)
+    |       RUN   pre-commit hook: lint, types, tests                                                     HARD
+    |       RUN   docs-fresh check                                                           docs.check = warn, soft
+    v
+ 6 PUSH     YOU   push
+    |       RUN   pre-push hook: protected branch refused                                                  HARD
+    |       RUN   review gate: reminder if there is no clean record                                  soft (reminder)
+    v
+ 7 PR       AI    pr-description drafts the text      YOU  open the PR, CI, merge      RUN  release PR (optional)
+```
+
+#### Org: many developers, policies that must hold
+
+Same as team, plus success measurements, and three more things that block: the docs check, the review record at
+push, and plan mode as the default.
+
+```text
+   YOU   ask for a change
+    |
+    v
+ 1 PLAN     AI    interviews you; drafts the Intent Anchor AND the success measurements    planning.gates = full
+    |             (metric, baseline -> target, how it is measured)
+    |       YOU   approve the anchor, the bucket map, each bucket's plan
+    |       RUN   plan mode is the session default: no file edit until
+    |       YOU   accept the plan                                                                          HARD
+    v
+ 2 BUILD    AI    router, always-on rules; new logic test-first                            tests.tdd = on, soft
+    |             bug fix in fix mode: failing test first, then the guard protects existing tests          HARD
+    |       YOU   answer "proceed, adjust or stop?" after each bucket
+    v
+ 3 VERIFY   AI    lint, types, tests, real output                                                       soft
+    v
+ 4 REVIEW   AI    MUST run the reviewer subagent on the staged change, fix its blocking    review.mode = required
+    |             findings, and record the result (.claude/reviews/<tree>.md); changed content needs a new record
+    v
+ 5 COMMIT   YOU   ask for the commit; changelog bump and line
+    |       RUN   pre-commit hook: lint, types, tests                                                     HARD
+    |       RUN   docs-fresh check: source changed but AGENTS.md did not                    docs.check = strict, HARD
+    |             the commit is blocked until the overview is part of it
+    v
+ 6 PUSH     YOU   push
+    |       RUN   pre-push hook: protected branch refused                                                  HARD
+    |       RUN   review gate: refused when the content has no clean record, or the record has blocking
+    |             findings                                                                                 HARD
+    v
+ 7 PR       AI    pr-description drafts the text      YOU  open the PR, CI, review by your colleagues, merge
+            RUN   release PR (optional)               YOU  merge it
+```
+
+Two limits to keep in mind in `org`. The review record is an attestation: the assistant that wrote the change can
+write it, so the push check is a reminder with teeth, not independent proof. And a second person reading the pull
+request, branch protection and required CI are your project's own settings; the kit neither reads nor sets them.
+
+#### Where a person is in the loop
+
+| Moment | solo | team | org | What the person does |
+|---|---|---|---|---|
+| Approve the Intent Anchor, the bucket map and each bucket plan | yes | yes | yes (plus the success measurements) | **Approves** before any non-trivial code |
+| Accept the plan before any edit (plan mode) | no | yes | yes | **Accepts**; a real stop in the terminal |
+| "Proceed, adjust or stop?" after each bucket | yes | yes | yes | **Decides** |
+| Read the change | you read the diff; the reviewer is advisory | same | the reviewer must run and record; you still decide | **Judges** |
+| Ask for the commit | yes | yes | yes | **Asks**; assistants commit only when asked |
+| Changelog bump and one-line entry | yes | yes | yes | **Types** it (or the assistant supplies it when it commits for you) |
+| Refresh the overview (`write-project-overview`) | yes | yes | yes | **Approves line by line**; only approved lines change |
+| Design sync (`figma-sync`, if used) | yes | yes | yes | **Approves** the plan before anything is drawn or written |
+| Approve the setup preview (`apply --dry-run`) | yes | yes | yes | **Says yes** before anything is installed |
+| Push | yes | yes | yes | **Pushes**; assistants never push |
+| Open the pull request, merge | yes | yes | yes | **Does it**; the kit drafts the text only |
+| Merge the release PR (if the release workflow is installed) | yes | yes | yes | **Merges**; that is the release |
+
+What runs without a person, in every profile: the always-on rules and the router, the verification and
+test-discipline rules, the reviewer subagent when the assistant starts it, the commit and push hooks, the
+test-edit guard, the config checks, and the release workflow's opening of a release PR.
+
+The controls, as a table:
 
 | Step or piece | solo | team | org |
 |---|---|---|---|
@@ -546,6 +662,30 @@ The same, as a table:
 | Checks that run `claude -p` (`claude.runChecks`) | off (opt-in) | off (opt-in) | off (opt-in) |
 | Plan mode as the session default | not offered | offered | offered |
 | Commit hook, push hook, changelog | your install choice, the same in every profile | | |
+
+### Turning pieces on and off: what changes in the flow
+
+The profile sets how strictly the workflow uses a piece. Whether a piece is **installed at all** is your choice at
+setup (and you can run the setup again). Each row says what the flow looks like with the piece on and off.
+
+| Piece (how it is turned off) | With it on | With it off, the flow becomes | Who is affected |
+|---|---|---|---|
+| **Planner**: `planning.gates = off`, or `goal-first-planner` not installed | Non-trivial work waits for an approved Intent Anchor; a checkpoint after each bucket | The assistant starts from your request. No written goal, no checkpoints: you steer by reading the diff | You lose the approval points of step 1 |
+| **Plan mode default**: not chosen at setup (solo) | The terminal session cannot edit until you accept a plan; the only hard stop on planning | Planning is a soft rule the assistant follows. Not read by the VS Code extension in any case | You accept less, the assistant is trusted more |
+| **Router**: `workspace-router` not installed | The assistant reads the skill that fits before it starts | It may work from memory; a skill is used only when you call it or its description matches | You get less consistent use of the other skills |
+| **Test-edit guard**: `tests.guard = off` | During a bug fix an edit to an existing test file is refused | The rule still says never weaken a test, but nothing stops it; you would notice in the diff | Review carries the load |
+| **Test-first**: `tests.tdd` = `off` / `bugs` / `on` | `on`: new logic too is test-first | `bugs`: only bug fixes, and buckets marked `TDD: yes`. `off`: no rule | You decide what counts as proof |
+| **Reviewer and review gate**: `review.mode` | `advisory`: the assistant reviews before every commit; the push hook only reminds. `required`: the push hook refuses without a clean record | `off`: a review happens only when you ask, and the push hook says nothing. **Not installed at all**: no reviewer, no `REVIEW.md`, no record; step 4 disappears and you are the only reader | You |
+| **Commit hook**: not installed | Lint, types and tests run on every commit and block it when they fail | Nothing stops a commit with failing checks; the commit-gate rule tells the assistant to run them (soft). No docs check, no changelog prompt | You |
+| **Docs-fresh check**: `docs.check` = `off` / `warn` / `strict` | `strict` blocks a commit that changes source without the overview; `warn` prints a message | `off`: silent. The docs-fresh rule still asks the assistant to update the overview | You |
+| **Changelog**: `changelog-bump` not installed | Every commit that changes behaviour carries a bump type and an entry | No changelog, no version bump; the release workflow cannot run (it needs this skill) | You |
+| **Release workflow**: not installed | After a merge to the protected branch a release PR is opened; merging it is the release | You bump versions and the changelog by hand | You |
+| **Push hook**: not installed | The protected branch is refused; the review gate runs at push | Nothing blocks a push to the protected branch except the commit-gate rule (soft). GitHub branch protection is outside the kit | You |
+| **`pr-description`**: not installed | The pull request text is drafted from the real diff and `PLAN.md` | You write it | You |
+| **Overview skill**: `write-project-overview` not installed | `AGENTS.md` is written from the code and refreshed with your line-by-line approval | You keep `AGENTS.md` by hand; the docs-fresh check still compares it against changes | You |
+| **Design sync**: `figma-sync` and `ui-change-flagging` not installed (off by default) | UI changes are logged turn by turn; before the commit the assistant shows its plan and asks before it draws or writes anything | No design step | You approve less |
+| **Harsh review**: `ultra-code-quality-review` | Runs only when you call it; it is not part of the gate and leaves no record | Nothing; the normal review is unaffected | You |
+| **Claude-powered checks**: `claude.runChecks` = `false` (default) | You can run the two checks that call `claude -p`; they use your Claude usage and never run from a hook or CI | They cannot run | You start them |
 
 ### Changing it
 
