@@ -14,7 +14,9 @@ directly with a granular token "will be removed in January 2027". Trusted publis
 
 ## One-time setup
 
-1. **An npm account** (npmjs.com) with two-factor authentication on. Do not create an access token.
+1. **An npm account** (npmjs.com) with two-factor authentication on, at the level **"Authorization and
+   publishing"** (Account > Two-Factor Authentication). Without it `npm publish` fails with
+   `403 ... Two-factor authentication ... is required to publish packages`. Do not create an access token.
 2. **The repository is public**, which also lets npm record provenance (which repository and commit built a version).
 3. **Optional manual gate.** Repository > Settings > Environments > `npm` > *Required reviewers*: add yourself. The
    publish job then waits for your click.
@@ -34,6 +36,12 @@ npm publish
 
 - `npm login` opens a browser or asks for your 2FA code. `npm publish` runs the tests first (`prepublishOnly`), and
   the package is already marked public.
+- **The version may be staged, not live.** On 2026-11-10 the upload printed `+ ai-workspace-kit@0.1.0`, yet npm had
+  only created a placeholder version `0.0.0-stage`, and `0.1.0` stayed hidden until it was approved: npmjs.com >
+  **Staged Packages** > the version > **Approve**, confirmed with 2FA (the CLI route, `npm stage approve`, needs
+  npm 11.15 or newer). It went live within about a minute. The `+ name@version` line is therefore **not** proof of
+  a release: check with `npm view ai-workspace-kit versions --json`. The `0.0.0-stage` placeholder stays in the
+  version list; `latest` points at the real version.
 - If npm refuses (a name or version problem), stop and look at the message before trying anything else. A version
   number that was ever published can never be used again, even after an unpublish.
 - Check it from a throw-away folder: `npx ai-workspace-kit@latest init --dry-run`.
