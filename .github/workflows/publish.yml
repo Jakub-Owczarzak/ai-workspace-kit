@@ -70,16 +70,35 @@ jobs:
     environment: npm
     permissions:
       contents: read
-      id-token: write # lets npm record where the package was built (provenance)
+      id-token: write # trusted publishing: npm logs in with a short-lived identity token, no stored secret
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           registry-url: https://registry.npmjs.org
-      - name: Publish
+      # Trusted publishing needs npm 11.5.1 or later (Node 22 ships an older npm).
+      - name: Use an npm that supports trusted publishing
+        run: |
+          npm install -g npm@^11.5.1
+          npm --version
+      # A tag for a version that is already on npm (for example the first release, published by hand) must not
+      # fail the run: npm never lets a version be published twice.
+      - name: Is this version already on npm?
+        id: published
+        run: |
+          NAME="$(node -p "require('./package.json').name")"
+          VERSION="$(node -p "require('./package.json').version")"
+          if npm view "$NAME@$VERSION" version >/dev/null 2>&1; then
+            echo "already=true" >> "$GITHUB_OUTPUT"
+            echo "$NAME@$VERSION is already on npm. Nothing to publish."
+          else
+            echo "already=false" >> "$GITHUB_OUTPUT"
+            echo "$NAME@$VERSION is not on npm yet."
+          fi
+      - name: Publish with trusted publishing (no token is stored in this repository)
+        if: steps.published.outputs.already != 'true'
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           REPOSITORY_IS_PRIVATE: ${{ github.event.repository.private }}
           DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run }}
         run: |
