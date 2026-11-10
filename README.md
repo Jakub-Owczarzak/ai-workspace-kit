@@ -519,7 +519,7 @@ The kit is a **human-in-the-loop** workflow. In no profile does anything push, o
 itself. The profile changes how much is blocked by a machine, not whether a person decides.
 
 #### Solo: one owner who reads every diff and approves every step
-![Solo workflow diagram: plan, build, verify, review, commit, push and pull request, showing who acts and where the hooks block](docs/diagrams/flow-solo.svg)
+![Solo workflow diagram: plan, test first (bug fixes and TDD buckets), build, verify, review, commit, push and pull request, showing who acts and where the hooks block](docs/diagrams/flow-solo.svg)
 
 <details>
 <summary>Text version of the solo flow</summary>
@@ -560,7 +560,7 @@ itself. The profile changes how much is blocked by a machine, not whether a pers
 </details>
 
 #### Team: a few developers on a shared repository
-![Team workflow diagram: solo plus plan mode on the plan step and the fix-mode test guard on the build step](docs/diagrams/flow-team.svg)
+![Team workflow diagram: solo plus plan mode, a failing test before every bug fix and new logic, and the fix-mode guard that protects existing tests](docs/diagrams/flow-team.svg)
 
 Same as solo, plus a real stop on planning, and a guard that protects tests during a bug fix.
 
@@ -604,7 +604,7 @@ Same as solo, plus a real stop on planning, and a guard that protects tests duri
 </details>
 
 #### Org: many developers, policies that must hold
-![Org workflow diagram: team plus success measurements, a required review record, a blocking docs check and a push gate](docs/diagrams/flow-org.svg)
+![Org workflow diagram: team plus success measurements, a required review record, a blocking docs check and a push gate; the failing test still comes before the code](docs/diagrams/flow-org.svg)
 
 Same as team, plus success measurements, and three more things that block: the docs check, the review record at
 push, and plan mode as the default.
@@ -651,6 +651,19 @@ Two limits to keep in mind in `org`. The review record is an attestation: the as
 write it, so the push check is a reminder with teeth, not independent proof. And a second person reading the pull
 request, branch protection and required CI are your project's own settings; the kit neither reads nor sets them.
 
+#### Test first and bug fixes: the test comes before the code
+
+In the diagrams above, **Test first** is a stage of its own, before **Build**: the failing test is the proof, so
+it is written and shown failing before any code is changed. This diagram zooms in on that part and on what
+each profile changes (the rule is [`rules/test-discipline.md`](rules/test-discipline.md); the policy is in
+[`docs/test-discipline.md`](docs/test-discipline.md)).
+
+Turning test-first off (`tests.tdd = off`) removes the **Test first** stage, not the tests: the assistant still
+runs the whole suite in **Verify**, the commit gate still says never to commit with a failing test, and the
+pre-commit hook still runs the tests. Only the rule "write the failing test first" goes away.
+
+![Test-first path: reproduce as a failing test, show it failing, lock the tests, change only the code, show it passing, stop fix mode; a test that looks wrong goes back to you](docs/diagrams/flow-tdd.svg)
+
 #### Where a person is in the loop
 
 | Moment | solo | team | org | What the person does |
@@ -659,6 +672,7 @@ request, branch protection and required CI are your project's own settings; the 
 | Accept the plan before any edit (plan mode) | no | yes | yes | **Accepts**; a real stop in the terminal |
 | "Proceed, adjust or stop?" after each bucket | yes | yes | yes | **Decides** |
 | Read the change | you read the diff; the reviewer is advisory | same | the reviewer must run and record; you still decide | **Judges** |
+| A test that looks wrong while fixing a bug | yes | yes | yes | **Decides**: the assistant stops, says why and asks; it never edits, skips or weakens the test on its own |
 | Ask for the commit | yes | yes | yes | **Asks**; assistants commit only when asked |
 | Changelog bump and one-line entry | yes | yes | yes | **Types** it (or the assistant supplies it when it commits for you) |
 | Refresh the overview (`write-project-overview`) | yes | yes | yes | **Approves line by line**; only approved lines change |
