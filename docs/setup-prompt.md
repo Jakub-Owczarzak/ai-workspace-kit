@@ -16,5 +16,6 @@ What happens next: the assistant asks which tools and which profile (solo, team,
 switchable rule, skill, hook and check in a line or two, installs only what you choose, and reports what it
 skipped. Run it again at any time to change your choices; it is safe to repeat.
 
-To undo: delete the `wk-*` skill folders and the text between `workspace-kit:start` and `workspace-kit:end`
-markers in your instruction files. Nothing else is changed.
+To undo everything the setup installed, run `node .claude/workspace-kit/bin/cli.mjs uninstall` (a preview; add
+`--yes` to remove). It removes only what the setup recorded, keeps any file you edited since, and never touches
+your own skills, scripts or hooks.

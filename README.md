@@ -74,8 +74,9 @@ where your AI tool reads it:
 - **Scripts and hooks**: small Node programs that check things without Claude (skill lint, `@` import
   resolver, doc-size report, stale-overview finder, test-edit guard, review gate, docs-fresh check).
 - **A workflow profile**: one file, `.claude/workflow.json`, that says how strict all of the above is.
-- **An installer and a catalog**: `init` copies the kit into the project, `apply` installs the pieces you chose,
-  and `catalog/options.json` holds the one-line explanation of every option that the setup questionnaire shows.
+- **An installer, an uninstaller and a catalog**: `init` copies the kit into the project, `apply` installs the
+  pieces you chose and records what it did, `uninstall` removes exactly that again, and `catalog/options.json` holds
+  the one-line explanation of every option that the setup questionnaire shows.
 
 **It is not** a library, a framework or a service. Nothing runs inside your app. It does not call Claude in CI,
 it does not need an API key, the installer makes no network calls, and most of its rules are advice the
@@ -143,7 +144,7 @@ folder; the setup prompt and the `apply` program then put each piece you chose w
                workflow.json, hooks/                a marked block in your git hooks (pre-commit, pre-push)
  templates/scripts/  the checks       --apply-->    scripts/*.mjs
  catalog/      every option, explained (read by the questionnaire)
- bin/ lib/     the installer: init, apply (copied too, so setup needs no network)
+ bin/ lib/     the installer: init, apply, uninstall (copied too, so setup needs no network)
  docs/ adapters/ stacks/                            reference only; they stay in .claude/workspace-kit/
 ```
 
@@ -859,12 +860,35 @@ Locations were checked against each tool's official documentation on 2026-11-10;
 
 A tool never gets a second copy when another selected tool's folder is one it already reads.
 
-### Undo
+### Uninstall
 
-Delete the `wk-*` skill folders; delete the text between the `workspace-kit:start` and `workspace-kit:end`
-markers in your instruction files, hooks and `.gitignore`; delete `.claude/workspace-kit/`. Files created from
-templates (`PLAN.md`, `scripts/`, ...) are yours to keep or delete. The `settings.json` keys and the
-`check:config` script have no markers (JSON cannot hold comments), so remove those by hand.
+One command removes everything the installer added, and nothing else:
+
+```text
+node .claude/workspace-kit/bin/cli.mjs uninstall           # a preview: shows exactly what would go, changes nothing
+node .claude/workspace-kit/bin/cli.mjs uninstall --yes     # does it
+```
+
+(`npx ai-workspace-kit uninstall` also works once the package is on npm.) It can do this safely because `apply`
+keeps a record, `.claude/workspace-kit/manifest.json`, of what it created and changed. The uninstaller removes only
+what that record lists:
+
+| What | What the uninstaller does |
+|---|---|
+| Files the kit created (skills, scripts, templates such as `PLAN.md`, the reviewer agent, the release workflow) | Deleted **only while they are still exactly what the kit wrote**. A file you edited since is kept and listed as `KEPT` (a Windows line-ending change is not an edit). |
+| Marked blocks in your own files (rules in `CLAUDE.md` or `AGENTS.md`, hooks, `.gitignore`) | The block is cut out; your text stays. If the kit created the file and nothing else is in it, the file goes too. |
+| Keys the kit added to `.claude/settings.json` | Only those keys. A value you changed since (for example `defaultMode`) is kept. |
+| The `check:config` script in `package.json` | Removed only while it is still the kit's command. |
+| Folders that end up empty | Removed, but never anything inside `.git`. |
+| `.claude/workspace-kit/` itself | Removed last. `--keep-kit` keeps it, with a fresh record, so you can run the setup again. |
+
+What it does **not** touch: your own skills (even one with the same plain name), your own scripts and hooks, review
+records and fix-mode state in `.claude/reviews/` and `.claude/state/` (it tells you they exist), and anything the
+kit never recorded. It also tells you if `CLAUDE.md` or `AGENTS.md` still imports files from the kit folder.
+After it runs, look at `git status` and `git diff`. One limit: a JSON file the uninstaller rewrites
+(`settings.json`, `package.json`) is written back with its own indentation, so a hand-formatted one may change in
+layout, and a file with comments is never rewritten, only reported for you to edit. A project installed by a version
+without a manifest cannot be uninstalled this way; the command says so and changes nothing.
 
 ### Day to day: the commands
 
@@ -1003,7 +1027,6 @@ package ([section 9](#9-keeping-the-kit-up-to-date)).
   write scoped rule files.
 - Hook systems other than plain shell hooks (`lefthook`, the Python `pre-commit` tool): the kit prints the lines
   to add instead of editing their configuration.
-- An automatic uninstall: removal is by hand ([section 8](#8-install-and-use)).
 
 ## 13. Repository layout
 
@@ -1012,9 +1035,10 @@ package ([section 9](#9-keeping-the-kit-up-to-date)).
    README.md                 this file
    package.json LICENSE      the npm package `ai-workspace-kit` (MIT)
    RELEASING.md              how a release is made (a version tag); not shipped in the package
-   bin/cli.mjs               the command: init and apply
-   lib/                      the installer: init, apply, marked blocks, hooks, settings.json merge, project
-                             files, skill renaming, where each tool reads (each with its tests)
+   bin/cli.mjs               the command: init, apply and uninstall
+   lib/                      the installer: init, apply, uninstall and its manifest, marked blocks, hooks,
+                             settings.json merge, project files, skill renaming, where each tool reads (each with
+                             its tests)
    catalog/options.json      every switchable option, explained in plain words (read by the questionnaire)
    rules/                    8 always-on rules: readable-code, repo-tidiness, docs-fresh, commit-gate,
                              verification, test-discipline, skill-routing, ui-change-flagging
@@ -1073,6 +1097,7 @@ are **not** shipped in the package or installed into projects.
 | **`wk-` prefix** | The name kit skills get in a project (`wk-pr-description`), so they cannot clash with skills the project already has |
 | **Dry run** | `apply --dry-run`: the full report of what would be created, skipped or left to you, with nothing written |
 | **Choices file** | The JSON with your answers (`answers.json`); `apply` reads it, and `choices.json` is the record of the last run |
+| **Manifest** | `.claude/workspace-kit/manifest.json`: what `apply` created (with a fingerprint of each file's content), which blocks and settings keys it added. `uninstall` removes exactly what it lists |
 
 ## 15. Credits
 

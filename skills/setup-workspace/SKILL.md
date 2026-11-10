@@ -117,8 +117,8 @@ Typical ones, with the same rules (new files only, marked blocks in existing fil
 ## Step 6: summary
 
 Report briefly: what was installed and where, what was skipped and why, the assumptions made, the files the
-user still has to edit, and how to undo (delete the `wk-*` folders and the marked blocks; nothing else was
-changed). Suggest one first step. Do not commit.
+user still has to edit, and how to undo: `node <KIT>/bin/cli.mjs uninstall` shows a preview of everything the
+setup added and `--yes` removes it (files the user edited since are kept). Suggest one first step. Do not commit.
 
 ## Limits
 
