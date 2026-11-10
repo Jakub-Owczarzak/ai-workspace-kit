@@ -1,7 +1,7 @@
 // Kit development only (not shipped). Proves a user can install the package the way they will:
 // pack the tarball, run `npx` from it in an empty project, then run it again.
 import { execFileSync } from 'node:child_process';
-import { existsSync, mkdirSync, mkdtempSync, readdirSync, rmSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import assert from 'node:assert/strict';
@@ -20,7 +20,7 @@ try {
 
   mkdirSync(project);
   const tgz = join(work, packed.filename);
-  const initCmd = ['exec', '--yes', `--package=${tgz}`, '--', 'workspace-kit', 'init'];
+  const initCmd = ['exec', '--yes', `--package=${tgz}`, '--', 'ai-workspace-kit', 'init'];
 
   const first = run('npm', initCmd, project);
   assert.match(first, /copied: [1-9]\d*,/, 'first run copies files');
@@ -30,6 +30,27 @@ try {
 
   const second = run('npm', initCmd, project);
   assert.match(second, /copied: 0,/, 'second run changes nothing');
+
+  // The setup prompt then runs the installed kit's own program: no network, no npx.
+  const choicesFile = join(work, 'choices.json');
+  writeFileSync(choicesFile, JSON.stringify({
+    profile: 'team',
+    tools: ['claude-code', 'codex'],
+    enabled: ['skill.pr-description', 'rule.verification', 'check.static'],
+  }));
+  mkdirSync(join(project, '.claude', 'skills', 'pr-description'), { recursive: true });
+  writeFileSync(join(project, '.claude', 'skills', 'pr-description', 'SKILL.md'), 'USER SKILL');
+  const cliPath = join(kit, 'bin', 'cli.mjs');
+  const applied = run('node', [cliPath, 'apply', '--choices', choicesFile], project);
+  assert.match(applied, /created: [1-9]/, 'apply creates files');
+  assert.ok(existsSync(join(project, '.claude', 'skills', 'wk-pr-description', 'SKILL.md')), 'wk- skill installed');
+  assert.ok(existsSync(join(project, '.agents', 'skills', 'wk-pr-description', 'SKILL.md')), 'shared skills folder used');
+  assert.equal(readFileSync(join(project, '.claude', 'skills', 'pr-description', 'SKILL.md'), 'utf8'), 'USER SKILL', 'user skill untouched');
+  assert.match(readFileSync(join(project, 'AGENTS.md'), 'utf8'), /workspace-kit:start rules/);
+  assert.match(readFileSync(join(project, 'CLAUDE.md'), 'utf8'), /@AGENTS\.md/, 'Claude Code imports the shared rules');
+  const reapplied = run('node', [cliPath, 'apply', '--choices', choicesFile], project);
+  assert.match(reapplied, /created: 0/);
+  assert.match(reapplied, /updated: 0/);
 
   const stray = (function find(dir) {
     return readdirSync(dir, { withFileTypes: true }).flatMap((e) =>

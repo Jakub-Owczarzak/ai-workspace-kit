@@ -1,16 +1,15 @@
 # Adapter: Cline
 
+Checked against Cline's documentation (rules and skills pages) on 2026-11-10.
+
 | Kit piece | Where it goes |
 |---|---|
-| Always-on rules (`rules/*.md`) | `.clinerules/` (one file per rule, or one combined file). Cline reads it for every task. |
-| Skills (`skills/<name>/`) | `.agents/skills/<name>/SKILL.md`. Tools that follow the shared agents layout read this folder; Cline reads it when the rules point at it. Add a line to the rules: "Skills are in `.agents/skills/`; read a skill's `SKILL.md` before the task it covers." |
-| Project overview | `AGENTS.md` at the project root (see `codex-and-agents-md.md`). |
-| Commit hook | Same project git hooks as for any tool. |
+| Skills (`skills/<name>/`) | `.cline/skills/wk-<name>/SKILL.md` (Cline's recommended folder). Cline also reads `.clinerules/skills/` and `.claude/skills/`, so when Claude Code is selected too, its `.claude/skills` copy is used and no second copy is made. **Cline does not read `.agents/skills`.** `name` must exactly match the folder name; `description` is limited to 1024 characters. |
+| Always-on rules (`rules/*.md`) | One marked block in `AGENTS.md`, which Cline detects. Cline's own folder is `.clinerules/` (or `.cline/rules/`), where every markdown file without `paths:` frontmatter is always active; the kit does not need it. |
+| Project overview | `AGENTS.md` at the project root. |
+| Commit and push hooks | The project's git hooks. |
 
 Notes:
 
-- If the project also uses Claude Code, write the rules text once and use it in both places, then run
-  `diff` on the two copies (the docs-fresh rule requires identical copies).
-- A skill in `.agents/skills/` is not loaded by Claude Code. If both tools are used, keep the skill in
-  `.claude/skills/` and point Cline's rules at that path, or copy it to both and keep them identical.
-- The changelog hook path must match where the skill actually lives.
+- `CLAUDE.md` is not documented as read by Cline, which is why the rules live in `AGENTS.md`.
+- If a global skill and a project skill share a name, the global one wins. The `wk-` prefix avoids that.

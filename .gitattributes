@@ -1,6 +1,10 @@
-# Keep scripts and hooks LF on every OS. A CRLF shebang breaks `npx` on macOS and Linux.
+# Keep every file the kit installs LF on every OS. A CRLF shebang breaks `npx` on macOS and Linux, and CRLF
+# text makes generated blocks differ from the files they were written into.
 *.mjs text eol=lf
 *.json text eol=lf
+*.md text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
 *.sh text eol=lf
 templates/hooks/* text eol=lf
 bin/* text eol=lf

@@ -17,9 +17,9 @@
 // Trigger fixtures: <skill folder>/triggers.json = { "should": ["phrase", ...], "shouldNot": ["phrase", ...] }.
 // A skill with `disable-model-invocation: true` is started by hand, so it needs no fixtures.
 
-import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync, realpathSync, statSync } from 'node:fs';
 import { join, resolve } from 'node:path';
-import { pathToFileURL } from 'node:url';
+import { fileURLToPath } from 'node:url';
 
 const MAX_DESCRIPTION_CHARS = 1024;
 const SHORT_DESCRIPTION_CHARS = 40;
@@ -278,7 +278,20 @@ export function exitCodeFor(report, strict = false) {
   return report.errors > 0 || (strict && report.warnings > 0) ? 1 : 0;
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+/**
+ * True when this file was started directly (`node scripts/<name>.mjs`). Both sides are resolved to real
+ * paths: Node reports the real path in import.meta.url, but argv[1] keeps a symlink or a Windows short name,
+ * and a plain comparison would then make the script silently do nothing.
+ */
+function startedDirectly() {
+  try {
+    return realpathSync.native(process.argv[1]) === realpathSync.native(fileURLToPath(import.meta.url));
+  } catch {
+    return false;
+  }
+}
+
+if (process.argv[1] && startedDirectly()) {
   const options = parseArguments(process.argv.slice(2));
   const report = checkSkills(options.skillsDirs.map((dir) => resolve(dir)), options);
   console.log(formatReport(report).join('\n'));

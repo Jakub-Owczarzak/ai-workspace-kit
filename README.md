@@ -3,11 +3,39 @@
 A portable set of working rules, skills, templates and checks that make an AI coding assistant (Claude Code
 first, other tools through adapters) work the way a careful engineer works: plan before building, keep the
 code and the docs true, prove what was done, get a second reader on the change, and ship with a clean history.
-Copy it into any project, run one setup skill, and choose how strict it should be: **solo**, **team** or **org**.
+Install it with one `npx` command, answer a short questionnaire in your AI tool, and choose how strict it should
+be: **solo**, **team** or **org**. It is built to sit beside the skills, hooks and workflows a project already
+has, and never overwrites them.
 
 It grew out of day-to-day work with an AI assistant, was made independent of any language or framework, and
 was then aligned with Anthropic's
 [AI-native SDLC playbook](https://claude.com/resources/articles/the-ai-native-sdlc-playbook).
+
+## Quick start
+
+Needs Node 18 or newer. In the project folder:
+
+```text
+npx ai-workspace-kit init        # copies the kit into .claude/workspace-kit/ and touches nothing else
+```
+
+Then open your AI tool in that folder and say:
+
+> Read `.claude/workspace-kit/skills/setup-workspace/SKILL.md` and follow it.
+
+The assistant asks which tools and which profile (solo, team or org) you use, explains every switchable rule,
+skill, hook and check in a line or two together with what it changes in your workflow, shows a dry run, and
+installs only what you choose. It never overwrites a file of yours. More in [section 8](#8-install-and-use).
+
+> **Status: not on npm yet.** The package is ready to publish: a version tag pushed to the repository publishes
+> it ([`RELEASING.md`](RELEASING.md)), and nothing has been tagged yet, so the command above does not work until
+> then. Today, install straight from GitHub: `npx github:Jakub-Owczarzak/ai-workspace-kit init` (it reads the
+> default branch, so it works once the pull request that adds the installer is merged; the same form was tried
+> with `--dry-run` from a branch of this repository's earlier home, not yet from here).
+
+**Trying it and want to tell us how it went?** Open an issue with the *Feedback or a problem* form
+([new issue](https://github.com/Jakub-Owczarzak/ai-workspace-kit/issues/new/choose)). It asks which AI tool and
+operating system you used and what the installer printed; those details make a report easy to act on.
 
 ## Contents
 
@@ -31,7 +59,8 @@ was then aligned with Anthropic's
 
 ## 1. What it is, and what it is not
 
-**It is** a folder of plain files that you copy into a project:
+**It is** an npm package that puts a set of plain files into a project, plus an installer that places each piece
+where your AI tool reads it:
 
 - **Rules**: short instructions the assistant follows on every change (readable code, tidy repository, docs
   kept fresh, a commit gate, honest verification, test discipline).
@@ -42,10 +71,13 @@ was then aligned with Anthropic's
 - **Scripts and hooks**: small Node programs that check things without Claude (skill lint, `@` import
   resolver, doc-size report, stale-overview finder, test-edit guard, review gate, docs-fresh check).
 - **A workflow profile**: one file, `.claude/workflow.json`, that says how strict all of the above is.
+- **An installer and a catalog**: `init` copies the kit into the project, `apply` installs the pieces you chose,
+  and `catalog/options.json` holds the one-line explanation of every option that the setup questionnaire shows.
 
 **It is not** a library, a framework or a service. Nothing runs inside your app. It does not call Claude in CI,
-it does not need an API key, and most of its rules are advice the assistant follows, not locks. The few hard
-stops (a failing commit hook, a blocked push) are listed in [section 7](#7-solo-team-and-org-what-turns-on-and-off).
+it does not need an API key, the installer makes no network calls, and most of its rules are advice the
+assistant follows, not locks. The few hard stops (a failing commit hook, a blocked push) are listed in
+[section 7](#7-solo-team-and-org-what-turns-on-and-off).
 
 ## 2. Why it was built
 
@@ -59,7 +91,8 @@ Working with an AI assistant on a real project goes wrong in predictable ways:
 | A bug is "fixed" by weakening the test | Test discipline: a failing test first, a hook that blocks edits to existing tests during a fix |
 | The author is the only reader of a change | A reviewer subagent that reads the change cold, against the plan and a checklist |
 | The assistant's instructions grow without anyone noticing | A skill lint, an `@` import check, and a size report for the always-loaded files |
-| Every project reinvents the workflow | One kit, installed by one skill, updated in both directions through git |
+| Every project reinvents the workflow | One kit, installed with one `npx` command and a setup prompt, upgraded by installing a newer version |
+| A new tool would overwrite what the project already has | Kit skills get a `wk-` prefix, edits to your files are marked blocks, and anything that exists and differs is skipped and reported |
 | One-size-fits-all strictness is too heavy for one person and too light for many | A profile (`solo`, `team`, `org`) turns each control on or off |
 
 The workflow was first built and used day to day, then generalized into this kit so any project can use it, and
@@ -90,22 +123,29 @@ Partly 12, Differs by decision 3, Out of scope by decision 5, kit addition 1, ea
 
 ## 4. The kit at a glance
 
-The kit lives in one repository. A project gets a copy, and the setup skill puts each piece where it is used.
+The kit is an npm package and a git repository. `init` copies it into the project's own `.claude/workspace-kit/`
+folder; the setup prompt and the `apply` program then put each piece you chose where it is used.
 
 ```text
- KIT REPOSITORY (this repo)                        YOUR PROJECT
- --------------------------                        ------------
- rules/        8 short rules          --setup-->   CLAUDE.md (rules are imported or pasted here)
- skills/       10 skills              --setup-->   .claude/skills/<name>/
- templates/    AGENTS.md, PLAN.md,    --setup-->   AGENTS.md, PLAN.md, REVIEW.md, CHANGELOG.md,
-               REVIEW.md, agents/,                 .claude/agents/reviewer.md, .claude/workflow.json
-               workflow.json, hooks/               git hooks (pre-commit, pre-push)
- templates/scripts/  checks + tests   --setup-->   scripts/*.mjs
- docs/ adapters/ stacks/                           (reference only; kept in .claude/workspace-kit/)
-        ^                                                    |
-        |   update-workspace-kit: PULL (kit -> project)      |
-        +---------------  PUSH (project -> kit)  <-----------+
+ THE PACKAGE (this repository)                      YOUR PROJECT
+ -----------------------------                      ------------
+ npx ... init  ---copies everything--->             .claude/workspace-kit/     the kit's own folder
+                                                          |   setup prompt + `apply`: only what you choose
+                                                          v
+ rules/        8 short rules          --apply-->    a marked block in CLAUDE.md (Claude Code alone)
+                                                    or in AGENTS.md (any other tool)
+ skills/       10 skills              --apply-->    .claude/skills/wk-<name>/   (or .agents/skills/, .cline/skills/)
+ templates/    AGENTS.md, PLAN.md,    --apply-->    AGENTS.md, PLAN.md, REVIEW.md, CHANGELOG.md (only if missing),
+               REVIEW.md, agents/,                  .claude/agents/reviewer.md, .claude/workflow.json,
+               workflow.json, hooks/                a marked block in your git hooks (pre-commit, pre-push)
+ templates/scripts/  the checks       --apply-->    scripts/*.mjs
+ catalog/      every option, explained (read by the questionnaire)
+ bin/ lib/     the installer: init, apply (copied too, so setup needs no network)
+ docs/ adapters/ stacks/                            reference only; they stay in .claude/workspace-kit/
 ```
+
+In a project the skills are named `wk-<name>` so they cannot clash with skills the project already has. The rest
+of this README uses the plain names.
 
 What reads what, inside a project:
 
@@ -154,7 +194,7 @@ control that tunes it, and what can stop you. Step 0 happens once per project.
    5 COMMIT ....... commit gate: checks, design sync if UI rows are pending, changelog entry
       |             hook: lint-staged, type check, tests, docs-fresh check, changelog
       v
-   6 PUSH ......... pre-push hook: no direct push to main or master; review gate
+   6 PUSH ......... pre-push hook: no direct push to the protected branch you named; review gate
       |             tuned by: review.mode
       v
    7 PULL REQUEST . pr-description writes the text; CI runs; merge; the release workflow bumps the version
@@ -166,31 +206,34 @@ control that tunes it, and what can stop you. Step 0 happens once per project.
 ### Step 0: install (once per project)
 
 ```text
-   copy the kit to .claude/workspace-kit/
+   npx ai-workspace-kit init      copies the kit to .claude/workspace-kit/ (all or nothing; nothing else touched)
       |
       v
    prompt: "Read .claude/workspace-kit/skills/setup-workspace/SKILL.md and follow it"
       |
       v
-   look at the project, read-only (stack, branch, hooks, CI, commands, existing assistant files)
+   look at the project, read-only (stack, branch, hooks, CI, commands, existing assistant files, existing skills)
       |
       v
-   ask ONE round, at most four questions (tools, pieces, changelog setup, wrong detections)
+   questionnaire from catalog/options.json, rounds of at most four questions:
+      1 tools + profile   2 strictness controls   3 what to install, a group at a time   4 project facts
       |
       v
-   install, never overwriting; append or merge and show the change
-      +--> skills ............ .claude/skills/<name>/
-      +--> rules ............. CLAUDE.md (or one file per rule for Cursor)
-      +--> templates ......... AGENTS.md, PLAN.md, REVIEW.md, CHANGELOG.md (only if missing)
-      +--> workflow profile .. .claude/workflow.json (you choose solo, team or org)
-      +--> scripts + hooks ... scripts/*.mjs, pre-commit, pre-push (only if chosen)
-      +--> plan mode ......... offered for team and org
+   answers.json --> apply --dry-run (created / skipped / manual / notes / warnings) --> you say yes --> apply
+      +--> skills ............ wk-<name>/ in the folder(s) your tools read
+      +--> rules ............. one marked block in CLAUDE.md or AGENTS.md
+      +--> templates ......... PLAN.md, REVIEW.md, CHANGELOG.md (only if missing; never replaced)
+      +--> workflow profile .. .claude/workflow.json
+      +--> scripts + hooks ... scripts/*.mjs; a marked block chained into your pre-commit / pre-push
+      +--> settings .......... .claude/settings.json keys added (plan mode for team and org, the test-edit guard)
       |
       v
-   verify (skills in place, scripts run, no leftover placeholders) --> summary --> no commit
+   finish the MANUAL lines, verify (scripts run, no leftover placeholders, a second apply changes nothing)
+      --> summary --> no commit
 ```
 
-Skills involved: `setup-workspace` (started by hand), then `write-project-overview` when `AGENTS.md` does not exist.
+Skills involved: `setup-workspace` (started by hand; it stays in the kit folder), then `write-project-overview`
+when `AGENTS.md` does not exist. Details and the safety rules: [section 8](#8-install-and-use).
 
 ### Step 1: plan
 
@@ -338,7 +381,7 @@ changelog or the lock file are skipped. Skill: `changelog-bump`.
       v
    pre-push hook, for each ref being pushed
       |
-      +--> is it the protected branch (the one named in the hook: main or master)? --yes--> BLOCKED:
+      +--> is it the protected branch (the one you named at setup, for example main)? --yes--> BLOCKED:
       |      push a branch, open a pull request
       |
       +--> review gate on the tip of the ref (review.mode)
@@ -392,12 +435,14 @@ Skills involved: `pr-description`, `changelog-bump`. Template: `templates/workfl
    the kit has improvements, or the project made one?
       |
       v
-   update-workspace-kit: PULL (kit -> project) or PUSH (project -> kit), always asks first
+   a newer kit version:  npx ...@latest init --force, review the diff, apply again (section 9)
+   a project improvement for the kit:  update-workspace-kit, PUSH mode (project -> kit), always asks first
 ```
 
 ## 6. The skills and how they connect
 
-Ten skills. **Started by hand** means only you can start it (`/name`); otherwise Claude may pick it from its
+Ten skills. In a project they are installed as `wk-<name>` (so `/wk-pr-description`); this page uses the plain
+names. **Started by hand** means only you can start it (`/name`); otherwise Claude may pick it from its
 description. The profile does not install or remove skills; you choose the skills at setup, and the profile
 changes how strictly the workflow uses them.
 
@@ -412,7 +457,7 @@ changes how strictly the workflow uses them.
 | `readable-fix-plan` | by Claude | Turning review findings or a bug list into one plan | none | a verified, clickable fix plan | takes findings from the reviewer or a harsh review |
 | `figma-sync` | by Claude | UI changes are pending, or you ask to align the design | none | frames in Figma, `FIGMA-SYNC.md` | fed by the `ui-change-flagging` rule; runs before the commit |
 | `ultra-code-quality-review` | by hand | You want a deliberately harsh maintainability review | none | a structural review | separate from the review gate; it does not leave a review record |
-| `update-workspace-kit` | by Claude | A change is reusable, or you say "pull the latest kit" | none | kit changes on a branch, or a refreshed snapshot | talks to the kit repository |
+| `update-workspace-kit` | by Claude | A change you made in the project is reusable and should go back into the kit (push mode; its pull mode predates the npm package, see [section 9](#9-keeping-the-kit-up-to-date)) | none | kit changes on a branch | talks to the kit repository |
 
 The `reviewer` is a **subagent**, not a skill: a file in `.claude/agents/` that the assistant starts as a fresh
 reader at step 4. It is tuned by `review.mode`.
@@ -420,7 +465,7 @@ reader at step 4. It is tuned by `review.mode`.
 How they connect:
 
 ```text
-   setup-workspace --installs--> everything --kept in step by--> update-workspace-kit <--> KIT REPOSITORY
+   setup-workspace --installs--> everything        update-workspace-kit --push--> KIT REPOSITORY
 
    workspace-router
       |--routes--> goal-first-planner --writes--> PLAN.md --read by--> reviewer --writes--> review record
@@ -452,45 +497,161 @@ Pick the smallest profile that fits. A control that blocks costs time every day;
 removes is real, not because it exists. Skills are installed or not at setup; the profile changes how strictly
 the workflow requires them.
 
-### What each step does in each profile
+### The flow in each profile: what is automated, what needs you
 
-Legend: **[off]** not applied. **[soft]** a rule or a warning; the assistant follows it, nothing stops you.
-**[HARD]** something blocks (a hook exit code or a tool). It exists only where the hook is installed, and a person
-can bypass it on purpose (`--no-verify`, `REVIEW_MODE=off`).
+Every step is tagged with **who acts** and **how it is enforced**:
 
 ```text
- SOLO (default)
-   1 plan     [soft]  non-trivial work needs an approved Intent Anchor in PLAN.md (the planner runs: interview,
-                      Intent Anchor, buckets, checkpoints); routine work is exempt; plan mode is not offered
-   2 build    rules always on; test-edit guard [off]; new-logic test-first only for a bucket marked TDD: yes
-   3 verify   [soft]  show the real output
-   4 review   [soft]  advisory: the assistant runs the reviewer before a commit
-   5 commit   checks + changelog [HARD, if you installed the commit hook]; docs-fresh [soft] warning
-   6 push     protected branch [HARD, if you installed the push hook]; review gate [soft] reminder
-   7 pr       pr-description when you ask
+   WHO ACTS    YOU   a person decides or acts: approves, asks, types, pushes, merges   <-- human in the loop
+               AI    the assistant, working under the always-on rules and skills
+               RUN   a script, a git hook or a CI job; no assistant and no person needed
 
- TEAM
-   1 plan     [soft]  non-trivial work needs an approved Intent Anchor in PLAN.md; routine work is exempt;
-                      plan mode (a real stop in the terminal) is offered at setup
-   2 build    rules always on; test-edit guard [HARD in fix mode]; new logic test-first [soft]
-   3 verify   [soft]
-   4 review   [soft]  advisory
-   5 commit   checks + changelog [HARD]; docs-fresh [soft] warning
-   6 push     protected branch [HARD]; review gate [soft] reminder
-   7 pr       pr-description when you ask
-
- ORG
-   1 plan     [soft]  the Intent Anchor AND success measurements before non-trivial code; plan mode offered
-   2 build    rules always on; test-edit guard [HARD in fix mode]; new logic test-first [soft]
-   3 verify   [soft]
-   4 review   [soft]  the assistant must run the reviewer and record the result
-   5 commit   checks + changelog [HARD]; docs-fresh [HARD]: the commit is blocked when source changed
-              but AGENTS.md did not
-   6 push     protected branch [HARD]; review gate [HARD]: blocked without a clean review record
-   7 pr       pr-description when you ask
+   ENFORCED    soft  a rule or a warning: the assistant follows it, nothing stops you
+               HARD  something blocks (a hook exit code or a tool). It exists only where it is installed,
+                     and a person can bypass it on purpose (--no-verify, REVIEW_MODE=off)
+               off   not applied in this profile
 ```
 
-The same, as a table:
+The kit is a **human-in-the-loop** workflow. In no profile does anything push, open a pull request or merge by
+itself. The profile changes how much is blocked by a machine, not whether a person decides.
+
+#### Solo: one owner who reads every diff and approves every step
+
+```text
+   YOU   ask for a change
+    |
+    v
+ 1 PLAN     AI    gathers context, interviews you, drafts the Intent Anchor        planning.gates = anchor, soft
+    |       YOU   approve the Intent Anchor, then the bucket map, then each bucket's plan
+    |             (a tight, small, already-tested change is exempt; plan mode is not offered)
+    v
+ 2 BUILD    AI    router picks the skill; the always-on rules shape the change                  soft
+    |             a bug fix starts with a failing test; new logic is test-first only when a bucket says TDD: yes
+    |       off   test-edit guard: nothing stops an edit to an existing test; the rule says never weaken one
+    |       YOU   answer "proceed, adjust or stop?" after each bucket
+    v
+ 3 VERIFY   AI    runs lint, types and tests, shows the real output, says what was not checked   soft
+    v
+ 4 REVIEW   AI    starts the reviewer subagent on the staged change, fixes its blocking   review.mode = advisory, soft
+    |             findings; a blocking finding sends it back to step 2, then review again
+    v
+ 5 COMMIT   YOU   ask for the commit (assistants commit when asked)
+    |       RUN   pre-commit hook, if you installed it: lint, types, tests                                  HARD
+    |       RUN   docs-fresh check: source changed but AGENTS.md did not                   docs.check = warn, soft
+    |       YOU   changelog: the bump type and one line, typed in the terminal (or the assistant supplies the
+    |             two values when it commits for you)
+    v
+ 6 PUSH     YOU   push. Assistants never push
+    |       RUN   pre-push hook, if installed: refuses the protected branch you named                       HARD
+    |       RUN   review gate: a reminder if this content has no clean review record                 soft (reminder)
+    v
+ 7 PR       AI    pr-description drafts the text from the real diff
+            YOU   open the pull request, let your own CI run, merge
+            RUN   release workflow (optional): opens a release PR after the merge;  YOU merge it = the release
+```
+
+#### Team: a few developers on a shared repository
+
+Same as solo, plus a real stop on planning, and a guard that protects tests during a bug fix.
+
+```text
+   YOU   ask for a change
+    |
+    v
+ 1 PLAN     AI    interviews you, drafts the Intent Anchor                         planning.gates = anchor, soft
+    |       YOU   approve the Intent Anchor, the bucket map, each bucket's plan
+    |       RUN   plan mode, offered at setup: the terminal session cannot edit any file until
+    |       YOU   accept the plan                                                                          HARD
+    v
+ 2 BUILD    AI    router, always-on rules; NEW LOGIC IS TEST-FIRST                         tests.tdd = on, soft
+    |
+    |       a BUG FIX goes through fix mode (tests.guard = on):
+    |          AI    writes a test that reproduces the bug and shows it FAILING for the right reason
+    |          AI    node scripts/test-edit-guard.mjs start, then lock (the assistant starts fix mode)
+    |          RUN   from here an Edit, Write or MultiEdit on an existing test file is refused               HARD
+    |          AI    changes the code only; runs the test, then the whole suite; then stop
+    |
+    |       YOU   answer "proceed, adjust or stop?" after each bucket
+    v
+ 3 VERIFY   AI    lint, types, tests, real output                                                       soft
+    v
+ 4 REVIEW   AI    reviewer subagent on the staged change; fixes blocking findings            review.mode = advisory
+    v
+ 5 COMMIT   YOU   ask for the commit; type the changelog bump and line (or the assistant supplies them)
+    |       RUN   pre-commit hook: lint, types, tests                                                     HARD
+    |       RUN   docs-fresh check                                                           docs.check = warn, soft
+    v
+ 6 PUSH     YOU   push
+    |       RUN   pre-push hook: protected branch refused                                                  HARD
+    |       RUN   review gate: reminder if there is no clean record                                  soft (reminder)
+    v
+ 7 PR       AI    pr-description drafts the text      YOU  open the PR, CI, merge      RUN  release PR (optional)
+```
+
+#### Org: many developers, policies that must hold
+
+Same as team, plus success measurements, and three more things that block: the docs check, the review record at
+push, and plan mode as the default.
+
+```text
+   YOU   ask for a change
+    |
+    v
+ 1 PLAN     AI    interviews you; drafts the Intent Anchor AND the success measurements    planning.gates = full
+    |             (metric, baseline -> target, how it is measured)
+    |       YOU   approve the anchor, the bucket map, each bucket's plan
+    |       RUN   plan mode is the session default: no file edit until
+    |       YOU   accept the plan                                                                          HARD
+    v
+ 2 BUILD    AI    router, always-on rules; new logic test-first                            tests.tdd = on, soft
+    |             bug fix in fix mode: failing test first, then the guard protects existing tests          HARD
+    |       YOU   answer "proceed, adjust or stop?" after each bucket
+    v
+ 3 VERIFY   AI    lint, types, tests, real output                                                       soft
+    v
+ 4 REVIEW   AI    MUST run the reviewer subagent on the staged change, fix its blocking    review.mode = required
+    |             findings, and record the result (.claude/reviews/<tree>.md); changed content needs a new record
+    v
+ 5 COMMIT   YOU   ask for the commit; changelog bump and line
+    |       RUN   pre-commit hook: lint, types, tests                                                     HARD
+    |       RUN   docs-fresh check: source changed but AGENTS.md did not                    docs.check = strict, HARD
+    |             the commit is blocked until the overview is part of it
+    v
+ 6 PUSH     YOU   push
+    |       RUN   pre-push hook: protected branch refused                                                  HARD
+    |       RUN   review gate: refused when the content has no clean record, or the record has blocking
+    |             findings                                                                                 HARD
+    v
+ 7 PR       AI    pr-description drafts the text      YOU  open the PR, CI, review by your colleagues, merge
+            RUN   release PR (optional)               YOU  merge it
+```
+
+Two limits to keep in mind in `org`. The review record is an attestation: the assistant that wrote the change can
+write it, so the push check is a reminder with teeth, not independent proof. And a second person reading the pull
+request, branch protection and required CI are your project's own settings; the kit neither reads nor sets them.
+
+#### Where a person is in the loop
+
+| Moment | solo | team | org | What the person does |
+|---|---|---|---|---|
+| Approve the Intent Anchor, the bucket map and each bucket plan | yes | yes | yes (plus the success measurements) | **Approves** before any non-trivial code |
+| Accept the plan before any edit (plan mode) | no | yes | yes | **Accepts**; a real stop in the terminal |
+| "Proceed, adjust or stop?" after each bucket | yes | yes | yes | **Decides** |
+| Read the change | you read the diff; the reviewer is advisory | same | the reviewer must run and record; you still decide | **Judges** |
+| Ask for the commit | yes | yes | yes | **Asks**; assistants commit only when asked |
+| Changelog bump and one-line entry | yes | yes | yes | **Types** it (or the assistant supplies it when it commits for you) |
+| Refresh the overview (`write-project-overview`) | yes | yes | yes | **Approves line by line**; only approved lines change |
+| Design sync (`figma-sync`, if used) | yes | yes | yes | **Approves** the plan before anything is drawn or written |
+| Approve the setup preview (`apply --dry-run`) | yes | yes | yes | **Says yes** before anything is installed |
+| Push | yes | yes | yes | **Pushes**; assistants never push |
+| Open the pull request, merge | yes | yes | yes | **Does it**; the kit drafts the text only |
+| Merge the release PR (if the release workflow is installed) | yes | yes | yes | **Merges**; that is the release |
+
+What runs without a person, in every profile: the always-on rules and the router, the verification and
+test-discipline rules, the reviewer subagent when the assistant starts it, the commit and push hooks, the
+test-edit guard, the config checks, and the release workflow's opening of a release PR.
+
+The controls, as a table:
 
 | Step or piece | solo | team | org |
 |---|---|---|---|
@@ -507,6 +668,30 @@ The same, as a table:
 | Checks that run `claude -p` (`claude.runChecks`) | off (opt-in) | off (opt-in) | off (opt-in) |
 | Plan mode as the session default | not offered | offered | offered |
 | Commit hook, push hook, changelog | your install choice, the same in every profile | | |
+
+### Turning pieces on and off: what changes in the flow
+
+The profile sets how strictly the workflow uses a piece. Whether a piece is **installed at all** is your choice at
+setup (and you can run the setup again). Each row says what the flow looks like with the piece on and off.
+
+| Piece (how it is turned off) | With it on | With it off, the flow becomes | Who is affected |
+|---|---|---|---|
+| **Planner**: `planning.gates = off`, or `goal-first-planner` not installed | Non-trivial work waits for an approved Intent Anchor; a checkpoint after each bucket | The assistant starts from your request. No written goal, no checkpoints: you steer by reading the diff | You lose the approval points of step 1 |
+| **Plan mode default**: not chosen at setup (solo) | The terminal session cannot edit until you accept a plan; the only hard stop on planning | Planning is a soft rule the assistant follows. Not read by the VS Code extension in any case | You accept less, the assistant is trusted more |
+| **Router**: `workspace-router` not installed | The assistant reads the skill that fits before it starts | It may work from memory; a skill is used only when you call it or its description matches | You get less consistent use of the other skills |
+| **Test-edit guard**: `tests.guard = off` | During a bug fix an edit to an existing test file is refused | The rule still says never weaken a test, but nothing stops it; you would notice in the diff | Review carries the load |
+| **Test-first**: `tests.tdd` = `off` / `bugs` / `on` | `on`: new logic too is test-first | `bugs`: only bug fixes, and buckets marked `TDD: yes`. `off`: no rule | You decide what counts as proof |
+| **Reviewer and review gate**: `review.mode` | `advisory`: the assistant reviews before every commit; the push hook only reminds. `required`: the push hook refuses without a clean record | `off`: a review happens only when you ask, and the push hook says nothing. **Not installed at all**: no reviewer, no `REVIEW.md`, no record; step 4 disappears and you are the only reader | You |
+| **Commit hook**: not installed | Lint, types and tests run on every commit and block it when they fail | Nothing stops a commit with failing checks; the commit-gate rule tells the assistant to run them (soft). No docs check, no changelog prompt | You |
+| **Docs-fresh check**: `docs.check` = `off` / `warn` / `strict` | `strict` blocks a commit that changes source without the overview; `warn` prints a message | `off`: silent. The docs-fresh rule still asks the assistant to update the overview | You |
+| **Changelog**: `changelog-bump` not installed | Every commit that changes behaviour carries a bump type and an entry | No changelog, no version bump; the release workflow cannot run (it needs this skill) | You |
+| **Release workflow**: not installed | After a merge to the protected branch a release PR is opened; merging it is the release | You bump versions and the changelog by hand | You |
+| **Push hook**: not installed | The protected branch is refused; the review gate runs at push | Nothing blocks a push to the protected branch except the commit-gate rule (soft). GitHub branch protection is outside the kit | You |
+| **`pr-description`**: not installed | The pull request text is drafted from the real diff and `PLAN.md` | You write it | You |
+| **Overview skill**: `write-project-overview` not installed | `AGENTS.md` is written from the code and refreshed with your line-by-line approval | You keep `AGENTS.md` by hand; the docs-fresh check still compares it against changes | You |
+| **Design sync**: `figma-sync` and `ui-change-flagging` not installed (off by default) | UI changes are logged turn by turn; before the commit the assistant shows its plan and asks before it draws or writes anything | No design step | You approve less |
+| **Harsh review**: `ultra-code-quality-review` | Runs only when you call it; it is not part of the gate and leaves no record | Nothing; the normal review is unaffected | You |
+| **Claude-powered checks**: `claude.runChecks` = `false` (default) | You can run the two checks that call `claude -p`; they use your Claude usage and never run from a hook or CI | They cannot run | You start them |
 
 ### Changing it
 
@@ -529,7 +714,7 @@ Precedence: environment variable, then `overrides`, then the profile default. A 
 | Commit hook: lint, type check, tests | Always, if you installed the hook and a check fails |
 | Docs-fresh check | `docs.check` is `strict` (org by default) |
 | Test-edit guard | `tests.guard` is `on` (team and org), the PreToolUse entry is in `.claude/settings.json`, and fix mode was started with `start`; it blocks edits made by Claude (Edit, Write, MultiEdit) |
-| Pre-push: protected branch | Always, if you installed the push hook |
+| Pre-push: protected branch | Always, if you installed the push hook and named a protected branch at setup |
 | Pre-push: review gate | `review.mode` is `required` (org by default) |
 
 Everything else is a rule or a warning. A hook that cannot run (no git, a crash, no `node`) allows the action
@@ -537,26 +722,114 @@ and says so; a broken profile file falls back to `solo` with a warning.
 
 ## 8. Install and use
 
-**Fast way (one step plus one prompt):**
-1. Copy the **whole kit** into the project as ONE folder: `.claude/workspace-kit/` (it is not loaded as
-   skills, so it does not clutter the skill list).
-2. Prompt the assistant: *"Read `.claude/workspace-kit/skills/setup-workspace/SKILL.md` and follow it."*
+### Requirements
 
-It finds the kit in that folder, looks at the project, asks four questions, then installs the pieces you choose
-([step 0](#step-0-install-once-per-project)). Afterwards keep `.claude/workspace-kit/` as the source for
-updates, or delete it. You can also give the kit's path in the prompt and skip the copy. Copying only the
-`setup-workspace` folder is not enough: without the kit it has nothing to install.
+- **Node 18 or newer.** The installer is plain Node with no dependencies.
+- **git** is needed only for the hook step; without a git repository the hooks are reported, not written.
+- Windows, macOS and Linux. The tests and the install smoke test run on all three, on Node 18 and 22, in CI
+  (current state: [section 11](#11-how-it-was-checked-and-what-is-not-proven)).
 
-**Why not copy the kit's folders straight into `.claude/`:** Claude Code loads skills only from
-`.claude/skills/<name>/`, and does not load `rules/`, `templates/` or `adapters/` from there. One subfolder
-keeps the kit together; the setup step puts each piece where it is actually used.
+### Install (once per project)
 
-**By hand:** pick pieces from the tables, follow `adapters/<your tool>.md` for the locations, fill the `<...>`
-placeholders in the templates, and wire the hooks if you want the changelog and the gates.
+**1. Copy the kit into the project.** From the project folder:
 
-**Tools:** Claude Code first. `adapters/` says where each piece goes for Claude Code, Cline, Cursor and tools
-that read `AGENTS.md`. The subagent, the plan-mode setting and `.claude/settings.json` hooks are Claude Code
-features.
+| When | Command |
+|---|---|
+| After the first npm release | `npx ai-workspace-kit init` |
+| Today (the package is not on npm yet) | `npx github:Jakub-Owczarzak/ai-workspace-kit init` |
+
+The GitHub form was tried with `--dry-run` from the feature branch; it installs from the repository's default
+branch once that branch has been merged. A packed tarball also works: `npm pack`, then
+`npx ./ai-workspace-kit-<version>.tgz init` (give a relative path; on Windows `npx` silently does
+nothing when it is given an absolute `C:/...` path).
+
+`init` writes **only** inside `.claude/workspace-kit/`. It is all or nothing: if that folder already holds
+kit files that differ from this version (an older copy of the kit, or edits made by hand), it writes nothing,
+lists them, and exits with code 2. Options: `--dir <path>`, `--dry-run`, `--force` (replace the kit's own files).
+
+**2. Run the setup prompt.** Open your AI tool in the project and say:
+
+> Read `.claude/workspace-kit/skills/setup-workspace/SKILL.md` and follow it.
+
+A tool without skill support can use the paste-in text in [`docs/setup-prompt.md`](docs/setup-prompt.md).
+
+**3. Answer the questions.** They come from [`catalog/options.json`](catalog/options.json), which gives every
+rule, skill, hook, check and control a title, a one-line "what it does" and a one-line "how it changes your
+workflow". In rounds of at most four questions:
+
+| Round | You decide |
+|---|---|
+| 1 | Which AI tools (Claude Code, Cursor, Codex, OpenCode, Cline) and which profile (`solo`, `team`, `org`) |
+| 2 | Whether to keep the profile's strictness defaults, or change single controls |
+| 3 | What to install, one group at a time: rules, skills, hooks and CI, review gate and checks, templates and settings |
+| 4 | Project facts for what you chose: the lint / type / test commands, the protected branch, the files that hold the version |
+
+**4. Preview, then apply.** The assistant writes your answers to `.claude/workspace-kit/answers.json`, shows a
+**dry run** (created, skipped, manual, notes, warnings), waits for your yes, and then installs. The installer
+is a program, not the assistant copying files, so it behaves the same everywhere:
+
+```text
+node .claude/workspace-kit/bin/cli.mjs apply --choices .claude/workspace-kit/answers.json --dry-run
+node .claude/workspace-kit/bin/cli.mjs apply --choices .claude/workspace-kit/answers.json
+```
+
+```json
+{
+  "profile": "team",
+  "tools": ["claude-code", "cursor"],
+  "overrides": { "docs.check": "strict" },
+  "enabled": ["rule.verification", "skill.pr-description", "hook.pre-commit", "review-gate", "check.static"],
+  "project": {
+    "commands": { "lint": "npm run lint", "typecheck": "npm run typecheck", "test": "npm test" },
+    "protectedBranch": "main",
+    "versionFiles": ["package.json:version"]
+  }
+}
+```
+
+Running it again changes nothing. Options an option needs are added for you and reported. An answer the program
+needs but does not have (for example the version files for the release workflow) means that one piece is not
+written, and the report names what is missing.
+
+### What the installer does and does not do
+
+The project already has its own skills, hooks, workflows and instruction files. The kit is built to sit beside
+them: it creates new things, adds clearly marked blocks, and otherwise leaves your files alone.
+
+| Your file or folder | What the kit does |
+|---|---|
+| Your skills | Kit skills are installed as `wk-<name>` (for example `wk-pr-description`), and references between them are rewritten. A skill of yours with the plain name is never touched; if one exists, a note says both are now visible. |
+| `CLAUDE.md` / `AGENTS.md` | One block between `workspace-kit:start rules` and `workspace-kit:end rules`. Your text outside it is never touched. With several tools the rules are written **once**, in `AGENTS.md`, and `CLAUDE.md` gets a marked `@AGENTS.md` import. Rules you already import with `@.claude/workspace-kit/rules/...` are not repeated. |
+| Git hooks (husky, `core.hooksPath`, `.git/hooks`) | One marked block chained into your hook; your lines before and after stay as they are. Whatever the hook already runs (lint, tests, docs-fresh, changelog) is left out of the block. |
+| A hook the kit cannot edit safely | `lefthook`, the Python `pre-commit` tool, a non-shell hook, or a pre-push hook that reads stdin (git-lfs): nothing is written, and the exact lines to add are printed. |
+| `.claude/settings.json` | Keys are added, never replaced: `permissions.defaultMode` only if you have not set it, and one `PreToolUse` entry for the test-edit guard. A file with comments is never rewritten. |
+| `.gitignore`, `package.json` | A marked block of ignore lines; a `check:config` script, only if that name is free. |
+| `PLAN.md`, `CHANGELOG.md`, `REVIEW.md`, `.claude/workflow.json`, the release workflow | Created if missing. **Never replaced, not even with `--force`**, because once they exist they are your data. |
+| `scripts/*.mjs` | Created if missing. An older copy is skipped with a **warning** (newer scripts depend on it), and `--force` replaces it. |
+
+The installer makes no network calls, writes nothing outside the project folder, and never commits or pushes.
+
+### Which tools read what
+
+Locations were checked against each tool's official documentation on 2026-11-10; the per-tool pages are in
+`adapters/`.
+
+| Tool | Skills are installed in | Always-on rules | Worth knowing |
+|---|---|---|---|
+| Claude Code | `.claude/skills/` | `CLAUDE.md` | Subagent, plan mode and `settings.json` hooks are Claude Code features |
+| Codex | `.agents/skills/` | `AGENTS.md` | |
+| Cursor | `.agents/skills/` | `AGENTS.md` | Does not read `CLAUDE.md`; `.cursor/rules` files must be `.mdc` (the kit does not write them) |
+| OpenCode | `.agents/skills/` (it also reads `.claude/skills/`) | `AGENTS.md` | With both files present only `AGENTS.md` is read |
+| Cline | `.cline/skills/` (it also reads `.claude/skills/`, **not** `.agents/skills/`) | `AGENTS.md` | Has its own `.clinerules/` folder, which the kit does not need |
+
+A tool never gets a second copy when another selected tool's folder is one it already reads.
+
+### Undo
+
+Delete the `wk-*` skill folders; delete the text between the `workspace-kit:start` and `workspace-kit:end`
+markers in your instruction files, hooks and `.gitignore`; delete `.claude/workspace-kit/`. Files created from
+templates (`PLAN.md`, `scripts/`, ...) are yours to keep or delete. The `settings.json` keys and the
+`check:config` script have no markers (JSON cannot hold comments), so remove those by hand.
 
 ### Day to day: the commands
 
@@ -571,21 +844,53 @@ features.
 | `node scripts/test-edit-guard.mjs start / lock / stop / status` | Fix mode for the test-edit guard | No |
 | `node scripts/run-claude-checks.mjs --yes` | Asks `claude -p` about `@` imports and skill triggers | **Yes** (opt-in, uses your usage) |
 
+**By hand, without the installer:** pick pieces from the tables, follow `adapters/<your tool>.md` for the
+locations, fill the `<...>` placeholders in the templates, and wire the hooks yourself.
+
 ## 9. Keeping the kit up to date
 
-This kit is a **git repository** (`https://github.com/Jakub-Owczarzak/workspace-kit`), so no project depends on
-one machine's folder. The `update-workspace-kit` skill moves changes both ways, and always asks first:
+### Installing a newer version of the kit
 
-- **Push** (project -> kit): it checks a piece is reusable, removes project facts, shows the plan, asks,
-  writes it to a branch of the kit, runs the piece's test, and asks before pushing or opening a pull request.
-- **Pull** (kit -> project): "pull the latest kit" refreshes the project's `.claude/workspace-kit/` snapshot,
-  offers to update the installed skills that are behind, and offers kit pieces the project does not have yet,
-  without overwriting project facts. The snapshot records the kit commit it came from in
-  `.claude/workspace-kit/.kit-version`, so drift can be measured.
+```text
+npx ai-workspace-kit@latest init           # a newer kit than the installed one: lists what differs, writes nothing
+npx ai-workspace-kit@latest init --force   # replaces the kit's own folder, .claude/workspace-kit/
+git diff .claude/workspace-kit                           # review it (the folder is yours to commit)
+node .claude/workspace-kit/bin/cli.mjs apply --choices .claude/workspace-kit/choices.json --dry-run
+```
 
-Install it like any other skill (copy `skills/update-workspace-kit/` to `.claude/skills/` and fill its Settings
-table: repository URL, optional local clone, the project's copy of the kit, kit-origin and project-only
-pieces). Keep project facts out of the kit.
+`.claude/workspace-kit/choices.json` is the record of your last answers, so you do not answer the questions
+again. `.claude/workspace-kit/.kit-version` holds the package version of the copy you have; `apply` refuses
+to run if it is missing, which is what stops a half-upgraded kit from being used.
+
+After an upgrade the installed `wk-*` skills and the `scripts/*.mjs` are older than the kit's. They are listed
+as skipped, and scripts get a **warning**: newer scripts depend on them and can silently do nothing until they
+are updated. Compare, then run `apply` again with `--force`. That replaces files the kit owns, including any
+edit you made to an installed `wk-` skill or script. It never replaces `PLAN.md`, `CHANGELOG.md`, `REVIEW.md`,
+`workflow.json` or the release workflow.
+
+### Moving from the old copy-the-folder install
+
+An older install copied `rules/`, `skills/` and friends by hand and named the skills without a prefix. Running
+`init` on such a project lists the kit files that differ and stops; `init --force` upgrades the folder. Then:
+
+- the old plain-named skills stay where they are, next to the new `wk-` ones. A note lists them; delete the old
+  ones if they came from the kit, keep them if they are yours;
+- lines your hook already runs, and rules your `CLAUDE.md` already imports, are not added a second time;
+- the old `scripts/*.mjs` get the warning above.
+
+This was tried on a copy of a real project that had exactly that history
+([section 11](#11-how-it-was-checked-and-what-is-not-proven)).
+
+### Sharing an improvement back: `update-workspace-kit`
+
+This kit is also a git repository (`https://github.com/Jakub-Owczarzak/ai-workspace-kit`). The
+`update-workspace-kit` skill's **push** mode (project to kit: check a piece is reusable, remove project facts,
+write it to a branch of the kit, ask before pushing) is described in the skill and was not re-tested after the
+npm package was introduced.
+
+**Its pull mode predates the package and should not be used with it.** It treats `.kit-version` as a git commit
+and copies a working copy over the kit folder, while the package writes its version number there and `init` is
+all or nothing. To get a newer kit, use `init --force` as above. The skill has not been reworked yet.
 
 ## 10. Design principles
 
@@ -604,28 +909,51 @@ pieces). Keep project facts out of the kit.
 
 ## 11. How it was checked, and what is not proven
 
-- **Tests:** `node --test templates/scripts/*.test.mjs skills/changelog-bump/scripts/*.test.mjs` passes
-  (218 tests on 2026-11-09, 22 of them for `changelog-bump`). None calls Claude. They include real runs in
-  throw-away git repositories and a run of the pre-push template with `sh`.
-- **Skill lint:** `node templates/scripts/check-config.mjs --root . --skills-dir skills` reports 10 skills,
-  0 errors, 0 warnings. This checks structure only; it does not prove a skill triggers.
-- **Model-reported checks (`claude -p`, with the owner's approval, one sample each):** trigger fixtures on an
-  installed copy of the kit (38 pass, 0 fail, 4 unclear), the overview skill (7 of 7), the planning gate (5 of 5
-  expected answers, re-run after `solo` moved to `anchor`).
-- **Real use:** one real project has had a pull of the kit, at commit `f76d0a6` (applied in its working tree,
-  not committed there); the test-edit guard blocked a real edit there. The overview skill, the review gate and
-  the planner changes came after that pull and are not in that project yet. No other project has been updated.
-- **Reviews:** five reviews by fresh subagents given the `reviewer` instructions (not the registered agent): the
-  review gate (twice), the planner changes, the mapping page and this README. All the runs above were made on
-  2026-11-09; the numbers are from that day and will change as the kit does.
-- **Not yet run:** plan mode, a real `git push` through the pre-push hook, `setup-workspace` with the newest
-  pieces, and a pull into a project that already has its own overview and skills.
+Numbers are from 2026-11-10 unless a line says otherwise; they change as the kit does.
+
+- **Tests:** `npm test` runs every `*.test.mjs` file in its own process, with a time limit and closed stdin:
+  318 tests, all pass, on Node 22 and on Node 18 (Windows). None calls Claude. They include real runs in
+  throw-away git repositories, a hook run through a symlink, and the installer's collision cases: a skill with
+  the same name, a hand-written `CLAUDE.md`, a `settings.json` with comments, a `git-lfs` pre-push hook, and an
+  older copy of the kit.
+- **Install smoke test** (`scripts/ci-smoke.mjs`): packs the tarball, runs `npx` from it in an empty project,
+  runs the installed kit's `apply`, runs it again and checks that nothing changed and that no dev test file was
+  shipped. Passes on Windows, Node 18 and 22.
+- **CI** (`.github/workflows/ci.yml`) runs both on Ubuntu, macOS and Windows, with Node 18 and 22. All six jobs
+  passed on commits `9ce5221` and `acbf13e`, so the installer, the hooks and the settings merge have run green on
+  macOS and Linux as well as Windows. Ubuntu and Windows pass on every commit since. **The macOS jobs are
+  unreliable:** on some commits no runner picked them up and they sat in the queue until GitHub cancelled them
+  (`6481ca0`, `2c5369d`, `e4a94f2`). The repository is private, where macOS minutes are billed at a higher rate;
+  the cause is not confirmed. A cancelled macOS job says nothing about the code, so check that all six jobs ran
+  before reading a CI result as proof of portability.
+- **Skill lint:** 10 skills, 0 errors, 0 warnings. This checks structure only; it does not prove a skill triggers.
+- **A real project, on a copy:** `react-naitive-starter-pack`, which already had an older kit copy, plain-named
+  skills, husky hooks, imported rules and a wired guard hook. `init` refused until `--force`. `apply` replaced
+  nothing the project owned, did not add what its hook already ran, and a second run changed nothing. With
+  the project's own `node_modules`, its type check and 58 tests gave the same results before and after, and a
+  real `git commit` ran through its husky hooks (lint-staged, type check, tests, docs-fresh, changelog) and
+  succeeded. The real repository has not been changed.
+- **Bugs those runs found, now fixed:** the test-edit guard and nine other scripts did nothing when started
+  through a symlink or a Windows short path (the guard let every edit through); a second run kept rewriting a
+  hook on a Windows checkout with CRLF line endings; `--force` would have replaced `PLAN.md`.
+- **Model-reported checks** (`claude -p`, 2026-11-09, an earlier version of the kit, one sample each): trigger
+  fixtures on an installed copy of the kit (38 pass, 0 fail, 4 unclear), the overview skill (7 of 7), the
+  planning gate (5 of 5 expected answers). Not re-run since.
+- **Reviews:** five reviews by fresh subagents given the `reviewer` instructions (2026-11-09): the review gate
+  (twice), the planner changes, the mapping page and the earlier README. The installer, the catalog and the
+  setup questionnaire have **not** been reviewed by a fresh reader.
+- **Not yet run:** the setup questionnaire in a real AI session (the installer behind it is tested; the asking
+  and the wording of the explanations are not); plan mode; a real `git push` through the pre-push hook; the
+  installer against a real project on macOS or Linux (CI covers it on throw-away projects only); an
+  `npm publish` and an install from the registry (the package is not published yet; the publish workflow has
+  been parsed and its two guards tested by hand, but it has never run).
 
 The status of every playbook practice, and how it was checked, is in
 [`docs/playbook-mapping.md`](docs/playbook-mapping.md). Known limits: a review record is an attestation (the
 assistant that wrote the change can write it); the reviewer has Bash and is told not to change anything, which is
-instructions, not a sandbox; the review gate is per machine; and the VS Code extension does not read a project's
-default plan mode, per the Claude Code docs.
+instructions, not a sandbox; the review gate is per machine; the VS Code extension does not read a project's
+default plan mode, per the Claude Code docs; and the `update-workspace-kit` pull mode does not work with the
+package ([section 9](#9-keeping-the-kit-up-to-date)).
 
 ## 12. What is not in the kit
 
@@ -636,12 +964,23 @@ default plan mode, per the Claude Code docs.
 - By decision: Claude in CI (evals, pull request review), managed settings, worktrees and parallel sessions,
   Maintain-stage plays, and reading GitHub branch protection (see `docs/playbook-mapping.md`).
 - `figma-sync` needs the Figma connector and, for first use, a copy of the design file.
+- Cursor `.cursor/rules/*.mdc` files: the always-on rules reach Cursor through `AGENTS.md`, so the kit does not
+  write scoped rule files.
+- Hook systems other than plain shell hooks (`lefthook`, the Python `pre-commit` tool): the kit prints the lines
+  to add instead of editing their configuration.
+- An automatic uninstall: removal is by hand ([section 8](#8-install-and-use)).
 
 ## 13. Repository layout
 
 ```text
  workspace-kit/
    README.md                 this file
+   package.json LICENSE      the npm package `ai-workspace-kit` (MIT)
+   RELEASING.md              how a release is made (a version tag); not shipped in the package
+   bin/cli.mjs               the command: init and apply
+   lib/                      the installer: init, apply, marked blocks, hooks, settings.json merge, project
+                             files, skill renaming, where each tool reads (each with its tests)
+   catalog/options.json      every switchable option, explained in plain words (read by the questionnaire)
    rules/                    8 always-on rules: readable-code, repo-tidiness, docs-fresh, commit-gate,
                              verification, test-discipline, skill-routing, ui-change-flagging
    skills/                   10 skills, each with SKILL.md (and triggers.json for the model-invocable ones)
@@ -652,16 +991,26 @@ default plan mode, per the Claude Code docs.
      workflows/              release_bump.yaml
      scripts/                the checks, the profile resolver and their tests
    docs/                     workflow-profiles, config-checks, test-discipline, project-overview,
-                             review-gate, playbook-mapping
-   adapters/                 where each piece goes: Claude Code, Cline, Cursor, AGENTS.md readers
+                             review-gate, playbook-mapping, setup-prompt
+   adapters/                 where each piece goes: Claude Code, Codex and AGENTS.md readers, Cursor, OpenCode, Cline
    stacks/expo-react-native/ routing rows and an always-on rule for one framework (optional)
+   scripts/                  kit development only, not shipped: run-tests.mjs, ci-smoke.mjs
+   .github/workflows/ci.yml  tests and the install smoke test on 3 operating systems and 2 Node versions
+   .github/workflows/publish.yml   publishes to npm when a version tag is pushed (guards: the tag matches
+                             package.json, the commit is on main, the tests pass)
+   .github/ISSUE_TEMPLATE/   the feedback form
 ```
+
+Test files (`*.test.mjs`) sit beside the code they test. They are kept in the repository for kit development and
+are **not** shipped in the package or installed into projects.
 
 | Folder | What | Always on? |
 |---|---|---|
-| `rules/` | Short rules every session follows | Yes (put in the tool's instruction file) |
+| `bin/`, `lib/` | The installer. Copied into the kit folder too, so setup needs no network | No (run during setup) |
+| `catalog/` | The explanation of every option; the questionnaire reads it | No (read during setup) |
+| `rules/` | Short rules every session follows | Yes (a marked block in the tool's instruction file) |
 | `skills/` | Procedures used on demand | No (used when the task matches) |
-| `templates/` | Starting files and scripts | Copied once, then edited |
+| `templates/` | Starting files and scripts | Copied once, then yours to edit |
 | `adapters/` | Where each piece goes per tool | Reference |
 | `docs/` | Reference docs for the profile, the checks, the test policy, the overview skill, the review gate and the playbook mapping | Read when choosing how strict a project's workflow should be |
 | `stacks/` | One folder per framework, with no project facts | Optional |
@@ -683,6 +1032,12 @@ default plan mode, per the Claude Code docs.
 | **Plan mode** | A Claude Code mode where Claude cannot edit files until you accept a plan |
 | **Soft rule / hard stop** | A soft rule is advice the assistant follows; a hard stop is something that blocks (a hook exit code) |
 | **Stack pack** | Routing rows and a rule for one framework, kept apart from the general kit |
+| **Kit folder** | `.claude/workspace-kit/` in a project: the copy of the kit that `init` writes and the setup reads from. The only place `init` writes |
+| **Catalog** | `catalog/options.json`: every switchable option with its one-line explanation and effect; the questionnaire reads it |
+| **Marked block** | Text the kit adds to a file you own, between `workspace-kit:start <id>` and `workspace-kit:end <id>` lines. Re-running replaces only the block; removing it removes the kit's part |
+| **`wk-` prefix** | The name kit skills get in a project (`wk-pr-description`), so they cannot clash with skills the project already has |
+| **Dry run** | `apply --dry-run`: the full report of what would be created, skipped or left to you, with nothing written |
+| **Choices file** | The JSON with your answers (`answers.json`); `apply` reads it, and `choices.json` is the record of the last run |
 
 ## 15. Credits
 

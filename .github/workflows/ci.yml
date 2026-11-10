@@ -9,6 +9,8 @@ jobs:
   portability:
     name: ${{ matrix.os }} / node ${{ matrix.node }}
     runs-on: ${{ matrix.os }}
+    # A hang must fail fast with a log, not run until it is cancelled.
+    timeout-minutes: 12
     strategy:
       fail-fast: false
       matrix:
@@ -20,6 +22,8 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
       - name: Kit tests
+        timeout-minutes: 6
         run: npm test
-      - name: Install smoke test (pack, npx init, npx init again)
+      - name: Install smoke test (pack, npx init, apply, apply again)
+        timeout-minutes: 5
         run: node scripts/ci-smoke.mjs

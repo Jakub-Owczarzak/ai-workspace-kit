@@ -12,9 +12,9 @@
 // Run `node workflow-config.mjs` in a project to print the resolved controls and where each came from.
 // Add `--json` for machine-readable output and `--root <dir>` to look at another project.
 
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readFileSync, realpathSync } from 'node:fs';
 import { join } from 'node:path';
-import { pathToFileURL } from 'node:url';
+import { fileURLToPath } from 'node:url';
 
 export const PROFILE_NAMES = ['solo', 'team', 'org'];
 export const DEFAULT_PROFILE = 'solo';
@@ -270,6 +270,19 @@ function main(argv) {
   return 0;
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+/**
+ * True when this file was started directly (`node scripts/<name>.mjs`). Both sides are resolved to real
+ * paths: Node reports the real path in import.meta.url, but argv[1] keeps a symlink or a Windows short name,
+ * and a plain comparison would then make the script silently do nothing.
+ */
+function startedDirectly() {
+  try {
+    return realpathSync.native(process.argv[1]) === realpathSync.native(fileURLToPath(import.meta.url));
+  } catch {
+    return false;
+  }
+}
+
+if (process.argv[1] && startedDirectly()) {
   process.exit(main(process.argv.slice(2)));
 }

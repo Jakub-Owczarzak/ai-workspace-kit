@@ -1,14 +1,14 @@
 # Adapter: Codex and any tool that reads `AGENTS.md`
 
-`AGENTS.md` at the project root is the closest thing to a shared standard: many assistants read it at the
-start of a task.
+`AGENTS.md` at the project root is the closest thing to a shared standard: Codex, OpenCode, Cursor and Cline
+all read it. Codex documentation (skills and customization pages) checked 2026-11-10.
 
 | Kit piece | Where it goes |
 |---|---|
-| Project overview | `AGENTS.md` (use `templates/AGENTS.md`). |
-| Always-on rules (`rules/*.md`) | Add them to `AGENTS.md`, under a "How to work" heading (or link to files in a `docs/` folder if the file gets long). |
-| Skills (`skills/<name>/`) | `.agents/skills/<name>/SKILL.md`, and say in `AGENTS.md`: "Skills are in `.agents/skills/`. When a task matches a skill, read its `SKILL.md` first." |
-| Commit hook | The project's git hooks. |
+| Project overview | `AGENTS.md` (use `templates/AGENTS.md`, or let `wk-write-project-overview` write it from the code). |
+| Always-on rules (`rules/*.md`) | One marked block in `AGENTS.md` (`workspace-kit:start rules` ... `workspace-kit:end rules`). Your own text outside the block is never touched. |
+| Skills (`skills/<name>/`) | `.agents/skills/wk-<name>/SKILL.md`. Codex reads repository skills from `.agents/skills` (and personal ones from `$HOME/.agents/skills`). `.codex/skills` is the older location. |
+| Commit and push hooks | The project's git hooks. |
 
 ## A tool that reads none of these
 
@@ -16,7 +16,7 @@ Paste the content of the rules into whatever custom-instructions field the tool 
 skill, open its `SKILL.md` and paste it, or tell the assistant to read it from the path. The skills are
 plain markdown, so they work this way too, without automatic triggering.
 
-## Keeping two tools in sync
+## Several tools, one set of rules
 
-If two tools each need their own copy of the same rules, write both from one text and run `diff`. The
-setup skill does this when you name more than one tool.
+The rules are written once, in `AGENTS.md`. Claude Code does not read `AGENTS.md`, so when it is one of the
+tools, `CLAUDE.md` gets a marked `@AGENTS.md` import instead of a second copy.

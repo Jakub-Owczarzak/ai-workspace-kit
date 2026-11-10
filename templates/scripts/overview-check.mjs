@@ -15,9 +15,9 @@
 //   --file     the overview to check (default: AGENTS.md in the root)
 //   --strict   exit 1 when anything is found (default: always exit 0, like the doc-size report)
 
-import { existsSync, readFileSync, readdirSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync, realpathSync } from 'node:fs';
 import { join, resolve } from 'node:path';
-import { pathToFileURL } from 'node:url';
+import { fileURLToPath } from 'node:url';
 
 /** Folders never searched: dependencies, build output and generated files. */
 const SKIPPED_FOLDERS = new Set(['node_modules', '.git', 'dist', 'build', 'coverage', '.expo']);
@@ -284,7 +284,20 @@ function readIfExists(path) {
   return existsSync(path) ? readFileSync(path, 'utf8') : null;
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+/**
+ * True when this file was started directly (`node scripts/<name>.mjs`). Both sides are resolved to real
+ * paths: Node reports the real path in import.meta.url, but argv[1] keeps a symlink or a Windows short name,
+ * and a plain comparison would then make the script silently do nothing.
+ */
+function startedDirectly() {
+  try {
+    return realpathSync.native(process.argv[1]) === realpathSync.native(fileURLToPath(import.meta.url));
+  } catch {
+    return false;
+  }
+}
+
+if (process.argv[1] && startedDirectly()) {
   const argv = process.argv.slice(2);
   const valueOf = (flag) => (argv.indexOf(flag) >= 0 ? argv[argv.indexOf(flag) + 1] : undefined);
   const root = resolve(valueOf('--root') ?? process.cwd());

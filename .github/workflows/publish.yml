@@ -1,0 +1,90 @@
+name: publish
+
+# Publishes to npm when a version tag is pushed. Nothing else publishes: a tag is a deliberate human act.
+#
+#   git tag v0.1.0
+#   git push origin v0.1.0
+#
+# Rehearsal: Actions > publish > Run workflow (dry run is on by default). It runs every check and
+# "npm publish --dry-run", and publishes nothing. See RELEASING.md for the one-time setup and the steps.
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Rehearse only: run every check and "npm publish --dry-run"'
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: verify / node ${{ matrix.node }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      matrix:
+        node: [18, 22]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - name: The tag matches the version in package.json
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          TAG="${GITHUB_REF_NAME#v}"
+          VERSION="$(node -p "require('./package.json').version")"
+          if [ "$TAG" != "$VERSION" ]; then
+            echo "Tag v$TAG does not match package.json version $VERSION. Nothing was published."
+            exit 1
+          fi
+      - name: The tagged commit is on main
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          git fetch origin main
+          if ! git merge-base --is-ancestor "$GITHUB_SHA" origin/main; then
+            echo "The tagged commit is not on main. Merge first, then tag. Nothing was published."
+            exit 1
+          fi
+      - name: Kit tests
+        run: npm test
+      - name: Install smoke test (pack, npx init, apply, apply again)
+        run: node scripts/ci-smoke.mjs
+      - name: What would ship
+        run: npm pack --dry-run
+
+  publish:
+    name: publish to npm
+    needs: verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    # An environment named "npm" lets the owner add "required reviewers" in the repository settings, which turns
+    # this job into a manual approval step. Without that setting it runs straight away.
+    environment: npm
+    permissions:
+      contents: read
+      id-token: write # lets npm record where the package was built (provenance)
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+      - name: Publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          REPOSITORY_IS_PRIVATE: ${{ github.event.repository.private }}
+          DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run }}
+        run: |
+          FLAGS=""
+          # Provenance needs a public repository; skip it while the repository is private.
+          if [ "$REPOSITORY_IS_PRIVATE" = "false" ]; then FLAGS="$FLAGS --provenance"; fi
+          if [ "$DRY_RUN" = "true" ]; then FLAGS="$FLAGS --dry-run"; echo "Dry run: nothing will be published."; fi
+          npm publish $FLAGS
