@@ -27,11 +27,10 @@ The assistant asks which tools and which profile (solo, team or org) you use, ex
 skill, hook and check in a line or two together with what it changes in your workflow, shows a dry run, and
 installs only what you choose. It never overwrites a file of yours. More in [section 8](#8-install-and-use).
 
-> **Status: not on npm yet.** The package is ready to publish: a version tag pushed to the repository publishes
-> it ([`RELEASING.md`](RELEASING.md)), and nothing has been tagged yet, so the command above does not work until
-> then. Today, install straight from GitHub: `npx github:Jakub-Owczarzak/ai-workspace-kit init` (it reads the
-> default branch, so it works once the pull request that adds the installer is merged; the same form was tried
-> with `--dry-run` from a branch of this repository's earlier home, not yet from here).
+> **Status: version 0.1.0 is on npm** (the first release; a first version, so expect rough edges and
+> [tell us about them](https://github.com/Jakub-Owczarzak/ai-workspace-kit/issues/new/choose)). The command above
+> installs it. To remove everything it installed again, see [Uninstall](#uninstall). How releases are made:
+> [`RELEASING.md`](RELEASING.md).
 
 **See how the workflow runs:** [flow diagrams for solo, team and org](#the-flow-in-each-profile-what-is-automated-what-needs-you): each step, who does it (you, the assistant or a script), what blocks, and where you decide.
 
@@ -769,13 +768,13 @@ and says so; a broken profile file falls back to `solo` with a warning.
 
 **1. Copy the kit into the project.** From the project folder:
 
-| When | Command |
+| Where from | Command |
 |---|---|
-| After the first npm release | `npx ai-workspace-kit init` |
-| Today (the package is not on npm yet) | `npx github:Jakub-Owczarzak/ai-workspace-kit init` |
+| npm (normal) | `npx ai-workspace-kit init` |
+| The newest unreleased code on GitHub | `npx github:Jakub-Owczarzak/ai-workspace-kit init` |
 
-The GitHub form was tried with `--dry-run` from the feature branch; it installs from the repository's default
-branch once that branch has been merged. A packed tarball also works: `npm pack`, then
+The npm form was tried from the real registry on 2026-11-10 in an empty folder: `init`, the installer, an uninstall
+preview and a real uninstall all worked (Windows). A packed tarball also works: `npm pack`, then
 `npx ./ai-workspace-kit-<version>.tgz init` (give a relative path; on Windows `npx` silently does
 nothing when it is given an absolute `C:/...` path).
 
@@ -1003,9 +1002,10 @@ Numbers are from 2026-11-10 unless a line says otherwise; they change as the kit
   setup questionnaire have **not** been reviewed by a fresh reader.
 - **Not yet run:** the setup questionnaire in a real AI session (the installer behind it is tested; the asking
   and the wording of the explanations are not); plan mode; a real `git push` through the pre-push hook; the
-  installer against a real project on macOS or Linux (CI covers it on throw-away projects only); an
-  `npm publish` and an install from the registry (the package is not published yet; the publish workflow has
-  been parsed and its two guards tested by hand, but it has never run).
+  installer against a real project on macOS or Linux (CI covers it on throw-away projects only); a release made
+  *through* the publish workflow with trusted publishing (version 0.1.0 was published by hand; the workflow ran
+  once on its tag and correctly skipped publishing because the version was already on npm, but it has never
+  published a version itself).
 
 The status of every playbook practice, and how it was checked, is in
 [`docs/playbook-mapping.md`](docs/playbook-mapping.md). Known limits: a review record is an attestation (the
