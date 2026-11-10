@@ -82,7 +82,10 @@ if (command === 'init') {
     }
     if (report.addedRequirements.length) console.log(`added because chosen options need them: ${report.addedRequirements.join(', ')}`);
     for (const item of report.skipped) console.log(`SKIPPED ${item.path}: ${item.reason}`);
-    for (const item of report.manual) console.log(`MANUAL  ${item.path}: ${item.reason}`);
+    for (const item of report.manual) {
+      console.log(`MANUAL  ${item.path}: ${item.reason}`);
+      if (item.snippet) console.log(item.snippet.split('\n').map((line) => `    | ${line}`).join('\n'));
+    }
   } catch (error) {
     console.error(`apply failed: ${error.message}`);
     process.exit(1);

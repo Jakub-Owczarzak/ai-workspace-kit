@@ -42,8 +42,9 @@ explanations. Show each option as one line `title: what (effect: impact)`. Prese
 for the chosen profile.
 
 1. **Round 1: tools and profile.** Which AI tools does this project use (Claude Code, Cursor, Codex,
-   OpenCode)? Which profile (`solo`, `team`, `org`)? Quote each profile's `forWho` and `summary`. Default
-   `solo`. If a stack pack matches, ask whether to add it.
+   OpenCode, Cline)? Which profile (`solo`, `team`, `org`)? Quote each profile's `forWho` and `summary`.
+   Default `solo`. If a stack pack matches, ask whether to add it. Tell the user where each tool will read
+   the kit from (`<KIT>/adapters/<tool>.md`): with several tools the rules are written once, in `AGENTS.md`.
 2. **Round 2: strictness.** List the 8 controls with the profile's defaults (see the catalog `values`, and
    `docs/workflow-profiles.md`). Ask: keep the defaults, or change some? Only ask about the controls the user
    wants to change; record changes as `overrides`.
@@ -51,8 +52,15 @@ for the chosen profile.
    change it?": rules; skills; hooks and CI; review gate and checks; templates and settings. If the user
    wants changes, ask which ids. Options marked `appliesWhen` are off unless that condition is true for this
    project. Options in `requires` are added automatically; say which.
-4. **Round 4: details of what was chosen.** Only if needed: which files hold the version (changelog), the lint
-   / test commands to put in the commit hook, the kit repository address (for `wk-update-workspace-kit`).
+4. **Round 4: project facts for what was chosen.** Ask only for what a chosen option needs, using what you
+   detected in Step 1 as the proposed answer:
+   - commit hook: the lint, type-check and test commands (`project.commands`);
+   - push hook or release workflow: the protected branch (`project.protectedBranch`; leave it out if the push
+     hook should only run the review gate);
+   - release workflow and changelog: the files that hold the version as `file:key`, for example
+     `package.json:version` (`project.versionFiles`);
+   - `wk-update-workspace-kit`: the kit repository address.
+   Without these answers the program writes nothing for that piece and reports exactly what it needs.
 
 If the user says "you decide", use the defaults and list them as assumptions in the summary.
 
@@ -60,26 +68,28 @@ If the user says "you decide", use the defaults and list them as assumptions in 
 
 1. Write the answers to `<KIT>/answers.json`:
    `{ "profile": "...", "tools": ["claude-code", ...], "overrides": { "docs.check": "strict" },
-   "enabled": ["rule.verification", "skill.pr-description", ...] }` (ids from the catalog).
+   "enabled": ["rule.verification", "skill.pr-description", ...],
+   "project": { "commands": { "lint": "...", "typecheck": "...", "test": "..." }, "protectedBranch": "main",
+   "versionFiles": ["package.json:version"] } }` (ids from the catalog; `project` only for what was asked).
 2. Preview: `node <KIT>/bin/cli.mjs apply --choices <KIT>/answers.json --dry-run`. Show the user the list
    (created, skipped, manual). Wait for a yes.
 3. Apply: the same command without `--dry-run`. Never add `--force` unless the user asks to replace a file
    that the report listed as skipped, after you showed the difference.
 
-## Step 4: finish what the program leaves to you (the `MANUAL` lines)
+## Step 4: finish what the program reports as MANUAL
 
-Do these with the same rules: new files only, marked blocks in existing files, show before writing.
+The program already did the hooks (a marked block chained into the project's own hook), the `.claude/settings.json`
+keys (added, never replaced), the `.gitignore` block, the release workflow (a new file) and a `check:config`
+script. Read the `MANUAL` and `SKIPPED` lines of the report and deal with each one the way its reason says.
+Typical ones, with the same rules (new files only, marked blocks in existing files, show before writing):
 
-- **Project overview:** if `AGENTS.md` does not exist and the overview was chosen, run `wk-write-project-overview`
-  (create mode). Otherwise leave the user's `AGENTS.md` alone.
-- **Git hooks:** add the kit's checks to the project's existing hook system as a marked block (hash style:
-  `# workspace-kit:start pre-commit` ... `# workspace-kit:end pre-commit`) that calls the project's own lint,
-  type and test commands and then the kit scripts. Never replace a hook; chain to it. With husky or lefthook,
-  use their config format. Tell the user how to remove the block.
-- **Release workflow:** adapt `<KIT>/templates/workflows/release_bump.yaml` (branch, paths, version files) and
-  show it. Existing workflows are never edited; the file is new.
-- **`.claude/settings.json`:** for plan mode as default (team and org) and for the test-edit guard hook, merge
-  only the keys needed and show the result. If the file has the key already, ask.
+- **Project overview:** if `AGENTS.md` does not exist and the overview was chosen, run
+  `wk-write-project-overview` (create mode). Otherwise leave the user's `AGENTS.md` alone.
+- **A hook the program could not edit** (lefthook, the Python `pre-commit` tool, a non-shell hook, a pre-push
+  hook that reads stdin such as git-lfs): the `MANUAL` line is followed by the exact shell lines the kit would
+  have added. Show them to the user to add to their own configuration. Do not rewrite their hook.
+- **`.claude/settings.json` with comments:** show the two keys to add by hand.
+- **Missing answers** (a protected branch, version files): ask, update `answers.json`, run `apply` again.
 - **Placeholders:** fill the placeholders in the new template files (`PLAN.md`, `CHANGELOG.md`, ...) with what
   you detected, and ask about the ones you cannot fill. Leave no `<...>` behind.
 
@@ -88,7 +98,7 @@ Do these with the same rules: new files only, marked blocks in existing files, s
 - The skill folders exist where each tool reads them, and each has a `SKILL.md`.
 - If the config checks were installed: `node scripts/workflow-config.mjs` prints the chosen profile, and
   `node scripts/check-config.mjs` ends with no errors.
-- If the changelog was installed: `node .claude/skills/wk-changelog-bump/scripts/changelog.mjs should-skip` runs.
+- If the changelog was installed: `node <skills folder>/wk-changelog-bump/scripts/changelog.mjs should-skip` runs.
   (Kit tests are not shipped to projects; do not look for them.)
 - No leftover `<...>` placeholders in written files (search for them).
 - Running the `apply` command a second time reports nothing created or updated.

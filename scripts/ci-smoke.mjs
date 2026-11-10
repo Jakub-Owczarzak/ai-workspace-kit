@@ -46,7 +46,8 @@ try {
   assert.ok(existsSync(join(project, '.claude', 'skills', 'wk-pr-description', 'SKILL.md')), 'wk- skill installed');
   assert.ok(existsSync(join(project, '.agents', 'skills', 'wk-pr-description', 'SKILL.md')), 'shared skills folder used');
   assert.equal(readFileSync(join(project, '.claude', 'skills', 'pr-description', 'SKILL.md'), 'utf8'), 'USER SKILL', 'user skill untouched');
-  assert.match(readFileSync(join(project, 'CLAUDE.md'), 'utf8'), /workspace-kit:start rules/);
+  assert.match(readFileSync(join(project, 'AGENTS.md'), 'utf8'), /workspace-kit:start rules/);
+  assert.match(readFileSync(join(project, 'CLAUDE.md'), 'utf8'), /@AGENTS\.md/, 'Claude Code imports the shared rules');
   const reapplied = run('node', [cliPath, 'apply', '--choices', choicesFile], project);
   assert.match(reapplied, /created: 0/);
   assert.match(reapplied, /updated: 0/);
