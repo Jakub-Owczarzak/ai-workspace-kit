@@ -27,8 +27,8 @@ The assistant asks which tools and which profile (solo, team or org) you use, ex
 skill, hook and check in a line or two together with what it changes in your workflow, shows a dry run, and
 installs only what you choose. It never overwrites a file of yours. More in [section 8](#8-install-and-use).
 
-> **Status: version 0.1.0 is on npm** (the first release; a first version, so expect rough edges and
-> [tell us about them](https://github.com/Jakub-Owczarzak/ai-workspace-kit/issues/new/choose)). The command above
+> **Status: `ai-workspace-kit` is on npm.** It is an early version (0.x), so expect rough edges and
+> [tell us about them](https://github.com/Jakub-Owczarzak/ai-workspace-kit/issues/new/choose). The command above
 > installs it. To remove everything it installed again, see [Uninstall](#uninstall). How releases are made:
 > [`RELEASING.md`](RELEASING.md).
 
@@ -1003,9 +1003,8 @@ Numbers are from 2026-11-10 unless a line says otherwise; they change as the kit
 - **Not yet run:** the setup questionnaire in a real AI session (the installer behind it is tested; the asking
   and the wording of the explanations are not); plan mode; a real `git push` through the pre-push hook; the
   installer against a real project on macOS or Linux (CI covers it on throw-away projects only); a release made
-  *through* the publish workflow with trusted publishing (version 0.1.0 was published by hand; the workflow ran
-  once on its tag and correctly skipped publishing because the version was already on npm, but it has never
-  published a version itself).
+  *through* the publish workflow with trusted publishing (as of 2026-11-10 the workflow had only run on the
+  v0.1.0 tag, where it correctly skipped publishing because that version, published by hand, was already on npm).
 
 The status of every playbook practice, and how it was checked, is in
 [`docs/playbook-mapping.md`](docs/playbook-mapping.md). Known limits: a review record is an attestation (the
