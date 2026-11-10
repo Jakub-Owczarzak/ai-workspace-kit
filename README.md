@@ -33,6 +33,8 @@ installs only what you choose. It never overwrites a file of yours. More in [sec
 > default branch, so it works once the pull request that adds the installer is merged; the same form was tried
 > with `--dry-run` from a branch of this repository's earlier home, not yet from here).
 
+**See how the workflow runs:** [flow diagrams for solo, team and org](#the-flow-in-each-profile-what-is-automated-what-needs-you): each step, who does it (you, the assistant or a script), what blocks, and where you decide.
+
 **Trying it and want to tell us how it went?** Open an issue with the *Feedback or a problem* form
 ([new issue](https://github.com/Jakub-Owczarzak/ai-workspace-kit/issues/new/choose)). It asks which AI tool and
 operating system you used and what the installer printed; those details make a report easy to act on.
@@ -46,6 +48,7 @@ operating system you used and what the installer printed; those details make a r
 5. [The workflow, step by step](#5-the-workflow-step-by-step)
 6. [The skills and how they connect](#6-the-skills-and-how-they-connect)
 7. [Solo, team and org: what turns on and off](#7-solo-team-and-org-what-turns-on-and-off)
+   - [Flow diagrams: what is automated, what needs you](#the-flow-in-each-profile-what-is-automated-what-needs-you)
 8. [Install and use](#8-install-and-use)
 9. [Keeping the kit up to date](#9-keeping-the-kit-up-to-date)
 10. [Design principles](#10-design-principles)
@@ -516,6 +519,10 @@ The kit is a **human-in-the-loop** workflow. In no profile does anything push, o
 itself. The profile changes how much is blocked by a machine, not whether a person decides.
 
 #### Solo: one owner who reads every diff and approves every step
+![Solo workflow diagram: plan, build, verify, review, commit, push and pull request, showing who acts and where the hooks block](docs/diagrams/flow-solo.svg)
+
+<details>
+<summary>Text version of the solo flow</summary>
 
 ```text
    YOU   ask for a change
@@ -550,9 +557,15 @@ itself. The profile changes how much is blocked by a machine, not whether a pers
             RUN   release workflow (optional): opens a release PR after the merge;  YOU merge it = the release
 ```
 
+</details>
+
 #### Team: a few developers on a shared repository
+![Team workflow diagram: solo plus plan mode on the plan step and the fix-mode test guard on the build step](docs/diagrams/flow-team.svg)
 
 Same as solo, plus a real stop on planning, and a guard that protects tests during a bug fix.
+
+<details>
+<summary>Text version of the team flow</summary>
 
 ```text
    YOU   ask for a change
@@ -588,10 +601,16 @@ Same as solo, plus a real stop on planning, and a guard that protects tests duri
  7 PR       AI    pr-description drafts the text      YOU  open the PR, CI, merge      RUN  release PR (optional)
 ```
 
+</details>
+
 #### Org: many developers, policies that must hold
+![Org workflow diagram: team plus success measurements, a required review record, a blocking docs check and a push gate](docs/diagrams/flow-org.svg)
 
 Same as team, plus success measurements, and three more things that block: the docs check, the review record at
 push, and plan mode as the default.
+
+<details>
+<summary>Text version of the org flow</summary>
 
 ```text
    YOU   ask for a change
@@ -625,6 +644,8 @@ push, and plan mode as the default.
  7 PR       AI    pr-description drafts the text      YOU  open the PR, CI, review by your colleagues, merge
             RUN   release PR (optional)               YOU  merge it
 ```
+
+</details>
 
 Two limits to keep in mind in `org`. The review record is an attestation: the assistant that wrote the change can
 write it, so the push check is a reminder with teeth, not independent proof. And a second person reading the pull
