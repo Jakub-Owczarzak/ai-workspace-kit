@@ -1,13 +1,13 @@
 ---
 name: setup-workspace
-description: Set up the workspace kit in this project after `npx @jakub-owczarzak/workspace-kit init`. Asks which AI tools and which profile (solo, team, org) the project uses, explains every switchable rule, skill, hook and check in a line or two with its effect on the workflow, then installs only what was chosen. Use once per project, or again to change the choices. Never overwrites an existing file.
+description: Set up the workspace kit in this project after `npx ai-workspace-kit init`. Asks which AI tools and which profile (solo, team, org) the project uses, explains every switchable rule, skill, hook and check in a line or two with its effect on the workflow, then installs only what was chosen. Use once per project, or again to change the choices. Never overwrites an existing file.
 disable-model-invocation: true
 ---
 
 # Set up the workspace kit in a project
 
 Run in the **project root**. The kit was copied to `.claude/workspace-kit/` by
-`npx @jakub-owczarzak/workspace-kit init` (call it `<KIT>`). This skill asks the questions and fills in the
+`npx ai-workspace-kit init` (call it `<KIT>`). This skill asks the questions and fills in the
 project-specific parts; a small program, `<KIT>/bin/cli.mjs apply`, does the file work the same way on every
 operating system, so you never copy files by hand.
 
@@ -24,7 +24,7 @@ operating system, so you never copy files by hand.
 ## Step 0: check the kit is there
 
 Look for `<KIT>/catalog/options.json` and `<KIT>/.kit-version`. If they are missing, stop and tell the user
-to run `npx @jakub-owczarzak/workspace-kit init` in this folder first. Do not search elsewhere and do not
+to run `npx ai-workspace-kit init` in this folder first. Do not search elsewhere and do not
 write kit files from memory. Say which kit version you found.
 
 If the project already has an older copy of the kit, `init` writes nothing and lists the files that differ (this

@@ -20,7 +20,7 @@ try {
 
   mkdirSync(project);
   const tgz = join(work, packed.filename);
-  const initCmd = ['exec', '--yes', `--package=${tgz}`, '--', 'workspace-kit', 'init'];
+  const initCmd = ['exec', '--yes', `--package=${tgz}`, '--', 'ai-workspace-kit', 'init'];
 
   const first = run('npm', initCmd, project);
   assert.match(first, /copied: [1-9]\d*,/, 'first run copies files');

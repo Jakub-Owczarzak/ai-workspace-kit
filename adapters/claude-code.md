@@ -1,6 +1,6 @@
 # Adapter: Claude Code
 
-`workspace-kit apply` does all of this for you; this page says what it does and why.
+`apply` does all of this for you; this page says what it does and why.
 
 | Kit piece | Where it goes |
 |---|---|

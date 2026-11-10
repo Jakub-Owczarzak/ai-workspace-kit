@@ -1,13 +1,26 @@
 {
-  "name": "@jakub-owczarzak/workspace-kit",
+  "name": "ai-workspace-kit",
   "version": "0.1.0",
-  "description": "Portable rules, skills, templates and checks that make an AI coding assistant work like a careful engineer. Install with npx, then run the setup prompt.",
+  "description": "Portable rules, skills, templates and checks that make an AI coding assistant (Claude Code, Cursor, Codex, OpenCode, Cline) work like a careful engineer. Install with npx, then run the setup prompt.",
   "type": "module",
-  "private": true,
   "license": "MIT",
   "author": "Jakub Owczarzak",
+  "keywords": [
+    "ai",
+    "claude-code",
+    "cursor",
+    "codex",
+    "opencode",
+    "cline",
+    "agents-md",
+    "skills",
+    "workflow",
+    "sdlc"
+  ],
+  "homepage": "https://github.com/Jakub-Owczarzak/workspace-kit#readme",
+  "bugs": { "url": "https://github.com/Jakub-Owczarzak/workspace-kit/issues" },
   "repository": { "type": "git", "url": "git+https://github.com/Jakub-Owczarzak/workspace-kit.git" },
-  "bin": { "workspace-kit": "bin/cli.mjs" },
+  "bin": { "ai-workspace-kit": "bin/cli.mjs" },
   "files": [
     "bin/",
     "lib/",
@@ -21,8 +34,10 @@
     "!**/*.test.mjs"
   ],
   "engines": { "node": ">=18" },
+  "publishConfig": { "access": "public" },
   "scripts": {
     "test": "node scripts/run-tests.mjs",
-    "pack:check": "npm pack --dry-run"
+    "pack:check": "npm pack --dry-run",
+    "prepublishOnly": "npm test"
   }
 }

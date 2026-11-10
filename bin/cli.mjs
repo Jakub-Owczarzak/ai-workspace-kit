@@ -7,7 +7,7 @@ import { apply } from '../lib/apply.mjs';
 const HELP = `workspace-kit: install the workspace kit into a project
 
 Usage:
-  npx @jakub-owczarzak/workspace-kit init  [--dir <path>] [--dry-run] [--force]
+  npx ai-workspace-kit init  [--dir <path>] [--dry-run] [--force]
   node .claude/workspace-kit/bin/cli.mjs apply --choices <file> [--dir <path>] [--dry-run] [--force]
 
 Commands:

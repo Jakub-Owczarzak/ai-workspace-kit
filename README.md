@@ -16,7 +16,7 @@ was then aligned with Anthropic's
 Needs Node 18 or newer. In the project folder:
 
 ```text
-npx @jakub-owczarzak/workspace-kit init        # copies the kit into .claude/workspace-kit/ and touches nothing else
+npx ai-workspace-kit init        # copies the kit into .claude/workspace-kit/ and touches nothing else
 ```
 
 Then open your AI tool in that folder and say:
@@ -27,9 +27,14 @@ The assistant asks which tools and which profile (solo, team or org) you use, ex
 skill, hook and check in a line or two together with what it changes in your workflow, shows a dry run, and
 installs only what you choose. It never overwrites a file of yours. More in [section 8](#8-install-and-use).
 
-> **Status: not on npm yet.** The package is marked `private` until the first publish, so the command above
-> does not work yet. Today, install straight from GitHub: `npx github:Jakub-Owczarzak/workspace-kit init`
-> (tried with `--dry-run` from the feature branch; it reads the default branch once that is merged).
+> **Status: not on npm yet.** The package is ready to publish: a version tag pushed to the repository publishes
+> it ([`RELEASING.md`](RELEASING.md)), and nothing has been tagged yet, so the command above does not work until
+> then. Today, install straight from GitHub: `npx github:Jakub-Owczarzak/workspace-kit init` (tried with
+> `--dry-run` from the feature branch; it reads the default branch once that is merged).
+
+**Trying it and want to tell us how it went?** Open an issue with the *Feedback or a problem* form
+([new issue](https://github.com/Jakub-Owczarzak/workspace-kit/issues/new/choose)). It asks which AI tool and
+operating system you used and what the installer printed; those details make a report easy to act on.
 
 ## Contents
 
@@ -200,7 +205,7 @@ control that tunes it, and what can stop you. Step 0 happens once per project.
 ### Step 0: install (once per project)
 
 ```text
-   npx @jakub-owczarzak/workspace-kit init      copies the kit to .claude/workspace-kit/ (all or nothing; nothing else touched)
+   npx ai-workspace-kit init      copies the kit to .claude/workspace-kit/ (all or nothing; nothing else touched)
       |
       v
    prompt: "Read .claude/workspace-kit/skills/setup-workspace/SKILL.md and follow it"
@@ -729,12 +734,12 @@ and says so; a broken profile file falls back to `solo` with a warning.
 
 | When | Command |
 |---|---|
-| After the first npm release | `npx @jakub-owczarzak/workspace-kit init` |
+| After the first npm release | `npx ai-workspace-kit init` |
 | Today (the package is not on npm yet) | `npx github:Jakub-Owczarzak/workspace-kit init` |
 
 The GitHub form was tried with `--dry-run` from the feature branch; it installs from the repository's default
 branch once that branch has been merged. A packed tarball also works: `npm pack`, then
-`npx ./jakub-owczarzak-workspace-kit-<version>.tgz init` (give a relative path; on Windows `npx` silently does
+`npx ./ai-workspace-kit-<version>.tgz init` (give a relative path; on Windows `npx` silently does
 nothing when it is given an absolute `C:/...` path).
 
 `init` writes **only** inside `.claude/workspace-kit/`. It is all or nothing: if that folder already holds
@@ -846,8 +851,8 @@ locations, fill the `<...>` placeholders in the templates, and wire the hooks yo
 ### Installing a newer version of the kit
 
 ```text
-npx @jakub-owczarzak/workspace-kit@latest init           # a newer kit than the installed one: lists what differs, writes nothing
-npx @jakub-owczarzak/workspace-kit@latest init --force   # replaces the kit's own folder, .claude/workspace-kit/
+npx ai-workspace-kit@latest init           # a newer kit than the installed one: lists what differs, writes nothing
+npx ai-workspace-kit@latest init --force   # replaces the kit's own folder, .claude/workspace-kit/
 git diff .claude/workspace-kit                           # review it (the folder is yours to commit)
 node .claude/workspace-kit/bin/cli.mjs apply --choices .claude/workspace-kit/choices.json --dry-run
 ```
@@ -939,8 +944,8 @@ Numbers are from 2026-11-10 unless a line says otherwise; they change as the kit
 - **Not yet run:** the setup questionnaire in a real AI session (the installer behind it is tested; the asking
   and the wording of the explanations are not); plan mode; a real `git push` through the pre-push hook; the
   installer against a real project on macOS or Linux (CI covers it on throw-away projects only); an
-  `npm publish` and an install from the registry (the package is not published, and `package.json` says
-  `private`).
+  `npm publish` and an install from the registry (the package is not published yet; the publish workflow has
+  been parsed and its two guards tested by hand, but it has never run).
 
 The status of every playbook practice, and how it was checked, is in
 [`docs/playbook-mapping.md`](docs/playbook-mapping.md). Known limits: a review record is an attestation (the
@@ -969,7 +974,8 @@ package ([section 9](#9-keeping-the-kit-up-to-date)).
 ```text
  workspace-kit/
    README.md                 this file
-   package.json LICENSE      the npm package (MIT); marked private until the first publish
+   package.json LICENSE      the npm package `ai-workspace-kit` (MIT)
+   RELEASING.md              how a release is made (a version tag); not shipped in the package
    bin/cli.mjs               the command: init and apply
    lib/                      the installer: init, apply, marked blocks, hooks, settings.json merge, project
                              files, skill renaming, where each tool reads (each with its tests)
@@ -989,6 +995,9 @@ package ([section 9](#9-keeping-the-kit-up-to-date)).
    stacks/expo-react-native/ routing rows and an always-on rule for one framework (optional)
    scripts/                  kit development only, not shipped: run-tests.mjs, ci-smoke.mjs
    .github/workflows/ci.yml  tests and the install smoke test on 3 operating systems and 2 Node versions
+   .github/workflows/publish.yml   publishes to npm when a version tag is pushed (guards: the tag matches
+                             package.json, the commit is on main, the tests pass)
+   .github/ISSUE_TEMPLATE/   the feedback form
 ```
 
 Test files (`*.test.mjs`) sit beside the code they test. They are kept in the repository for kit development and

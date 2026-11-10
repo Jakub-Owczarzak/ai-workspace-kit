@@ -1,0 +1,60 @@
+name: Feedback or a problem
+description: Tried the install and the setup? Tell us how it went.
+labels: [feedback]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for trying it. The most useful reports say what you ran, what you expected and what happened.
+        Please do not paste secrets or private code.
+  - type: dropdown
+    id: kind
+    attributes:
+      label: What is this?
+      options:
+        - It did not work (a bug)
+        - It worked, but something was confusing
+        - A wish or an idea
+        - It worked well
+    validations:
+      required: true
+  - type: dropdown
+    id: tool
+    attributes:
+      label: Which AI tool(s) did you set it up for?
+      multiple: true
+      options:
+        - Claude Code
+        - Cursor
+        - Codex
+        - OpenCode
+        - Cline
+        - Other
+  - type: input
+    id: system
+    attributes:
+      label: Operating system and Node version
+      description: For example "macOS 15, Node 22". Run `node -v` to see the Node version.
+  - type: dropdown
+    id: profile
+    attributes:
+      label: Profile you chose
+      options:
+        - solo
+        - team
+        - org
+        - I did not get that far
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: |
+        The command or prompt you used, what you expected and what you saw. If the installer printed
+        SKIPPED, WARNING, NOTE or MANUAL lines, paste them.
+    validations:
+      required: true
+  - type: textarea
+    id: project
+    attributes:
+      label: Anything unusual about the project?
+      description: Existing skills, git hooks (husky, lefthook), a CLAUDE.md or AGENTS.md you already had, a monorepo.

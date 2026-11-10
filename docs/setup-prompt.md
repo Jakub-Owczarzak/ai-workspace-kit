@@ -1,6 +1,6 @@
 # Setup prompt for tools without skill support
 
-`npx @jakub-owczarzak/workspace-kit init` copied the kit to `.claude/workspace-kit/`. If your AI tool cannot
+`npx ai-workspace-kit init` copied the kit to `.claude/workspace-kit/`. If your AI tool cannot
 run a skill by name, paste the text below into a new session in the project folder.
 
 ```text
