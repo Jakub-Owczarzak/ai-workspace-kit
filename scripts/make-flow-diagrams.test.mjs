@@ -51,6 +51,18 @@ describe('workflow diagrams', () => {
     assert.ok(DIAGRAMS.tdd.loops.some((loop) => /YOU decide/.test(loop.label)), 'a test that looks wrong goes back to a person');
   });
 
+  it('turning test-first off removes the Test first stage, not the tests: Verify stays after Build in every profile', () => {
+    for (const name of PROFILES) {
+      const titles = DIAGRAMS[name].stages.map((stage) => stage.title);
+      assert.ok(titles.includes('Verify') && titles.indexOf('Verify') > titles.indexOf('Build'), `${name}: tests must still run after Build`);
+    }
+    const off = DIAGRAMS.tdd.panel.rows.find((row) => row.label === 'OFF');
+    assert.ok(off, 'the test-first diagram says what tests.tdd = off does');
+    assert.match(off.text, /Test first stage is skipped/);
+    assert.match(off.text, /still runs the whole suite in Verify/);
+    assert.match(off.text, /pre-commit hook runs the tests/);
+  });
+
   it('no note, subtitle or loop label is long enough to collide with a neighbour', () => {
     for (const [name, spec] of Object.entries(DIAGRAMS)) {
       const lay = layoutFor(spec.stages.length);

@@ -26,6 +26,7 @@ const COLOR = {
   solo: '#6e7681',
   team: '#a371f7',
   org: '#db61a2',
+  off: '#57606a',
 };
 const FONT = "'Segoe UI', -apple-system, BlinkMacSystemFont, Helvetica, Arial, sans-serif";
 
@@ -226,7 +227,7 @@ const PROFILE_LOOPS = [
 
 const COMMIT = { title: 'Commit', sub: 'hook gate', actors: ['YOU', 'RUN'], hard: true };
 const PUSH = { title: 'Push', sub: 'hook gate', actors: ['YOU', 'RUN'], hard: true };
-const VERIFY = { title: 'Verify', sub: 'lint, types, whole suite', actors: ['AI'], note: 'the assistant runs them and shows the real output' };
+const VERIFY = { title: 'Verify', sub: 'lint, types, whole suite', actors: ['AI'], note: 'the assistant runs the whole suite and shows the real output. Always, even with tests.tdd off' };
 const PULL_REQUEST = { title: 'Pull request', sub: 'drafted, merged by you', actors: ['AI', 'YOU', 'RUN'] };
 
 const SOLO = {
@@ -290,7 +291,7 @@ const TDD = {
   ariaLabel: 'Test-first and bug-fix path: reproduce as a failing test, show it failing, lock the tests, change only the code, show it passing, stop fix mode',
   title: 'Test first and bug fixes: the test comes before the code',
   subtitle: 'A failing test is the proof. It is written first and shown failing; then only the code changes until it passes.',
-  height: 700,
+  height: 760,
   stages: [
     { title: 'Reproduce', sub: 'as a failing test', actors: ['AI'], note: 'bug fix: reproduce it as a test. New logic: one test per acceptance criterion' },
     { title: 'Show it failing', sub: 'for the right reason', actors: ['AI'], note: 'run it and show the failure. A test that fails for the wrong reason proves nothing' },
@@ -310,6 +311,7 @@ const TDD = {
       { label: 'SOLO', text: 'tests.tdd = bugs: a bug fix always starts with a failing test. New logic is test-first only in a bucket the plan marks TDD: yes. The guard is off: the rule says never weaken a test, but nothing blocks it.' },
       { label: 'TEAM', text: 'tests.tdd = on: bug fixes and all new logic start with a failing test. The guard is on: in fix mode the hook refuses edits to existing test files (HARD).' },
       { label: 'ORG', text: 'Same test-first rules as team. What org adds is around it: success measurements in the plan, a docs check that blocks the commit, and a review record the push hook requires.' },
+      { label: 'OFF', text: 'tests.tdd = off (an override, no profile uses it): no test-first rule, so the Test first stage is skipped. Tests are NOT gone from the flow: the assistant still runs the whole suite in Verify, the commit gate says never to commit with a failing test, and the pre-commit hook runs the tests.' },
     ],
   },
   footer: 'Never skip, delete, weaken or loosen a failing test to get to green. If a test looks wrong, the assistant stops and asks you.',

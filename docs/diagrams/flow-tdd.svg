@@ -1,7 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 700" width="1200" height="700" role="img" aria-label="Test-first and bug-fix path: reproduce as a failing test, show it failing, lock the tests, change only the code, show it passing, stop fix mode" font-family="'Segoe UI', -apple-system, BlinkMacSystemFont, Helvetica, Arial, sans-serif">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 760" width="1200" height="760" role="img" aria-label="Test-first and bug-fix path: reproduce as a failing test, show it failing, lock the tests, change only the code, show it passing, stop fix mode" font-family="'Segoe UI', -apple-system, BlinkMacSystemFont, Helvetica, Arial, sans-serif">
 <title>Test-first and bug-fix path: reproduce as a failing test, show it failing, lock the tests, change only the code, show it passing, stop fix mode</title>
 <defs><marker id="arrow" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#9da7b3"/></marker><marker id="arrow-entry" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#e3b341"/></marker><marker id="arrow-wrong" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#e3b341"/></marker><marker id="arrow-again" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#f0883e"/></marker></defs>
-<rect x="1" y="1" width="1198" height="698" rx="16" fill="#0d1117" stroke="#3d444d" stroke-width="2"/>
+<rect x="1" y="1" width="1198" height="758" rx="16" fill="#0d1117" stroke="#3d444d" stroke-width="2"/>
 <text x="37" y="48" font-size="24" font-weight="700" fill="#e6edf3">Test first and bug fixes: the test comes before the code</text>
 <text x="37" y="72" font-size="14" fill="#9da7b3">A failing test is the proof. It is written first and shown failing; then only the code changes until it passes.</text>
 <text x="137" y="140" text-anchor="middle" font-size="12" fill="#9da7b3">bug fix: reproduce it as a</text>
@@ -67,15 +67,19 @@
 <rect x="37" y="516" width="32" height="17" rx="8.5" fill="#db61a2"/><text x="53" y="528.2" text-anchor="middle" font-size="10.5" font-weight="700" fill="#ffffff">ORG</text>
 <text x="81" y="529" font-size="12.5" fill="#9da7b3">Same test-first rules as team. What org adds is around it: success measurements in the plan, a docs check that blocks the commit, and a review</text>
 <text x="81" y="545" font-size="12.5" fill="#9da7b3">record the push hook requires.</text>
-<rect x="37" y="564" width="32" height="17" rx="8.5" fill="#e3b341"/><text x="53" y="576.2" text-anchor="middle" font-size="10.5" font-weight="700" fill="#0d1117">YOU</text>
-<text x="79" y="577" font-size="12.5" fill="#9da7b3">a person decides or acts: approves, asks, pushes, merges</text>
-<rect x="597" y="564" width="25" height="17" rx="8.5" fill="#58a6ff"/><text x="609.5" y="576.2" text-anchor="middle" font-size="10.5" font-weight="700" fill="#0d1117">AI</text>
-<text x="632" y="577" font-size="12.5" fill="#9da7b3">the assistant, working under the rules and skills</text>
-<rect x="37" y="590" width="32" height="17" rx="8.5" fill="#3fb950"/><text x="53" y="602.2" text-anchor="middle" font-size="10.5" font-weight="700" fill="#0d1117">RUN</text>
-<text x="79" y="603" font-size="12.5" fill="#9da7b3">a script, a git hook or a CI job</text>
-<rect x="597" y="590" width="38" height="17" rx="8.5" fill="#f85149"/><text x="616" y="602.2" text-anchor="middle" font-size="10.5" font-weight="700" fill="#ffffff">HARD</text>
-<text x="645" y="603" font-size="12.5" fill="#9da7b3">something blocks (only where the hook or tool is installed)</text>
-<rect x="37" y="616" width="34" height="17" rx="6" fill="none" stroke="#9da7b3" stroke-width="1.4" stroke-dasharray="4 3"/>
-<text x="81" y="629" font-size="12.5" fill="#9da7b3">dashed box: happens only in some cases (the note says when)</text>
-<text x="37" y="656" font-size="12.5" fill="#9da7b3">Never skip, delete, weaken or loosen a failing test to get to green. If a test looks wrong, the assistant stops and asks you.</text>
+<rect x="37" y="560" width="32" height="17" rx="8.5" fill="#57606a"/><text x="53" y="572.2" text-anchor="middle" font-size="10.5" font-weight="700" fill="#ffffff">OFF</text>
+<text x="81" y="573" font-size="12.5" fill="#9da7b3">tests.tdd = off (an override, no profile uses it): no test-first rule, so the Test first stage is skipped. Tests are NOT gone from the flow:</text>
+<text x="81" y="589" font-size="12.5" fill="#9da7b3">the assistant still runs the whole suite in Verify, the commit gate says never to commit with a failing test, and the pre-commit hook runs the</text>
+<text x="81" y="605" font-size="12.5" fill="#9da7b3">tests.</text>
+<rect x="37" y="624" width="32" height="17" rx="8.5" fill="#e3b341"/><text x="53" y="636.2" text-anchor="middle" font-size="10.5" font-weight="700" fill="#0d1117">YOU</text>
+<text x="79" y="637" font-size="12.5" fill="#9da7b3">a person decides or acts: approves, asks, pushes, merges</text>
+<rect x="597" y="624" width="25" height="17" rx="8.5" fill="#58a6ff"/><text x="609.5" y="636.2" text-anchor="middle" font-size="10.5" font-weight="700" fill="#0d1117">AI</text>
+<text x="632" y="637" font-size="12.5" fill="#9da7b3">the assistant, working under the rules and skills</text>
+<rect x="37" y="650" width="32" height="17" rx="8.5" fill="#3fb950"/><text x="53" y="662.2" text-anchor="middle" font-size="10.5" font-weight="700" fill="#0d1117">RUN</text>
+<text x="79" y="663" font-size="12.5" fill="#9da7b3">a script, a git hook or a CI job</text>
+<rect x="597" y="650" width="38" height="17" rx="8.5" fill="#f85149"/><text x="616" y="662.2" text-anchor="middle" font-size="10.5" font-weight="700" fill="#ffffff">HARD</text>
+<text x="645" y="663" font-size="12.5" fill="#9da7b3">something blocks (only where the hook or tool is installed)</text>
+<rect x="37" y="676" width="34" height="17" rx="6" fill="none" stroke="#9da7b3" stroke-width="1.4" stroke-dasharray="4 3"/>
+<text x="81" y="689" font-size="12.5" fill="#9da7b3">dashed box: happens only in some cases (the note says when)</text>
+<text x="37" y="716" font-size="12.5" fill="#9da7b3">Never skip, delete, weaken or loosen a failing test to get to green. If a test looks wrong, the assistant stops and asks you.</text>
 </svg>

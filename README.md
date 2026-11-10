@@ -658,6 +658,10 @@ it is written and shown failing before any code is changed. This diagram zooms i
 each profile changes (the rule is [`rules/test-discipline.md`](rules/test-discipline.md); the policy is in
 [`docs/test-discipline.md`](docs/test-discipline.md)).
 
+Turning test-first off (`tests.tdd = off`) removes the **Test first** stage, not the tests: the assistant still
+runs the whole suite in **Verify**, the commit gate still says never to commit with a failing test, and the
+pre-commit hook still runs the tests. Only the rule "write the failing test first" goes away.
+
 ![Test-first path: reproduce as a failing test, show it failing, lock the tests, change only the code, show it passing, stop fix mode; a test that looks wrong goes back to you](docs/diagrams/flow-tdd.svg)
 
 #### Where a person is in the loop
