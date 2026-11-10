@@ -27,6 +27,10 @@ Look for `<KIT>/catalog/options.json` and `<KIT>/.kit-version`. If they are miss
 to run `npx @jakub-owczarzak/workspace-kit init` in this folder first. Do not search elsewhere and do not
 write kit files from memory. Say which kit version you found.
 
+If the project already has an older copy of the kit, `init` writes nothing and lists the files that differ (this
+skill itself may be the old one). Tell the user to run `init --force` (the kit folder is the kit's own; if it is
+tracked in git, they review `git diff` afterwards) and then start the setup again.
+
 ## Step 1: look at the project (read-only, no questions)
 
 Note: languages and build tools, the default branch, the lint / type-check / test / build commands, existing
@@ -77,6 +81,13 @@ If the user says "you decide", use the defaults and list them as assumptions in 
    that the report listed as skipped, after you showed the difference.
 
 ## Step 4: finish what the program reports as MANUAL
+
+Read the `WARNING` lines first. A warning about older kit scripts means newer scripts may silently do nothing:
+show the user the difference (`diff` each listed script against `<KIT>/templates/scripts/`), and only after they
+agree run `apply` again with `--force`. That replaces kit-owned files only; `PLAN.md`, `CHANGELOG.md`,
+`REVIEW.md`, `workflow.json` and the release workflow are never replaced. `NOTE` lines are information: for
+example, plain-named skills from an earlier kit install now sit beside the `wk-` ones, and the user decides
+whether to delete the old ones.
 
 The program already did the hooks (a marked block chained into the project's own hook), the `.claude/settings.json`
 keys (added, never replaced), the `.gitignore` block, the release workflow (a new file) and a `check:config`

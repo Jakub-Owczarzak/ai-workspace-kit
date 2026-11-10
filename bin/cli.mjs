@@ -18,7 +18,7 @@ Options:
   --dir <path>      project folder (default: current folder)
   --choices <file>  JSON: { "profile": "solo", "tools": ["claude-code"], "enabled": ["rule.verification", ...] }
   --dry-run         show what would change, write nothing
-  --force           replace files that already exist and differ
+  --force           init: replace kit files that differ (older copy). apply: replace files that exist and differ
   -h, --help        show this help`;
 
 const args = process.argv.slice(2);
@@ -51,10 +51,17 @@ if (command === 'init') {
   const verb = dryRun ? 'would copy' : 'copied';
   const kitPath = TARGET.split('\\').join('/');
   console.log(`Kit folder: ${result.dest}`);
-  console.log(
-    `${verb}: ${result.created.length}, unchanged: ${result.unchanged.length}, ` +
-      `skipped (differs, use --force): ${result.skipped.length}`
-  );
+  if (result.blocked) {
+    console.log(`\nNothing was written. ${result.skipped.length} file(s) in the kit folder differ from this version of the kit:`);
+    for (const path of result.skipped) console.log(`  ${path.split('\\').join('/')}`);
+    console.log(
+      `\nThis is an older copy of the kit, or files you edited by hand. The kit folder is the kit's own, so it is\n` +
+        `safe to replace, but it may be tracked in git: run again with --force, then review "git diff ${kitPath}".\n` +
+        `Your own skills, hooks and instruction files are not touched by this command either way.`
+    );
+    process.exit(2);
+  }
+  console.log(`${verb}: ${result.created.length}, unchanged: ${result.unchanged.length}`);
   console.log(
     `\nNext: open your AI tool in this project and run the setup prompt:\n` +
       `  "Run the setup-workspace skill from ${kitPath}/skills/setup-workspace/SKILL.md"\n` +
@@ -82,6 +89,8 @@ if (command === 'init') {
     }
     if (report.addedRequirements.length) console.log(`added because chosen options need them: ${report.addedRequirements.join(', ')}`);
     for (const item of report.skipped) console.log(`SKIPPED ${item.path}: ${item.reason}`);
+    for (const warning of report.warnings) console.log(`WARNING ${warning}`);
+    for (const note of report.notices) console.log(`NOTE    ${note}`);
     for (const item of report.manual) {
       console.log(`MANUAL  ${item.path}: ${item.reason}`);
       if (item.snippet) console.log(item.snippet.split('\n').map((line) => `    | ${line}`).join('\n'));
