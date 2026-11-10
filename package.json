@@ -1,0 +1,27 @@
+{
+  "name": "@jakub-owczarzak/workspace-kit",
+  "version": "0.1.0",
+  "description": "Portable rules, skills, templates and checks that make an AI coding assistant work like a careful engineer. Install with npx, then run the setup prompt.",
+  "type": "module",
+  "private": true,
+  "license": "MIT",
+  "author": "Jakub Owczarzak",
+  "repository": { "type": "git", "url": "git+https://github.com/Jakub-Owczarzak/workspace-kit.git" },
+  "bin": { "workspace-kit": "bin/cli.mjs" },
+  "files": [
+    "bin/",
+    "lib/",
+    "skills/",
+    "rules/",
+    "templates/",
+    "adapters/",
+    "stacks/",
+    "docs/",
+    "!**/*.test.mjs"
+  ],
+  "engines": { "node": ">=18" },
+  "scripts": {
+    "test": "node --test",
+    "pack:check": "npm pack --dry-run"
+  }
+}
