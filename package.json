@@ -17,9 +17,9 @@
     "workflow",
     "sdlc"
   ],
-  "homepage": "https://github.com/Jakub-Owczarzak/workspace-kit#readme",
-  "bugs": { "url": "https://github.com/Jakub-Owczarzak/workspace-kit/issues" },
-  "repository": { "type": "git", "url": "git+https://github.com/Jakub-Owczarzak/workspace-kit.git" },
+  "homepage": "https://github.com/Jakub-Owczarzak/ai-workspace-kit#readme",
+  "bugs": { "url": "https://github.com/Jakub-Owczarzak/ai-workspace-kit/issues" },
+  "repository": { "type": "git", "url": "git+https://github.com/Jakub-Owczarzak/ai-workspace-kit.git" },
   "bin": { "ai-workspace-kit": "bin/cli.mjs" },
   "files": [
     "bin/",

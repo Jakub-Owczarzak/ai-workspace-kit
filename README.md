@@ -29,11 +29,12 @@ installs only what you choose. It never overwrites a file of yours. More in [sec
 
 > **Status: not on npm yet.** The package is ready to publish: a version tag pushed to the repository publishes
 > it ([`RELEASING.md`](RELEASING.md)), and nothing has been tagged yet, so the command above does not work until
-> then. Today, install straight from GitHub: `npx github:Jakub-Owczarzak/workspace-kit init` (tried with
-> `--dry-run` from the feature branch; it reads the default branch once that is merged).
+> then. Today, install straight from GitHub: `npx github:Jakub-Owczarzak/ai-workspace-kit init` (it reads the
+> default branch, so it works once the pull request that adds the installer is merged; the same form was tried
+> with `--dry-run` from a branch of this repository's earlier home, not yet from here).
 
 **Trying it and want to tell us how it went?** Open an issue with the *Feedback or a problem* form
-([new issue](https://github.com/Jakub-Owczarzak/workspace-kit/issues/new/choose)). It asks which AI tool and
+([new issue](https://github.com/Jakub-Owczarzak/ai-workspace-kit/issues/new/choose)). It asks which AI tool and
 operating system you used and what the installer printed; those details make a report easy to act on.
 
 ## Contents
@@ -735,7 +736,7 @@ and says so; a broken profile file falls back to `solo` with a warning.
 | When | Command |
 |---|---|
 | After the first npm release | `npx ai-workspace-kit init` |
-| Today (the package is not on npm yet) | `npx github:Jakub-Owczarzak/workspace-kit init` |
+| Today (the package is not on npm yet) | `npx github:Jakub-Owczarzak/ai-workspace-kit init` |
 
 The GitHub form was tried with `--dry-run` from the feature branch; it installs from the repository's default
 branch once that branch has been merged. A packed tarball also works: `npm pack`, then
@@ -882,7 +883,7 @@ This was tried on a copy of a real project that had exactly that history
 
 ### Sharing an improvement back: `update-workspace-kit`
 
-This kit is also a git repository (`https://github.com/Jakub-Owczarzak/workspace-kit`). The
+This kit is also a git repository (`https://github.com/Jakub-Owczarzak/ai-workspace-kit`). The
 `update-workspace-kit` skill's **push** mode (project to kit: check a piece is reusable, remove project facts,
 write it to a branch of the kit, ask before pushing) is described in the skill and was not re-tested after the
 npm package was introduced.
