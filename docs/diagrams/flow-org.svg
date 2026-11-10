@@ -1,106 +1,117 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600" width="1200" height="600" role="img" aria-label="Org workflow: success measurements, plan mode, required review record, strict docs check, push gate, with who acts and where something blocks" font-family="'Segoe UI', -apple-system, BlinkMacSystemFont, Helvetica, Arial, sans-serif">
-<title>Org workflow: success measurements, plan mode, required review record, strict docs check, push gate, with who acts and where something blocks</title>
-<defs><marker id="arrow" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#9da7b3"/></marker><marker id="arrow-fail" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#f0883e"/></marker><marker id="arrow-changes" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#58a6ff"/></marker><marker id="arrow-hook" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#f85149"/></marker></defs>
-<rect x="1" y="1" width="1198" height="598" rx="16" fill="#0d1117" stroke="#3d444d" stroke-width="2"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 620" width="1200" height="620" role="img" aria-label="Org workflow: success measurements, plan mode, test first, build with the guard, required review record, strict docs check and push gate, with who acts and where something blocks" font-family="'Segoe UI', -apple-system, BlinkMacSystemFont, Helvetica, Arial, sans-serif">
+<title>Org workflow: success measurements, plan mode, test first, build with the guard, required review record, strict docs check and push gate, with who acts and where something blocks</title>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#9da7b3"/></marker><marker id="arrow-entry" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#e3b341"/></marker><marker id="arrow-fail" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#f0883e"/></marker><marker id="arrow-changes" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#58a6ff"/></marker><marker id="arrow-hook" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#f85149"/></marker></defs>
+<rect x="1" y="1" width="1198" height="618" rx="16" fill="#0d1117" stroke="#3d444d" stroke-width="2"/>
 <text x="37" y="48" font-size="24" font-weight="700" fill="#e6edf3">Org: many developers, policies that must hold</text>
 <text x="37" y="72" font-size="14" fill="#9da7b3">Team, plus success measurements, a docs check that blocks, and a review record the push hook requires.</text>
-<text x="96" y="155" text-anchor="middle" font-size="12" fill="#9da7b3">a request in your own</text>
-<text x="96" y="170" text-anchor="middle" font-size="12" fill="#9da7b3">words</text>
-<rect x="37" y="196" width="118" height="84" rx="12" fill="#161b22" stroke="#3d444d" stroke-width="1.4"/>
-<text x="96" y="234" text-anchor="middle" font-size="16" font-weight="700" fill="#e6edf3">You ask</text>
-<text x="96" y="252" text-anchor="middle" font-size="12" fill="#9da7b3">a change</text>
-<rect x="45" y="187" width="32" height="17" rx="8.5" fill="#e3b341"/><text x="61" y="199.2" text-anchor="middle" font-size="10.5" font-weight="700" fill="#0d1117">YOU</text>
-<line x1="158" y1="238" x2="177" y2="238" stroke="#9da7b3" stroke-width="1.6" marker-end="url(#arrow)"/>
-<text x="240" y="110" text-anchor="middle" font-size="12" fill="#9da7b3">anchor plus success</text>
-<text x="240" y="125" text-anchor="middle" font-size="12" fill="#9da7b3">measurements. Plan</text>
-<text x="240" y="140" text-anchor="middle" font-size="12" fill="#9da7b3">mode is the default:</text>
-<text x="240" y="155" text-anchor="middle" font-size="12" fill="#9da7b3">you accept before any</text>
-<text x="240" y="170" text-anchor="middle" font-size="12" fill="#9da7b3">edit</text>
-<rect x="181" y="196" width="118" height="84" rx="12" fill="#161b22" stroke="#f85149" stroke-width="2"/>
-<text x="240" y="234" text-anchor="middle" font-size="16" font-weight="700" fill="#e6edf3">Plan</text>
-<text x="240" y="252" text-anchor="middle" font-size="12" fill="#9da7b3">anchor + measures</text>
-<rect x="189" y="187" width="25" height="17" rx="8.5" fill="#58a6ff"/><text x="201.5" y="199.2" text-anchor="middle" font-size="10.5" font-weight="700" fill="#0d1117">AI</text>
-<rect x="219" y="187" width="32" height="17" rx="8.5" fill="#e3b341"/><text x="235" y="199.2" text-anchor="middle" font-size="10.5" font-weight="700" fill="#0d1117">YOU</text>
-<rect x="253" y="271" width="38" height="17" rx="8.5" fill="#f85149"/><text x="272" y="283.2" text-anchor="middle" font-size="10.5" font-weight="700" fill="#ffffff">HARD</text>
-<line x1="302" y1="238" x2="321" y2="238" stroke="#9da7b3" stroke-width="1.6" marker-end="url(#arrow)"/>
-<text x="384" y="110" text-anchor="middle" font-size="12" fill="#9da7b3">new logic is</text>
-<text x="384" y="125" text-anchor="middle" font-size="12" fill="#9da7b3">test-first. In fix</text>
-<text x="384" y="140" text-anchor="middle" font-size="12" fill="#9da7b3">mode the guard</text>
-<text x="384" y="155" text-anchor="middle" font-size="12" fill="#9da7b3">refuses edits to</text>
-<text x="384" y="170" text-anchor="middle" font-size="12" fill="#9da7b3">existing tests</text>
-<rect x="325" y="196" width="118" height="84" rx="12" fill="#161b22" stroke="#f85149" stroke-width="2"/>
-<text x="384" y="234" text-anchor="middle" font-size="16" font-weight="700" fill="#e6edf3">Build</text>
-<text x="384" y="252" text-anchor="middle" font-size="12" fill="#9da7b3">fix mode guard</text>
-<rect x="333" y="187" width="25" height="17" rx="8.5" fill="#58a6ff"/><text x="345.5" y="199.2" text-anchor="middle" font-size="10.5" font-weight="700" fill="#0d1117">AI</text>
-<rect x="397" y="271" width="38" height="17" rx="8.5" fill="#f85149"/><text x="416" y="283.2" text-anchor="middle" font-size="10.5" font-weight="700" fill="#ffffff">HARD</text>
-<line x1="446" y1="238" x2="465" y2="238" stroke="#9da7b3" stroke-width="1.6" marker-end="url(#arrow)"/>
-<text x="528" y="140" text-anchor="middle" font-size="12" fill="#9da7b3">the assistant runs</text>
-<text x="528" y="155" text-anchor="middle" font-size="12" fill="#9da7b3">them and shows the</text>
-<text x="528" y="170" text-anchor="middle" font-size="12" fill="#9da7b3">real output</text>
-<rect x="469" y="196" width="118" height="84" rx="12" fill="#161b22" stroke="#3d444d" stroke-width="1.4"/>
-<text x="528" y="234" text-anchor="middle" font-size="16" font-weight="700" fill="#e6edf3">Verify</text>
-<text x="528" y="252" text-anchor="middle" font-size="12" fill="#9da7b3">lint, types,</text>
-<text x="528" y="266" text-anchor="middle" font-size="12" fill="#9da7b3">tests</text>
-<rect x="477" y="187" width="25" height="17" rx="8.5" fill="#58a6ff"/><text x="489.5" y="199.2" text-anchor="middle" font-size="10.5" font-weight="700" fill="#0d1117">AI</text>
-<line x1="590" y1="238" x2="609" y2="238" stroke="#9da7b3" stroke-width="1.6" marker-end="url(#arrow)"/>
-<text x="672" y="125" text-anchor="middle" font-size="12" fill="#9da7b3">the assistant must</text>
-<text x="672" y="140" text-anchor="middle" font-size="12" fill="#9da7b3">run the reviewer and</text>
-<text x="672" y="155" text-anchor="middle" font-size="12" fill="#9da7b3">record the result for</text>
-<text x="672" y="170" text-anchor="middle" font-size="12" fill="#9da7b3">these exact contents</text>
-<rect x="613" y="196" width="118" height="84" rx="12" fill="#161b22" stroke="#3d444d" stroke-width="1.4"/>
-<text x="672" y="234" text-anchor="middle" font-size="16" font-weight="700" fill="#e6edf3">Review</text>
-<text x="672" y="252" text-anchor="middle" font-size="12" fill="#9da7b3">required</text>
-<rect x="621" y="187" width="25" height="17" rx="8.5" fill="#58a6ff"/><text x="633.5" y="199.2" text-anchor="middle" font-size="10.5" font-weight="700" fill="#0d1117">AI</text>
-<line x1="734" y1="238" x2="753" y2="238" stroke="#9da7b3" stroke-width="1.6" marker-end="url(#arrow)"/>
-<text x="816" y="110" text-anchor="middle" font-size="12" fill="#9da7b3">you ask for it. Hook:</text>
-<text x="816" y="125" text-anchor="middle" font-size="12" fill="#9da7b3">lint, types, tests.</text>
-<text x="816" y="140" text-anchor="middle" font-size="12" fill="#9da7b3">Docs check blocks</text>
-<text x="816" y="155" text-anchor="middle" font-size="12" fill="#9da7b3">until AGENTS.md is</text>
-<text x="816" y="170" text-anchor="middle" font-size="12" fill="#9da7b3">updated</text>
-<rect x="757" y="196" width="118" height="84" rx="12" fill="#161b22" stroke="#f85149" stroke-width="2"/>
-<text x="816" y="234" text-anchor="middle" font-size="16" font-weight="700" fill="#e6edf3">Commit</text>
-<text x="816" y="252" text-anchor="middle" font-size="12" fill="#9da7b3">hook gate</text>
-<rect x="765" y="187" width="32" height="17" rx="8.5" fill="#e3b341"/><text x="781" y="199.2" text-anchor="middle" font-size="10.5" font-weight="700" fill="#0d1117">YOU</text>
-<rect x="802" y="187" width="32" height="17" rx="8.5" fill="#3fb950"/><text x="818" y="199.2" text-anchor="middle" font-size="10.5" font-weight="700" fill="#0d1117">RUN</text>
-<rect x="829" y="271" width="38" height="17" rx="8.5" fill="#f85149"/><text x="848" y="283.2" text-anchor="middle" font-size="10.5" font-weight="700" fill="#ffffff">HARD</text>
-<line x1="878" y1="238" x2="897" y2="238" stroke="#9da7b3" stroke-width="1.6" marker-end="url(#arrow)"/>
-<text x="960" y="125" text-anchor="middle" font-size="12" fill="#9da7b3">you push. Protected</text>
-<text x="960" y="140" text-anchor="middle" font-size="12" fill="#9da7b3">branch refused. No</text>
-<text x="960" y="155" text-anchor="middle" font-size="12" fill="#9da7b3">clean review record:</text>
-<text x="960" y="170" text-anchor="middle" font-size="12" fill="#9da7b3">refused</text>
-<rect x="901" y="196" width="118" height="84" rx="12" fill="#161b22" stroke="#f85149" stroke-width="2"/>
-<text x="960" y="234" text-anchor="middle" font-size="16" font-weight="700" fill="#e6edf3">Push</text>
-<text x="960" y="252" text-anchor="middle" font-size="12" fill="#9da7b3">hook gate</text>
-<rect x="909" y="187" width="32" height="17" rx="8.5" fill="#e3b341"/><text x="925" y="199.2" text-anchor="middle" font-size="10.5" font-weight="700" fill="#0d1117">YOU</text>
-<rect x="946" y="187" width="32" height="17" rx="8.5" fill="#3fb950"/><text x="962" y="199.2" text-anchor="middle" font-size="10.5" font-weight="700" fill="#0d1117">RUN</text>
-<rect x="973" y="271" width="38" height="17" rx="8.5" fill="#f85149"/><text x="992" y="283.2" text-anchor="middle" font-size="10.5" font-weight="700" fill="#ffffff">HARD</text>
-<line x1="1022" y1="238" x2="1041" y2="238" stroke="#9da7b3" stroke-width="1.6" marker-end="url(#arrow)"/>
-<text x="1104" y="110" text-anchor="middle" font-size="12" fill="#9da7b3">assistant drafts the</text>
-<text x="1104" y="125" text-anchor="middle" font-size="12" fill="#9da7b3">text. Your PR rules</text>
-<text x="1104" y="140" text-anchor="middle" font-size="12" fill="#9da7b3">and colleagues apply.</text>
-<text x="1104" y="155" text-anchor="middle" font-size="12" fill="#9da7b3">You merge, then the</text>
-<text x="1104" y="170" text-anchor="middle" font-size="12" fill="#9da7b3">release PR</text>
-<rect x="1045" y="196" width="118" height="84" rx="12" fill="#161b22" stroke="#3d444d" stroke-width="1.4"/>
-<text x="1104" y="234" text-anchor="middle" font-size="16" font-weight="700" fill="#e6edf3">Pull request</text>
-<text x="1104" y="252" text-anchor="middle" font-size="12" fill="#9da7b3">drafted, merged</text>
-<text x="1104" y="266" text-anchor="middle" font-size="12" fill="#9da7b3">by you</text>
-<rect x="1053" y="187" width="25" height="17" rx="8.5" fill="#58a6ff"/><text x="1065.5" y="199.2" text-anchor="middle" font-size="10.5" font-weight="700" fill="#0d1117">AI</text>
-<rect x="1083" y="187" width="32" height="17" rx="8.5" fill="#e3b341"/><text x="1099" y="199.2" text-anchor="middle" font-size="10.5" font-weight="700" fill="#0d1117">YOU</text>
-<rect x="1120" y="187" width="32" height="17" rx="8.5" fill="#3fb950"/><text x="1136" y="199.2" text-anchor="middle" font-size="10.5" font-weight="700" fill="#0d1117">RUN</text>
-<path d="M 528 282 V 324 H 384 V 284" fill="none" stroke="#f0883e" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow-fail)"/>
-<text x="408" y="341" font-size="12.5" fill="#f0883e">FAIL: the assistant gets the log and</text>
-<text x="408" y="356" font-size="12.5" fill="#f0883e">fixes it</text>
-<path d="M 672 282 V 372 H 367 V 284" fill="none" stroke="#58a6ff" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow-changes)"/>
-<text x="408" y="389" font-size="12.5" fill="#58a6ff">CHANGES: a blocking finding is fixed, then reviewed again</text>
-<path d="M 816 282 V 420 H 350 V 284" fill="none" stroke="#f85149" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow-hook)"/>
-<text x="408" y="437" font-size="12.5" fill="#f85149">HOOK FAILS: the commit is blocked, fix and commit again</text>
-<rect x="37" y="488" width="32" height="17" rx="8.5" fill="#e3b341"/><text x="53" y="500.2" text-anchor="middle" font-size="10.5" font-weight="700" fill="#0d1117">YOU</text>
-<text x="79" y="501" font-size="12.5" fill="#9da7b3">a person decides or acts: approves, asks, pushes, merges</text>
-<rect x="597" y="488" width="25" height="17" rx="8.5" fill="#58a6ff"/><text x="609.5" y="500.2" text-anchor="middle" font-size="10.5" font-weight="700" fill="#0d1117">AI</text>
-<text x="632" y="501" font-size="12.5" fill="#9da7b3">the assistant, working under the rules and skills</text>
-<rect x="37" y="514" width="32" height="17" rx="8.5" fill="#3fb950"/><text x="53" y="526.2" text-anchor="middle" font-size="10.5" font-weight="700" fill="#0d1117">RUN</text>
-<text x="79" y="527" font-size="12.5" fill="#9da7b3">a script, a git hook or a CI job</text>
-<rect x="597" y="514" width="38" height="17" rx="8.5" fill="#f85149"/><text x="616" y="526.2" text-anchor="middle" font-size="10.5" font-weight="700" fill="#ffffff">HARD</text>
-<text x="645" y="527" font-size="12.5" fill="#9da7b3">something blocks (only where the hook or tool is installed)</text>
-<text x="37" y="558" font-size="12.5" fill="#9da7b3">In no profile does anything push, open a pull request or merge by itself. The profile changes how much a machine blocks, not whether a person decides.</text>
+<line x1="12" y1="238" x2="58" y2="238" stroke="#e3b341" stroke-width="1.8" marker-end="url(#arrow-entry)"/>
+<text x="12" y="230" font-size="11.5" font-weight="700" fill="#e3b341">you ask</text>
+<text x="120" y="110" text-anchor="middle" font-size="12" fill="#9da7b3">anchor plus success</text>
+<text x="120" y="125" text-anchor="middle" font-size="12" fill="#9da7b3">measurements. Plan</text>
+<text x="120" y="140" text-anchor="middle" font-size="12" fill="#9da7b3">mode is the default:</text>
+<text x="120" y="155" text-anchor="middle" font-size="12" fill="#9da7b3">you accept before</text>
+<text x="120" y="170" text-anchor="middle" font-size="12" fill="#9da7b3">any edit</text>
+<rect x="62" y="196" width="116" height="84" rx="12" fill="#161b22" stroke="#f85149" stroke-width="2"/>
+<text x="120" y="234" text-anchor="middle" font-size="16" font-weight="700" fill="#e6edf3">Plan</text>
+<text x="120" y="252" text-anchor="middle" font-size="12" fill="#9da7b3">anchor +</text>
+<text x="120" y="266" text-anchor="middle" font-size="12" fill="#9da7b3">measures</text>
+<rect x="70" y="187" width="25" height="17" rx="8.5" fill="#58a6ff"/><text x="82.5" y="199.2" text-anchor="middle" font-size="10.5" font-weight="700" fill="#0d1117">AI</text>
+<rect x="100" y="187" width="32" height="17" rx="8.5" fill="#e3b341"/><text x="116" y="199.2" text-anchor="middle" font-size="10.5" font-weight="700" fill="#0d1117">YOU</text>
+<rect x="132" y="271" width="38" height="17" rx="8.5" fill="#f85149"/><text x="151" y="283.2" text-anchor="middle" font-size="10.5" font-weight="700" fill="#ffffff">HARD</text>
+<line x1="181" y1="238" x2="198.28571428571428" y2="238" stroke="#9da7b3" stroke-width="1.6" marker-end="url(#arrow)"/>
+<text x="260.2857142857143" y="110" text-anchor="middle" font-size="12" fill="#9da7b3">bug fixes and new</text>
+<text x="260.2857142857143" y="125" text-anchor="middle" font-size="12" fill="#9da7b3">logic start with a</text>
+<text x="260.2857142857143" y="140" text-anchor="middle" font-size="12" fill="#9da7b3">failing test. Fix</text>
+<text x="260.2857142857143" y="155" text-anchor="middle" font-size="12" fill="#9da7b3">mode: start, write</text>
+<text x="260.2857142857143" y="170" text-anchor="middle" font-size="12" fill="#9da7b3">tests, lock</text>
+<rect x="202.28571428571428" y="196" width="116" height="84" rx="12" fill="#161b22" stroke="#f85149" stroke-width="2"/>
+<text x="260.2857142857143" y="234" text-anchor="middle" font-size="16" font-weight="700" fill="#e6edf3">Test first</text>
+<text x="260.2857142857143" y="252" text-anchor="middle" font-size="12" fill="#9da7b3">red: must fail</text>
+<text x="260.2857142857143" y="266" text-anchor="middle" font-size="12" fill="#9da7b3">first</text>
+<rect x="210.28571428571428" y="187" width="25" height="17" rx="8.5" fill="#58a6ff"/><text x="222.78571428571428" y="199.2" text-anchor="middle" font-size="10.5" font-weight="700" fill="#0d1117">AI</text>
+<rect x="272.2857142857143" y="271" width="38" height="17" rx="8.5" fill="#f85149"/><text x="291.2857142857143" y="283.2" text-anchor="middle" font-size="10.5" font-weight="700" fill="#ffffff">HARD</text>
+<line x1="321.2857142857143" y1="238" x2="338.57142857142856" y2="238" stroke="#9da7b3" stroke-width="1.6" marker-end="url(#arrow)"/>
+<text x="400.57142857142856" y="110" text-anchor="middle" font-size="12" fill="#9da7b3">the guard refuses</text>
+<text x="400.57142857142856" y="125" text-anchor="middle" font-size="12" fill="#9da7b3">edits to existing</text>
+<text x="400.57142857142856" y="140" text-anchor="middle" font-size="12" fill="#9da7b3">tests. A test that</text>
+<text x="400.57142857142856" y="155" text-anchor="middle" font-size="12" fill="#9da7b3">looks wrong: stop</text>
+<text x="400.57142857142856" y="170" text-anchor="middle" font-size="12" fill="#9da7b3">and ask you</text>
+<rect x="342.57142857142856" y="196" width="116" height="84" rx="12" fill="#161b22" stroke="#f85149" stroke-width="2"/>
+<text x="400.57142857142856" y="234" text-anchor="middle" font-size="16" font-weight="700" fill="#e6edf3">Build</text>
+<text x="400.57142857142856" y="252" text-anchor="middle" font-size="12" fill="#9da7b3">green: code only</text>
+<rect x="350.57142857142856" y="187" width="25" height="17" rx="8.5" fill="#58a6ff"/><text x="363.07142857142856" y="199.2" text-anchor="middle" font-size="10.5" font-weight="700" fill="#0d1117">AI</text>
+<rect x="412.57142857142856" y="271" width="38" height="17" rx="8.5" fill="#f85149"/><text x="431.57142857142856" y="283.2" text-anchor="middle" font-size="10.5" font-weight="700" fill="#ffffff">HARD</text>
+<line x1="461.57142857142856" y1="238" x2="478.85714285714283" y2="238" stroke="#9da7b3" stroke-width="1.6" marker-end="url(#arrow)"/>
+<text x="540.8571428571429" y="140" text-anchor="middle" font-size="12" fill="#9da7b3">the assistant runs</text>
+<text x="540.8571428571429" y="155" text-anchor="middle" font-size="12" fill="#9da7b3">them and shows the</text>
+<text x="540.8571428571429" y="170" text-anchor="middle" font-size="12" fill="#9da7b3">real output</text>
+<rect x="482.85714285714283" y="196" width="116" height="84" rx="12" fill="#161b22" stroke="#3d444d" stroke-width="1.4"/>
+<text x="540.8571428571429" y="234" text-anchor="middle" font-size="16" font-weight="700" fill="#e6edf3">Verify</text>
+<text x="540.8571428571429" y="252" text-anchor="middle" font-size="12" fill="#9da7b3">lint, types,</text>
+<text x="540.8571428571429" y="266" text-anchor="middle" font-size="12" fill="#9da7b3">whole suite</text>
+<rect x="490.85714285714283" y="187" width="25" height="17" rx="8.5" fill="#58a6ff"/><text x="503.35714285714283" y="199.2" text-anchor="middle" font-size="10.5" font-weight="700" fill="#0d1117">AI</text>
+<line x1="601.8571428571429" y1="238" x2="619.1428571428571" y2="238" stroke="#9da7b3" stroke-width="1.6" marker-end="url(#arrow)"/>
+<text x="681.1428571428571" y="110" text-anchor="middle" font-size="12" fill="#9da7b3">the assistant must</text>
+<text x="681.1428571428571" y="125" text-anchor="middle" font-size="12" fill="#9da7b3">run the reviewer and</text>
+<text x="681.1428571428571" y="140" text-anchor="middle" font-size="12" fill="#9da7b3">record the result</text>
+<text x="681.1428571428571" y="155" text-anchor="middle" font-size="12" fill="#9da7b3">for these exact</text>
+<text x="681.1428571428571" y="170" text-anchor="middle" font-size="12" fill="#9da7b3">contents</text>
+<rect x="623.1428571428571" y="196" width="116" height="84" rx="12" fill="#161b22" stroke="#3d444d" stroke-width="1.4"/>
+<text x="681.1428571428571" y="234" text-anchor="middle" font-size="16" font-weight="700" fill="#e6edf3">Review</text>
+<text x="681.1428571428571" y="252" text-anchor="middle" font-size="12" fill="#9da7b3">required</text>
+<rect x="631.1428571428571" y="187" width="25" height="17" rx="8.5" fill="#58a6ff"/><text x="643.6428571428571" y="199.2" text-anchor="middle" font-size="10.5" font-weight="700" fill="#0d1117">AI</text>
+<line x1="742.1428571428571" y1="238" x2="759.4285714285713" y2="238" stroke="#9da7b3" stroke-width="1.6" marker-end="url(#arrow)"/>
+<text x="821.4285714285713" y="110" text-anchor="middle" font-size="12" fill="#9da7b3">you ask for it.</text>
+<text x="821.4285714285713" y="125" text-anchor="middle" font-size="12" fill="#9da7b3">Hook: lint, types,</text>
+<text x="821.4285714285713" y="140" text-anchor="middle" font-size="12" fill="#9da7b3">tests. Docs check</text>
+<text x="821.4285714285713" y="155" text-anchor="middle" font-size="12" fill="#9da7b3">blocks until</text>
+<text x="821.4285714285713" y="170" text-anchor="middle" font-size="12" fill="#9da7b3">AGENTS.md is updated</text>
+<rect x="763.4285714285713" y="196" width="116" height="84" rx="12" fill="#161b22" stroke="#f85149" stroke-width="2"/>
+<text x="821.4285714285713" y="234" text-anchor="middle" font-size="16" font-weight="700" fill="#e6edf3">Commit</text>
+<text x="821.4285714285713" y="252" text-anchor="middle" font-size="12" fill="#9da7b3">hook gate</text>
+<rect x="771.4285714285713" y="187" width="32" height="17" rx="8.5" fill="#e3b341"/><text x="787.4285714285713" y="199.2" text-anchor="middle" font-size="10.5" font-weight="700" fill="#0d1117">YOU</text>
+<rect x="808.4285714285713" y="187" width="32" height="17" rx="8.5" fill="#3fb950"/><text x="824.4285714285713" y="199.2" text-anchor="middle" font-size="10.5" font-weight="700" fill="#0d1117">RUN</text>
+<rect x="833.4285714285713" y="271" width="38" height="17" rx="8.5" fill="#f85149"/><text x="852.4285714285713" y="283.2" text-anchor="middle" font-size="10.5" font-weight="700" fill="#ffffff">HARD</text>
+<line x1="882.4285714285713" y1="238" x2="899.7142857142856" y2="238" stroke="#9da7b3" stroke-width="1.6" marker-end="url(#arrow)"/>
+<text x="961.7142857142857" y="125" text-anchor="middle" font-size="12" fill="#9da7b3">you push. Protected</text>
+<text x="961.7142857142857" y="140" text-anchor="middle" font-size="12" fill="#9da7b3">branch refused. No</text>
+<text x="961.7142857142857" y="155" text-anchor="middle" font-size="12" fill="#9da7b3">clean review record:</text>
+<text x="961.7142857142857" y="170" text-anchor="middle" font-size="12" fill="#9da7b3">refused</text>
+<rect x="903.7142857142857" y="196" width="116" height="84" rx="12" fill="#161b22" stroke="#f85149" stroke-width="2"/>
+<text x="961.7142857142857" y="234" text-anchor="middle" font-size="16" font-weight="700" fill="#e6edf3">Push</text>
+<text x="961.7142857142857" y="252" text-anchor="middle" font-size="12" fill="#9da7b3">hook gate</text>
+<rect x="911.7142857142857" y="187" width="32" height="17" rx="8.5" fill="#e3b341"/><text x="927.7142857142857" y="199.2" text-anchor="middle" font-size="10.5" font-weight="700" fill="#0d1117">YOU</text>
+<rect x="948.7142857142857" y="187" width="32" height="17" rx="8.5" fill="#3fb950"/><text x="964.7142857142857" y="199.2" text-anchor="middle" font-size="10.5" font-weight="700" fill="#0d1117">RUN</text>
+<rect x="973.7142857142857" y="271" width="38" height="17" rx="8.5" fill="#f85149"/><text x="992.7142857142857" y="283.2" text-anchor="middle" font-size="10.5" font-weight="700" fill="#ffffff">HARD</text>
+<line x1="1022.7142857142857" y1="238" x2="1040" y2="238" stroke="#9da7b3" stroke-width="1.6" marker-end="url(#arrow)"/>
+<text x="1102" y="110" text-anchor="middle" font-size="12" fill="#9da7b3">assistant drafts the</text>
+<text x="1102" y="125" text-anchor="middle" font-size="12" fill="#9da7b3">text. Your PR rules</text>
+<text x="1102" y="140" text-anchor="middle" font-size="12" fill="#9da7b3">and colleagues</text>
+<text x="1102" y="155" text-anchor="middle" font-size="12" fill="#9da7b3">apply. You merge,</text>
+<text x="1102" y="170" text-anchor="middle" font-size="12" fill="#9da7b3">then the release PR</text>
+<rect x="1044" y="196" width="116" height="84" rx="12" fill="#161b22" stroke="#3d444d" stroke-width="1.4"/>
+<text x="1102" y="234" text-anchor="middle" font-size="16" font-weight="700" fill="#e6edf3">Pull request</text>
+<text x="1102" y="252" text-anchor="middle" font-size="12" fill="#9da7b3">drafted, merged</text>
+<text x="1102" y="266" text-anchor="middle" font-size="12" fill="#9da7b3">by you</text>
+<rect x="1052" y="187" width="25" height="17" rx="8.5" fill="#58a6ff"/><text x="1064.5" y="199.2" text-anchor="middle" font-size="10.5" font-weight="700" fill="#0d1117">AI</text>
+<rect x="1082" y="187" width="32" height="17" rx="8.5" fill="#e3b341"/><text x="1098" y="199.2" text-anchor="middle" font-size="10.5" font-weight="700" fill="#0d1117">YOU</text>
+<rect x="1119" y="187" width="32" height="17" rx="8.5" fill="#3fb950"/><text x="1135" y="199.2" text-anchor="middle" font-size="10.5" font-weight="700" fill="#0d1117">RUN</text>
+<path d="M 540.8571428571429 282 V 324 H 400.57142857142856 V 284" fill="none" stroke="#f0883e" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow-fail)"/>
+<text x="424.57142857142856" y="341" font-size="12.5" fill="#f0883e">FAIL: the assistant gets the log and</text>
+<text x="424.57142857142856" y="356" font-size="12.5" fill="#f0883e">fixes it</text>
+<path d="M 681.1428571428571 282 V 372 H 383.57142857142856 V 284" fill="none" stroke="#58a6ff" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow-changes)"/>
+<text x="424.57142857142856" y="389" font-size="12.5" fill="#58a6ff">CHANGES: a blocking finding is fixed, then reviewed again</text>
+<path d="M 821.4285714285713 282 V 420 H 366.57142857142856 V 284" fill="none" stroke="#f85149" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow-hook)"/>
+<text x="424.57142857142856" y="437" font-size="12.5" fill="#f85149">HOOK FAILS: the commit is blocked, fix and commit again</text>
+<rect x="37" y="484" width="32" height="17" rx="8.5" fill="#e3b341"/><text x="53" y="496.2" text-anchor="middle" font-size="10.5" font-weight="700" fill="#0d1117">YOU</text>
+<text x="79" y="497" font-size="12.5" fill="#9da7b3">a person decides or acts: approves, asks, pushes, merges</text>
+<rect x="597" y="484" width="25" height="17" rx="8.5" fill="#58a6ff"/><text x="609.5" y="496.2" text-anchor="middle" font-size="10.5" font-weight="700" fill="#0d1117">AI</text>
+<text x="632" y="497" font-size="12.5" fill="#9da7b3">the assistant, working under the rules and skills</text>
+<rect x="37" y="510" width="32" height="17" rx="8.5" fill="#3fb950"/><text x="53" y="522.2" text-anchor="middle" font-size="10.5" font-weight="700" fill="#0d1117">RUN</text>
+<text x="79" y="523" font-size="12.5" fill="#9da7b3">a script, a git hook or a CI job</text>
+<rect x="597" y="510" width="38" height="17" rx="8.5" fill="#f85149"/><text x="616" y="522.2" text-anchor="middle" font-size="10.5" font-weight="700" fill="#ffffff">HARD</text>
+<text x="645" y="523" font-size="12.5" fill="#9da7b3">something blocks (only where the hook or tool is installed)</text>
+<rect x="37" y="536" width="34" height="17" rx="6" fill="none" stroke="#9da7b3" stroke-width="1.4" stroke-dasharray="4 3"/>
+<text x="81" y="549" font-size="12.5" fill="#9da7b3">dashed box: happens only in some cases (the note says when)</text>
+<text x="37" y="576" font-size="12.5" fill="#9da7b3">In no profile does anything push, open a pull request or merge by itself. The profile changes how much a machine blocks, not whether a person decides.</text>
 </svg>
