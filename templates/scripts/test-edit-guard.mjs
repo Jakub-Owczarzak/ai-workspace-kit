@@ -27,9 +27,9 @@
 //       "hooks": [ { "type": "command", "command": "node \"$CLAUDE_PROJECT_DIR/scripts/test-edit-guard.mjs\"" } ] } ] } }
 
 import { execFileSync } from 'node:child_process';
-import { appendFileSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
-import { dirname, isAbsolute, join, relative, resolve } from 'node:path';
-import { pathToFileURL } from 'node:url';
+import { appendFileSync, existsSync, mkdirSync, readFileSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
+import { basename, dirname, isAbsolute, join, relative, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 export const DEFAULT_TTL_HOURS = 4;
 
@@ -41,10 +41,26 @@ function logPath(root) {
   return join(root, '.claude', 'state', 'test-guard.log');
 }
 
+/**
+ * The real path of a file or folder, even when the file does not exist yet (a new test): the nearest
+ * existing parent is resolved and the missing names are put back. Resolving matters because git reports
+ * the project root by its real path, while an editor may reach the same file through a symlink (macOS temp
+ * folders, linked project folders) or a Windows short name (RUNNER~1). Without it the file looks like it is
+ * outside the project and the guard would allow the edit.
+ */
+export function canonicalPath(path) {
+  try {
+    return realpathSync.native(path);
+  } catch {
+    const parent = dirname(path);
+    return parent === path ? path : join(canonicalPath(parent), basename(path));
+  }
+}
+
 /** A forward-slash path relative to the project root. */
 export function toRelative(root, filePath) {
   const absolute = isAbsolute(filePath) ? filePath : resolve(root, filePath);
-  return relative(root, absolute).split('\\').join('/');
+  return relative(canonicalPath(root), canonicalPath(absolute)).split('\\').join('/');
 }
 
 /** True for a path that looks like a test file or sits in a test folder (JS/TS, Python, Go). */
@@ -239,7 +255,20 @@ export async function runCommand(command, args, root, env = process.env, now = D
   return { code: 1, lines: ['Usage: test-edit-guard.mjs start [--reason "..."] | lock | status | stop   (no command = run as the hook)'] };
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+/**
+ * True when this file was started directly (`node scripts/test-edit-guard.mjs`). Both sides are resolved to
+ * real paths: Node reports the real path in import.meta.url, but argv[1] keeps a symlink or a Windows short
+ * name, and a plain comparison would then make the hook silently do nothing (and so allow every edit).
+ */
+function startedDirectly() {
+  try {
+    return realpathSync.native(process.argv[1]) === realpathSync.native(fileURLToPath(import.meta.url));
+  } catch {
+    return false;
+  }
+}
+
+if (process.argv[1] && startedDirectly()) {
   const [command, ...args] = process.argv.slice(2);
   try {
     if (command) {

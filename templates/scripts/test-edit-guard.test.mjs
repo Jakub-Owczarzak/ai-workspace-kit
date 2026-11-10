@@ -1,7 +1,7 @@
 // Run: node --test test-edit-guard.test.mjs
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { copyFileSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { copyFileSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { describe, it } from 'node:test';
@@ -96,6 +96,22 @@ describe('parseHookInput and toRelative', () => {
     assert.equal(toRelative(root, 'src/a.test.ts'), 'src/a.test.ts');
   });
 
+  it('gives the same relative path for the real folder and for a link to it, also for files that do not exist yet', () => {
+    const real = mkdtempSync(join(tmpdir(), 'guard-rel-'));
+    const link = `${real}-link`;
+    try {
+      mkdirSync(join(real, 'src'));
+      writeFileSync(join(real, 'src', 'a.test.ts'), 'x');
+      symlinkSync(real, link, 'junction');
+      assert.equal(toRelative(real, join(link, 'src', 'a.test.ts')), 'src/a.test.ts');
+      assert.equal(toRelative(link, join(real, 'src', 'a.test.ts')), 'src/a.test.ts');
+      assert.equal(toRelative(real, join(link, 'src', 'deeper', 'new.test.ts')), 'src/deeper/new.test.ts');
+    } finally {
+      rmSync(link, { recursive: true, force: true });
+      rmSync(real, { recursive: true, force: true });
+    }
+  });
+
   it('builds a message that names the file and the way forward', () => {
     const message = buildBlockMessage('src/a.test.ts', 'existing-test');
     assert.match(message, /src\/a\.test\.ts/);
@@ -168,6 +184,22 @@ describe('the real hook in a throw-away git repo', () => {
       assert.equal(hook(root, 'src/a.ts').status, 0);
       assert.equal(hook(root, 'src/new.test.ts').status, 0);
       assert.match(readFileSync(join(root, '.claude', 'state', 'test-guard.log'), 'utf8'), /blocked existing-test src\/a\.test\.ts/);
+    });
+  });
+
+  it('still blocks when the project is reached through a symlink or a short Windows path', () => {
+    // macOS temp folders are symlinks and Windows runners use short names (RUNNER~1); git reports the real
+    // path, the editor may not. A mismatch used to make the guard allow every edit.
+    inRepo('{"overrides":{"tests.guard":"on"}}', (root) => {
+      const link = `${root}-link`;
+      symlinkSync(root, link, 'junction');
+      try {
+        script(root, 'start', '--reason', 'fix the bug');
+        assert.equal(hook(link, 'src/a.test.ts').status, 2, 'existing test must be blocked through the link');
+        assert.equal(hook(link, 'src/new.test.ts').status, 0, 'a new test through the link is still allowed');
+      } finally {
+        rmSync(link, { recursive: true, force: true });
+      }
     });
   });
 
