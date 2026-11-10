@@ -3,22 +3,27 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { init, TARGET } from '../lib/init.mjs';
 import { apply } from '../lib/apply.mjs';
+import { uninstall } from '../lib/uninstall.mjs';
 
 const HELP = `workspace-kit: install the workspace kit into a project
 
 Usage:
   npx ai-workspace-kit init  [--dir <path>] [--dry-run] [--force]
   node .claude/workspace-kit/bin/cli.mjs apply --choices <file> [--dir <path>] [--dry-run] [--force]
+  node .claude/workspace-kit/bin/cli.mjs uninstall [--dir <path>] [--yes] [--keep-kit]
 
 Commands:
-  init    copy the kit into <project>/.claude/workspace-kit/ (nothing else is touched)
-  apply   install the pieces named in a choices file (written by the setup prompt)
+  init       copy the kit into <project>/.claude/workspace-kit/ (nothing else is touched)
+  apply      install the pieces named in a choices file (written by the setup prompt)
+  uninstall  remove everything apply installed, using the record it kept. Shows a preview; --yes does it
 
 Options:
   --dir <path>      project folder (default: current folder)
   --choices <file>  JSON: { "profile": "solo", "tools": ["claude-code"], "enabled": ["rule.verification", ...] }
   --dry-run         show what would change, write nothing
   --force           init: replace kit files that differ (older copy). apply: replace files that exist and differ
+  --yes             uninstall: actually remove (without it, uninstall only previews)
+  --keep-kit        uninstall: keep .claude/workspace-kit/ so you can run the setup again
   -h, --help        show this help`;
 
 const args = process.argv.slice(2);
@@ -27,7 +32,7 @@ if (!command || command === '-h' || command === '--help') {
   console.log(HELP);
   process.exit(0);
 }
-if (command !== 'init' && command !== 'apply') {
+if (command !== 'init' && command !== 'apply' && command !== 'uninstall') {
   console.error(`Unknown command: ${command}\n\n${HELP}`);
   process.exit(1);
 }
@@ -67,6 +72,33 @@ if (command === 'init') {
       `  "Run the setup-workspace skill from ${kitPath}/skills/setup-workspace/SKILL.md"\n` +
       `No skill support in your tool? Paste the text in ${kitPath}/docs/setup-prompt.md instead.`
   );
+} else if (command === 'uninstall') {
+  try {
+    const yes = flag('--yes');
+    const report = uninstall({ dir, yes, keepKit: flag('--keep-kit') });
+    if (report.nothingToDo) {
+      console.log(`Nothing to uninstall: ${TARGET.split('\\').join('/')} was not found in ${dir}.`);
+      process.exit(0);
+    }
+    const tag = yes ? '' : '[preview] ';
+    console.log(`${tag}${yes ? 'Removed' : 'Would remove'}:`);
+    for (const path of report.removedFiles) console.log(`  file    ${path}`);
+    for (const block of report.blocks) {
+      console.log(`  block   ${block.file}: ${block.ids.join(', ')}${block.fileDeleted ? '  (the kit created this file, so the file goes too)' : ''}`);
+    }
+    if (report.settings) console.log(`  keys    ${report.settings.file}: ${report.settings.removed.join(', ')}${report.settings.fileDeleted ? '  (file removed)' : ''}`);
+    if (report.packageScript) console.log(`  script  package.json: ${report.packageScript.name}`);
+    for (const path of report.removedDirs) console.log(`  folder  ${path}  (empty)`);
+    console.log(`  kit     ${TARGET.split('\\').join('/')}: ${report.kitFolder}`);
+    for (const item of report.keptFiles) console.log(`KEPT    ${item.path}: ${item.reason}`);
+    for (const item of report.manual) console.log(`MANUAL  ${item.path}: ${item.reason}`);
+    for (const note of report.notices) console.log(`NOTE    ${note}`);
+    if (!yes) console.log('\nNothing was changed. Run again with --yes to remove the above. Review the result with "git status" and "git diff".');
+    else console.log('\nDone. Review the result with "git status" and "git diff".');
+  } catch (error) {
+    console.error(`uninstall failed: ${error.message}`);
+    process.exit(1);
+  }
 } else {
   const choicesPath = valueOf('--choices');
   if (!choicesPath) {

@@ -57,6 +57,19 @@ try {
       e.isDirectory() ? find(join(dir, e.name)) : e.name.endsWith('.test.mjs') ? [e.name] : []);
   })(project);
   assert.deepEqual(stray, [], 'no dev tests installed into the project');
+
+  // Uninstall: a preview changes nothing; --yes removes what the kit installed and nothing else.
+  const previewed = run('node', [cliPath, 'uninstall'], project);
+  assert.match(previewed, /Would remove:/);
+  assert.match(previewed, /Nothing was changed/);
+  assert.ok(existsSync(join(project, '.claude', 'skills', 'wk-pr-description', 'SKILL.md')), 'the preview removed nothing');
+  const removed = run('node', [cliPath, 'uninstall', '--yes'], project);
+  assert.match(removed, /Removed:/);
+  assert.ok(!existsSync(join(project, '.claude', 'skills', 'wk-pr-description')), 'kit skill removed');
+  assert.ok(!existsSync(join(project, '.agents')), 'the folder only the kit used is removed');
+  assert.ok(!existsSync(kit), 'the kit folder is removed');
+  assert.ok(!existsSync(join(project, 'AGENTS.md')) && !existsSync(join(project, 'CLAUDE.md')), 'files only the kit created are removed');
+  assert.equal(readFileSync(join(project, '.claude', 'skills', 'pr-description', 'SKILL.md'), 'utf8'), 'USER SKILL', 'user skill still untouched');
   console.log(`smoke ok on ${process.platform}, node ${process.version}`);
 } finally {
   rmSync(work, { recursive: true, force: true });
