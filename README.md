@@ -914,11 +914,12 @@ Numbers are from 2026-11-10 unless a line says otherwise; they change as the kit
   runs the installed kit's `apply`, runs it again and checks that nothing changed and that no dev test file was
   shipped. Passes on Windows, Node 18 and 22.
 - **CI** (`.github/workflows/ci.yml`) runs both on Ubuntu, macOS and Windows, with Node 18 and 22. All six jobs
-  passed on commit `9ce5221`. On the latest commit checked (`e4a94f2`) Ubuntu and Windows pass on both Node
-  versions. **The macOS jobs have not run since `9ce5221`: no runner picked them up** (they sit in the queue
-  until they are cancelled; the repository is private, and macOS minutes on private repositories are billed at a
-  higher rate; the cause is not confirmed). So macOS has not been tested against the installer, hooks and
-  settings code written after that commit.
+  passed on commits `9ce5221` and `acbf13e`, so the installer, the hooks and the settings merge have run green on
+  macOS and Linux as well as Windows. Ubuntu and Windows pass on every commit since. **The macOS jobs are
+  unreliable:** on some commits no runner picked them up and they sat in the queue until GitHub cancelled them
+  (`6481ca0`, `2c5369d`, `e4a94f2`). The repository is private, where macOS minutes are billed at a higher rate;
+  the cause is not confirmed. A cancelled macOS job says nothing about the code, so check that all six jobs ran
+  before reading a CI result as proof of portability.
 - **Skill lint:** 10 skills, 0 errors, 0 warnings. This checks structure only; it does not prove a skill triggers.
 - **A real project, on a copy:** `react-naitive-starter-pack`, which already had an older kit copy, plain-named
   skills, husky hooks, imported rules and a wired guard hook. `init` refused until `--force`. `apply` replaced
@@ -936,9 +937,10 @@ Numbers are from 2026-11-10 unless a line says otherwise; they change as the kit
   (twice), the planner changes, the mapping page and the earlier README. The installer, the catalog and the
   setup questionnaire have **not** been reviewed by a fresh reader.
 - **Not yet run:** the setup questionnaire in a real AI session (the installer behind it is tested; the asking
-  and the wording of the explanations are not); plan mode; a real `git push` through the pre-push hook; any
-  macOS run of the installer; an `npm publish` and an install from the registry (the package is not published,
-  and `package.json` says `private`).
+  and the wording of the explanations are not); plan mode; a real `git push` through the pre-push hook; the
+  installer against a real project on macOS or Linux (CI covers it on throw-away projects only); an
+  `npm publish` and an install from the registry (the package is not published, and `package.json` says
+  `private`).
 
 The status of every playbook practice, and how it was checked, is in
 [`docs/playbook-mapping.md`](docs/playbook-mapping.md). Known limits: a review record is an attestation (the
