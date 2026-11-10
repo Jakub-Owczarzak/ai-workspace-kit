@@ -17,11 +17,12 @@
     "adapters/",
     "stacks/",
     "docs/",
+    "catalog/",
     "!**/*.test.mjs"
   ],
   "engines": { "node": ">=18" },
   "scripts": {
-    "test": "node --test",
+    "test": "node scripts/run-tests.mjs",
     "pack:check": "npm pack --dry-run"
   }
 }

@@ -1,0 +1,485 @@
+{
+  "schemaVersion": 1,
+  "_comment": "Every switchable option of the kit, in plain words. The setup questionnaire reads this file so the explanations live in one place. `kind` groups the options. `source` is the kit file or folder the option installs (rules and skills must have one); `installs` lists other kit files it copies. `default` is true/false for all profiles, or an object with solo/team/org. `controls` entries must agree with templates/scripts/workflow-config.mjs (the test checks it). `installAs` is the namespaced skill name in the user's project, so it never collides with a skill the user already has.",
+  "profiles": [
+    {
+      "id": "solo",
+      "name": "Solo",
+      "forWho": "One owner who reads every diff and approves every step",
+      "summary": "Light: warnings and advice. The goal is agreed before non-trivial work. Nothing blocks a commit except the hooks you choose to install."
+    },
+    {
+      "id": "team",
+      "name": "Team",
+      "forWho": "A few developers sharing a repository",
+      "summary": "Adds a guard that protects existing tests during a bug fix and test-first for new logic. Review runs as advice."
+    },
+    {
+      "id": "org",
+      "name": "Org",
+      "forWho": "Many developers shipping in parallel, with policies that must hold",
+      "summary": "Strict: the docs check blocks a commit, a clean review record is required to push, and success measurements are recorded."
+    }
+  ],
+  "options": [
+    {
+      "id": "control.planning.gates",
+      "kind": "control",
+      "control": "planning.gates",
+      "title": "Planning gates",
+      "what": "Decides whether the assistant must agree the goal in writing (the Intent Anchor) before it builds anything non-trivial.",
+      "impact": "off: the planner is used only when you ask. anchor: no code for non-trivial work until you approve the goal. full: also records success measurements. Routine small changes are exempt.",
+      "values": {
+        "off": "Planner only on request",
+        "anchor": "Goal agreed before non-trivial work",
+        "full": "Goal agreed, plus success measurements recorded"
+      },
+      "touches": [".claude/workflow.json"],
+      "requires": ["skill.goal-first-planner"]
+    },
+    {
+      "id": "control.docs.check",
+      "kind": "control",
+      "control": "docs.check",
+      "title": "Docs-fresh check at commit",
+      "what": "At commit time, notices when source code changed but the project overview (AGENTS.md) did not.",
+      "impact": "off: silent. warn: prints a reminder and lets the commit through. strict: blocks the commit until the overview is updated.",
+      "values": {
+        "off": "Silent",
+        "warn": "Reminder only",
+        "strict": "Blocks the commit"
+      },
+      "touches": [".claude/workflow.json", "scripts/check-docs-fresh.mjs", "pre-commit hook"],
+      "requires": ["hook.pre-commit"]
+    },
+    {
+      "id": "control.docs.sizeWarnChars",
+      "kind": "control",
+      "control": "docs.sizeWarnChars",
+      "title": "Instruction-file size warning",
+      "what": "Warns when the always-loaded instruction files (CLAUDE.md, AGENTS.md and similar) grow too large, since they cost context on every session.",
+      "impact": "A number of characters; 0 turns the warning off. Informational only, never blocks.",
+      "valueHint": "number of characters, 0 = off",
+      "touches": [".claude/workflow.json", "scripts/doc-size.mjs"],
+      "requires": ["check.static"]
+    },
+    {
+      "id": "control.tests.guard",
+      "kind": "control",
+      "control": "tests.guard",
+      "title": "Test-edit guard",
+      "what": "During a bug fix, blocks the assistant from editing a test file that already exists in git, so a fix cannot be made to pass by weakening its own proof.",
+      "impact": "off: no guard. on: a hook refuses edits to existing tests while fix mode is on. New test files are always allowed.",
+      "values": {
+        "off": "No guard",
+        "on": "Existing tests are protected during a fix"
+      },
+      "touches": [".claude/workflow.json", ".claude/settings.json (PreToolUse hook)", ".claude/state/ (git-ignored)", "scripts/test-edit-guard.mjs"],
+      "requires": ["rule.test-discipline"]
+    },
+    {
+      "id": "control.tests.tdd",
+      "kind": "control",
+      "control": "tests.tdd",
+      "title": "Test-first policy",
+      "what": "Tells the assistant when to write a failing test before the code.",
+      "impact": "off: no rule. bugs: a bug fix starts with a failing test that reproduces it. on: new logic is test-first too. A plan bucket marked 'TDD: yes' opts in under any value except off.",
+      "values": {
+        "off": "No test-first rule",
+        "bugs": "Bug fixes start with a failing test",
+        "on": "Bug fixes and new logic are test-first"
+      },
+      "touches": [".claude/workflow.json"],
+      "requires": ["rule.test-discipline"]
+    },
+    {
+      "id": "control.review.mode",
+      "kind": "control",
+      "control": "review.mode",
+      "title": "Independent review before push",
+      "what": "A separate reviewer assistant reads the change cold, against the plan and a checklist (REVIEW.md), before it is committed.",
+      "impact": "off: only when you ask. advisory: the review runs and the pre-push hook reminds you if there is no record. required: the pre-push hook blocks a push whose content has no clean review record.",
+      "values": {
+        "off": "Review only on request",
+        "advisory": "Review runs; a missing record only produces a reminder",
+        "required": "A push is blocked without a clean review record"
+      },
+      "touches": [".claude/workflow.json", "pre-push hook", "scripts/check-review-gate.mjs"],
+      "requires": ["review-gate"]
+    },
+    {
+      "id": "control.claude.runChecks",
+      "kind": "control",
+      "control": "claude.runChecks",
+      "title": "Checks that run Claude locally",
+      "what": "Allows the two checks that call 'claude -p' on your machine (the @ import check and the skill trigger runner).",
+      "impact": "They use your Claude usage, so they are opt-in and never run from hooks or CI.",
+      "values": {
+        "true": "Allowed when you run them by hand",
+        "false": "Never run"
+      },
+      "touches": [".claude/workflow.json", "scripts/run-claude-checks.mjs"]
+    },
+    {
+      "id": "control.static.checks",
+      "kind": "control",
+      "control": "static.checks",
+      "title": "Static config checks",
+      "what": "Cheap checks that need no Claude: lint of the skill files and a resolver for @ imports.",
+      "impact": "Free and fast; on in every profile.",
+      "values": {
+        "true": "Checks are available",
+        "false": "Checks are skipped"
+      },
+      "touches": [".claude/workflow.json", "scripts/check-config.mjs"],
+      "requires": ["check.static"]
+    },
+
+    {
+      "id": "rule.readable-code",
+      "kind": "rule",
+      "source": "rules/readable-code.md",
+      "title": "Readable, self-documenting code",
+      "what": "Full-word names, small functions, comments only for the why.",
+      "impact": "The assistant rewrites cryptic names and long functions instead of adding explanations. Diffs may be slightly larger.",
+      "default": true,
+      "touches": ["always-on instruction file of each tool"]
+    },
+    {
+      "id": "rule.repo-tidiness",
+      "kind": "rule",
+      "source": "rules/repo-tidiness.md",
+      "title": "Tidy repository",
+      "what": "Every new file goes to the folder its kind belongs in, after looking for an existing helper to reuse.",
+      "impact": "Fewer duplicate helpers and loose files; the assistant checks the overview for where things live.",
+      "default": true,
+      "touches": ["always-on instruction file of each tool"]
+    },
+    {
+      "id": "rule.docs-fresh",
+      "kind": "rule",
+      "source": "rules/docs-fresh.md",
+      "title": "Keep the docs fresh",
+      "what": "After every change the assistant updates the documents that describe it, in the same turn.",
+      "impact": "Docs stay true without a separate cleanup task; every change touches a few more lines.",
+      "default": true,
+      "touches": ["always-on instruction file of each tool"]
+    },
+    {
+      "id": "rule.commit-gate",
+      "kind": "rule",
+      "source": "rules/commit-gate.md",
+      "title": "Commit gate",
+      "what": "The fixed order before every commit: fix lint, types and tests, update docs, review, then commit.",
+      "impact": "Nothing is committed with failing checks; the assistant never skips the order to save time.",
+      "default": true,
+      "touches": ["always-on instruction file of each tool"]
+    },
+    {
+      "id": "rule.verification",
+      "kind": "rule",
+      "source": "rules/verification.md",
+      "title": "Honest verification",
+      "what": "The assistant says exactly what it ran and shows the result; code it only read is never called tested.",
+      "impact": "Answers include the command and its output, and say plainly what was not checked.",
+      "default": true,
+      "touches": ["always-on instruction file of each tool"]
+    },
+    {
+      "id": "rule.test-discipline",
+      "kind": "rule",
+      "source": "rules/test-discipline.md",
+      "title": "Test discipline",
+      "what": "Failing test first for bug fixes (and new logic, depending on the profile), and no weakening a test to make it pass.",
+      "impact": "Strictness follows the tests.tdd and tests.guard controls.",
+      "default": true,
+      "touches": ["always-on instruction file of each tool"]
+    },
+    {
+      "id": "rule.skill-routing",
+      "kind": "rule",
+      "source": "rules/skill-routing.md",
+      "title": "Use the project's skills",
+      "what": "When a task matches a skill, the assistant reads the whole skill before starting.",
+      "impact": "Already part of the router; only needed on its own when the router is not installed.",
+      "default": false,
+      "appliesWhen": "The router (skill.workspace-router) is not installed",
+      "touches": ["always-on instruction file of each tool"]
+    },
+    {
+      "id": "rule.ui-change-flagging",
+      "kind": "rule",
+      "source": "rules/ui-change-flagging.md",
+      "title": "Flag user-visible UI changes",
+      "what": "Each user-visible change adds a row to the design-sync list in the same turn.",
+      "impact": "Needed so the design file can be brought up to date at the end of a session.",
+      "default": false,
+      "appliesWhen": "The project has a UI and uses Figma",
+      "requires": ["skill.figma-sync"],
+      "touches": ["always-on instruction file of each tool"]
+    },
+
+    {
+      "id": "skill.workspace-router",
+      "kind": "skill",
+      "source": "skills/workspace-router",
+      "installAs": "wk-workspace-router",
+      "title": "Router",
+      "what": "Sends each task to the right skill or document and holds the standing workflow rules.",
+      "impact": "Makes the assistant consult the project's skills and truth order before changing code.",
+      "default": true,
+      "touches": [".claude/skills/wk-workspace-router/"]
+    },
+    {
+      "id": "skill.goal-first-planner",
+      "kind": "skill",
+      "source": "skills/goal-first-planner",
+      "installAs": "wk-goal-first-planner",
+      "title": "Goal-first planner",
+      "what": "Interviews you for the real goal, then plans in small buckets with a checkpoint after each.",
+      "impact": "Slows the start of big work slightly, in exchange for agreed scope and fewer rebuilds.",
+      "default": true,
+      "touches": [".claude/skills/wk-goal-first-planner/", "PLAN.md"]
+    },
+    {
+      "id": "skill.pr-description",
+      "kind": "skill",
+      "source": "skills/pr-description",
+      "installAs": "wk-pr-description",
+      "title": "Pull request description",
+      "what": "Writes a PR description from the real diff and commits, as copy-paste Markdown. Never opens or pushes the PR.",
+      "impact": "Consistent, checked PR text; nothing is published without you.",
+      "default": true,
+      "touches": [".claude/skills/wk-pr-description/"]
+    },
+    {
+      "id": "skill.readable-fix-plan",
+      "kind": "skill",
+      "source": "skills/readable-fix-plan",
+      "installAs": "wk-readable-fix-plan",
+      "title": "Readable fix plan",
+      "what": "Turns review findings or a bug list into one scannable plan with severity, verified file links and a checklist.",
+      "impact": "Use when several findings need an order of work.",
+      "default": true,
+      "touches": [".claude/skills/wk-readable-fix-plan/"]
+    },
+    {
+      "id": "skill.ultra-code-quality-review",
+      "kind": "skill",
+      "source": "skills/ultra-code-quality-review",
+      "installAs": "wk-ultra-code-quality-review",
+      "title": "Harsh maintainability review",
+      "what": "An extremely strict review of abstractions, giant files and growing condition chains. Runs only when you invoke it.",
+      "impact": "No effect until you call it; the report can be long and blunt.",
+      "default": true,
+      "touches": [".claude/skills/wk-ultra-code-quality-review/"]
+    },
+    {
+      "id": "skill.write-project-overview",
+      "kind": "skill",
+      "source": "skills/write-project-overview",
+      "installAs": "wk-write-project-overview",
+      "title": "Project overview writer",
+      "what": "Writes or refreshes AGENTS.md from the real code: architecture, stack, commands.",
+      "impact": "Gives the assistant (and new people) an accurate map; the docs-fresh check relies on it.",
+      "default": true,
+      "touches": [".claude/skills/wk-write-project-overview/", "AGENTS.md", "scripts/overview-check.mjs"],
+      "installs": ["templates/scripts/overview-check.mjs", "templates/AGENTS.md"]
+    },
+    {
+      "id": "skill.changelog-bump",
+      "kind": "skill",
+      "source": "skills/changelog-bump",
+      "installAs": "wk-changelog-bump",
+      "title": "Changelog and version bump",
+      "what": "Keeps one CHANGELOG.md with an Unreleased section that each relevant commit adds to, and bumps the version on release.",
+      "impact": "Every user-facing commit carries a changelog line. Optional commit hook and release workflow automate it.",
+      "default": true,
+      "touches": [".claude/skills/wk-changelog-bump/", "CHANGELOG.md", "the file holding the version, e.g. package.json"],
+      "installs": ["templates/CHANGELOG.md"]
+    },
+    {
+      "id": "skill.figma-sync",
+      "kind": "skill",
+      "source": "skills/figma-sync",
+      "installAs": "wk-figma-sync",
+      "title": "Figma design sync",
+      "what": "Turns the list of flagged UI changes into Figma frames at the end of a working session.",
+      "impact": "Needs a Figma connection. Pointless for projects without a UI.",
+      "default": false,
+      "appliesWhen": "The project has a UI and uses Figma",
+      "touches": [".claude/skills/wk-figma-sync/", "FIGMA-SYNC.md"],
+      "installs": ["templates/FIGMA-SYNC.md"]
+    },
+    {
+      "id": "skill.update-workspace-kit",
+      "kind": "skill",
+      "source": "skills/update-workspace-kit",
+      "installAs": "wk-update-workspace-kit",
+      "title": "Kit updater",
+      "what": "Pulls newer kit versions into this project, and can port a reusable piece of this project back into the kit.",
+      "impact": "Needs the kit repository address. Never changes files without showing the change first.",
+      "default": true,
+      "touches": [".claude/skills/wk-update-workspace-kit/", ".claude/workspace-kit/.kit-version"]
+    },
+    {
+      "id": "skill.setup-workspace",
+      "kind": "skill",
+      "source": "skills/setup-workspace",
+      "installAs": null,
+      "title": "Setup (this questionnaire)",
+      "what": "The installer prompt. It stays inside the kit folder and is not copied into the project's own skills.",
+      "impact": "Run it again to change your choices; it is safe to repeat.",
+      "default": true,
+      "touches": []
+    },
+
+    {
+      "id": "hook.pre-commit",
+      "kind": "hook",
+      "title": "Pre-commit hook",
+      "what": "Runs your lint, type and test commands, the changelog entry check and the docs-fresh check before each commit.",
+      "impact": "Commits take a few seconds longer. It chains with an existing hook (husky or .git/hooks) and never replaces it.",
+      "default": true,
+      "installs": ["templates/hooks/pre-commit", "templates/scripts/check-docs-fresh.mjs", "templates/scripts/workflow-config.mjs"],
+      "touches": ["the project's pre-commit hook (a marked block)", "scripts/check-docs-fresh.mjs", "scripts/workflow-config.mjs"]
+    },
+    {
+      "id": "hook.pre-push",
+      "kind": "hook",
+      "title": "Pre-push hook",
+      "what": "Checks that the change has a review record before it is pushed.",
+      "impact": "Reminder or hard stop depending on review.mode. Chains with an existing pre-push hook.",
+      "default": true,
+      "requires": ["review-gate"],
+      "installs": ["templates/hooks/pre-push"],
+      "touches": ["the project's pre-push hook (a marked block)"]
+    },
+    {
+      "id": "workflow.release-bump",
+      "kind": "workflow",
+      "title": "Release version-bump workflow",
+      "what": "A GitHub Actions workflow that bumps the version and finalizes the changelog when a release is made.",
+      "impact": "Runs in CI on your repository; you review its branch, paths and version files before it is written.",
+      "default": false,
+      "appliesWhen": "The project uses GitHub Actions and changelog-bump",
+      "requires": ["skill.changelog-bump"],
+      "installs": ["templates/workflows/release_bump.yaml"],
+      "touches": [".github/workflows/release_bump.yaml (new file; existing workflows are never touched)"]
+    },
+
+    {
+      "id": "review-gate",
+      "kind": "agent",
+      "title": "Review gate",
+      "what": "A reviewer subagent, the REVIEW.md checklist and a review-record check, so a second reader examines every change.",
+      "impact": "Adds one review step per change; how hard it is enforced is set by review.mode.",
+      "default": true,
+      "installs": ["templates/agents/reviewer.md", "templates/REVIEW.md", "templates/scripts/check-review-gate.mjs"],
+      "touches": [".claude/agents/reviewer.md", "REVIEW.md", "scripts/check-review-gate.mjs", ".claude/reviews/ (git-ignored)"]
+    },
+    {
+      "id": "check.static",
+      "kind": "check",
+      "title": "Config checks",
+      "what": "Scripts that lint the skill files, resolve @ imports and report instruction-file size, plus a profile viewer.",
+      "impact": "Run by hand or from a package script such as check:config. No Claude needed.",
+      "default": true,
+      "installs": [
+        "templates/scripts/check-config.mjs",
+        "templates/scripts/check-skills.mjs",
+        "templates/scripts/check-imports.mjs",
+        "templates/scripts/doc-size.mjs",
+        "templates/scripts/workflow-config.mjs",
+        "templates/workflow.json"
+      ],
+      "touches": ["scripts/", ".claude/workflow.json", "package.json (a check:config script)"]
+    },
+    {
+      "id": "check.claude",
+      "kind": "check",
+      "title": "Claude-powered checks",
+      "what": "A runner for the checks that call 'claude -p' (skill trigger tests, @ import verification).",
+      "impact": "Uses your Claude usage and only runs when you start it and claude.runChecks allows it.",
+      "default": false,
+      "requires": ["check.static"],
+      "installs": ["templates/scripts/run-claude-checks.mjs"],
+      "touches": ["scripts/run-claude-checks.mjs"]
+    },
+    {
+      "id": "check.test-edit-guard",
+      "kind": "check",
+      "title": "Test-edit guard script and hook",
+      "what": "The script and tool hook behind the tests.guard control.",
+      "impact": "Installed only when tests.guard is on (default in team and org).",
+      "default": { "solo": false, "team": true, "org": true },
+      "requires": ["control.tests.guard"],
+      "installs": ["templates/scripts/test-edit-guard.mjs"],
+      "touches": ["scripts/test-edit-guard.mjs", ".claude/settings.json (a marked entry)", ".claude/state/ (git-ignored)"]
+    },
+    {
+      "id": "setting.plan-mode-default",
+      "kind": "setting",
+      "title": "Plan mode as the session default",
+      "what": "Claude Code starts every session in plan mode, where it cannot edit files until you accept a plan.",
+      "impact": "A hard stop behind the planning gate. Every session starts in plan mode, even trivial ones. Does not apply in the VS Code extension.",
+      "default": { "solo": false, "team": true, "org": true },
+      "touches": [".claude/settings.json (merged, never overwritten)"]
+    },
+
+    {
+      "id": "template.plan-file",
+      "kind": "template",
+      "title": "PLAN.md",
+      "what": "A starting file for the Intent Anchor, bucket map and decision log that the planner keeps.",
+      "impact": "Lets a new session resume where the last stopped. Created only if it does not exist.",
+      "default": true,
+      "installs": ["templates/PLAN.md"],
+      "touches": ["PLAN.md (new file)"]
+    },
+    {
+      "id": "template.backlog",
+      "kind": "template",
+      "title": "BACKLOG.md",
+      "what": "A starting file for ideas and later work, kept out of the current plan.",
+      "impact": "Created only if it does not exist.",
+      "default": false,
+      "installs": ["templates/BACKLOG.md"],
+      "touches": ["BACKLOG.md (new file)"]
+    },
+    {
+      "id": "template.claude-md",
+      "kind": "template",
+      "title": "CLAUDE.md starter",
+      "what": "A short always-on file for Claude Code that points to the overview and the rules.",
+      "impact": "If CLAUDE.md exists, the kit adds only a marked block and leaves your text alone.",
+      "default": true,
+      "installs": ["templates/CLAUDE.md"],
+      "touches": ["CLAUDE.md (new file, or a marked block in the existing one)"]
+    },
+
+    {
+      "id": "stack.expo-react-native",
+      "kind": "stack",
+      "title": "Expo / React Native pack",
+      "what": "Router rows and a rule that makes the assistant load the matching Expo skill before touching Expo, EAS or React Native APIs.",
+      "impact": "Expo changes APIs every SDK, so this avoids answers from stale memory. Needs the Expo plugin or a repo-local copy of its skills.",
+      "default": false,
+      "appliesWhen": "The project has an 'expo' dependency",
+      "installs": ["stacks/expo-react-native/router-rows.md", "stacks/expo-react-native/README.md"],
+      "touches": ["router skill (a marked block)", "always-on instruction file of each tool"]
+    },
+    {
+      "id": "rule.expo-docs-first",
+      "kind": "rule",
+      "source": "stacks/expo-react-native/rules/expo-docs-first.md",
+      "title": "Expo: skill and docs first",
+      "what": "Before Expo, EAS or React Native API work, the assistant loads the matching Expo skill once per session.",
+      "impact": "Slightly slower first answer, far fewer outdated APIs.",
+      "default": false,
+      "appliesWhen": "The project has an 'expo' dependency",
+      "requires": ["stack.expo-react-native"],
+      "touches": ["always-on instruction file of each tool"]
+    }
+  ]
+}
