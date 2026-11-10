@@ -8,10 +8,10 @@
 //
 // Usage: node check-imports.mjs [--root <project folder>]     Exit 1 when an import is missing.
 
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readFileSync, realpathSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { dirname, isAbsolute, join, resolve } from 'node:path';
-import { pathToFileURL } from 'node:url';
+import { fileURLToPath } from 'node:url';
 import { stripCode } from './check-skills.mjs';
 
 const IMPORT_EXTENSIONS = /\.(md|markdown|mdc|txt|json|ya?ml)$/i;
@@ -111,7 +111,20 @@ export function formatImportsReport(report) {
   return lines;
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+/**
+ * True when this file was started directly (`node scripts/<name>.mjs`). Both sides are resolved to real
+ * paths: Node reports the real path in import.meta.url, but argv[1] keeps a symlink or a Windows short name,
+ * and a plain comparison would then make the script silently do nothing.
+ */
+function startedDirectly() {
+  try {
+    return realpathSync.native(process.argv[1]) === realpathSync.native(fileURLToPath(import.meta.url));
+  } catch {
+    return false;
+  }
+}
+
+if (process.argv[1] && startedDirectly()) {
   const argv = process.argv.slice(2);
   const rootIndex = argv.indexOf('--root');
   const root = resolve(rootIndex >= 0 && argv[rootIndex + 1] ? argv[rootIndex + 1] : process.cwd());

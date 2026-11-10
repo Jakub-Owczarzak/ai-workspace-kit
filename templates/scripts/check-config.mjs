@@ -13,7 +13,8 @@
 //   --no-placeholders   also report leftover <...> placeholders (for a project's installed skills)
 
 import { resolve } from 'node:path';
-import { pathToFileURL } from 'node:url';
+import { realpathSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import { checkImports, formatImportsReport } from './check-imports.mjs';
 import { checkSkills, exitCodeFor, formatReport } from './check-skills.mjs';
 import { formatSizeReport, measureProject } from './doc-size.mjs';
@@ -82,7 +83,20 @@ function parseArguments(argv) {
   return options;
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+/**
+ * True when this file was started directly (`node scripts/<name>.mjs`). Both sides are resolved to real
+ * paths: Node reports the real path in import.meta.url, but argv[1] keeps a symlink or a Windows short name,
+ * and a plain comparison would then make the script silently do nothing.
+ */
+function startedDirectly() {
+  try {
+    return realpathSync.native(process.argv[1]) === realpathSync.native(fileURLToPath(import.meta.url));
+  } catch {
+    return false;
+  }
+}
+
+if (process.argv[1] && startedDirectly()) {
   const { sections, exitCode } = await runConfigChecks(parseArguments(process.argv.slice(2)));
   console.log(formatSections(sections));
   process.exit(exitCode);

@@ -16,9 +16,9 @@
 //   With neither --imports nor --triggers, both run. --model picks a cheaper model, for example haiku.
 
 import { spawnSync } from 'node:child_process';
-import { existsSync, readFileSync, readdirSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync, realpathSync } from 'node:fs';
 import { basename, join, resolve } from 'node:path';
-import { pathToFileURL } from 'node:url';
+import { fileURLToPath } from 'node:url';
 import { checkImports } from './check-imports.mjs';
 import { parseFrontmatter } from './check-skills.mjs';
 
@@ -231,7 +231,20 @@ function parseArguments(argv) {
   return options;
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+/**
+ * True when this file was started directly (`node scripts/<name>.mjs`). Both sides are resolved to real
+ * paths: Node reports the real path in import.meta.url, but argv[1] keeps a symlink or a Windows short name,
+ * and a plain comparison would then make the script silently do nothing.
+ */
+function startedDirectly() {
+  try {
+    return realpathSync.native(process.argv[1]) === realpathSync.native(fileURLToPath(import.meta.url));
+  } catch {
+    return false;
+  }
+}
+
+if (process.argv[1] && startedDirectly()) {
   const options = parseArguments(process.argv.slice(2));
   const root = resolve(options.root ?? process.cwd());
   const skillsDirs = (options.skillsDirs.length ? options.skillsDirs : ['.claude/skills']).map((dir) => resolve(root, dir));
