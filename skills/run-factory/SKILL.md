@@ -18,9 +18,10 @@ skill on their own from its description, and this one pushes code.
 
 ## 0. Preflight (always first)
 
-Run `node scripts/factory-guard.mjs preflight`.
+Run `node scripts/factory-guard.mjs preflight --json` once, in the same turn as `plan-excerpt` and the reads below (do not
+run the plain form as well: the JSON holds the same `problems` and `notes`).
 
-- If it says `not ready`, show the user every `problem:` line and stop. Change nothing. Do not work around a
+- If `ok` is false, show the user every problem and stop. Change nothing. Do not work around a
   problem: not a dirty tree, not a missing "Done when", not a host it does not support.
 - Show the `note:` lines once. They say what will not happen (for example, that e2e will not run).
 - Get the plan with `node scripts/factory-guard.mjs plan-excerpt`: it prints the Intent Anchor and the plan of every
@@ -44,7 +45,11 @@ Every turn you take re-reads everything in this conversation, so its size and yo
 run. Within this skill's other rules:
 
 - **Batch.** Run independent commands in one shell call, and the lint, type check and tests of a check round in one
-  call that prints each exit code. Make independent tool calls in the same turn.
+  call that prints each exit code. Make independent tool calls in the same turn. Plan a step's commands before you
+  run them, and do not spend a turn on `--help` for a command this skill or its host reference already spells out.
+- **Go straight on.** When a subagent's report or a command's output arrives, make the next tool call in that turn; do
+  not write a status message first. Start every subagent in the **foreground** (not in the background): the next step
+  needs its result, and a background run costs an extra turn for each notification.
 - **Filter output.** Show the tail or the failing lines (`| tail -n 25`, `clean-log`, `--jq`), never a whole log or list.
 - **Read only what you need.** The plan excerpt, not `PLAN.md`; the lines of a file, not the file. Do not open a
   screenshot unless a "Done when" item depends on how it looks, and then at most two.
@@ -64,17 +69,17 @@ The preflight lists the buckets still to build. For each one:
    - `prLayout` `single`: one branch for the whole plan, `factory/<plan-name>`, made once.
    - `prLayout` `stack`: **[host: branches]**. Without a stack tool, `git switch -c <branch>` from the previous
      bucket's branch (the first one from the start branch); each PR will target the branch below it.
-2. **Build.** Start the `factory-builder` subagent with the bucket's plan (`plan-excerpt --bucket <id>`: goal, steps,
-   "Done when", "Verify by", TDD, E2E), the project commands (and the e2e command for an `E2E: yes` bucket), the rules in
-   force, and the handoff path `.claude/factory/handoff/<id>.md`. Give it nothing else from this conversation:
-   a fresh context is the point. It edits files, runs the checks and fixes its own failures (up to 3 rounds inside
+2. **Build.** Start the `factory-builder` subagent with the bucket id, the project commands (and the e2e command for an
+   `E2E: yes` bucket), the rules in force, and the handoff path `.claude/factory/handoff/<id>.md`. It gets its own plan
+   with `node scripts/factory-guard.mjs plan-excerpt --bucket <id>`: do not print that excerpt and paste it into the
+   prompt. Give it nothing else from this conversation: a fresh context is the point. It edits files, runs the checks and fixes its own failures (up to 3 rounds inside
    its own run, so you do not start a new builder for each one); it does not commit, push or switch branches.
    - It writes its full report to the handoff file and replies with a few lines, the path and one line,
      `Status: done` or `Status: blocked: <question>`. On `blocked`, stop the run (section 4) with that question.
-     Never answer it yourself and carry on. On `done`, run `node scripts/factory-guard.mjs handoff-check --bucket <id>`:
-     exit 1 means the handoff is missing or incomplete, so ask the builder to complete it.
-3. **Verify yourself, once.** Run the project's lint, type check and tests, and the bucket's "Verify by", in one
-   batched call with each exit code shown (output filtered). Do not trust the builder's report. If something fails,
+     Never answer it yourself and carry on. The builder has already run `handoff-check` itself; you run it again in
+     the batched call of step 3, and only an exit 1 there (missing or incomplete) sends the builder back.
+3. **Verify yourself, once.** In one batched call run `node scripts/factory-guard.mjs handoff-check --bucket <id>`, the
+   project's lint, type check and tests, and the bucket's "Verify by", with each exit code shown (output filtered). Do not trust the builder's report. If something fails,
    give the real failing output to a new builder run (same handoff path) and verify again, at most 3 times per
    bucket, then stop (section 4).
    - **E2E, only for a bucket whose `e2e` flag is true** (marked `E2E: yes`) **and `tests.e2e` is not `off`.** The
@@ -85,18 +90,18 @@ The preflight lists the buckets still to build. For each one:
      browser, no emulator, no device), stop (section 4) and name what is missing; never go on without it.
    - After a passing run, copy the PNGs from `e2e-out/` into `.claude/factory/shots/<id>/` (git-ignored), so a later
      bucket cannot overwrite them. A bucket that is not marked `E2E: yes` runs no e2e tests and takes no screenshots.
-4. **Review**, as the commit gate says for the current `review.mode`: stage the change (only the bucket's own
-   files: never `git add -A` blindly, and check `git diff --cached --name-only` before you commit; generated files such
+4. **Update `PLAN.md`** now, before the review: set the bucket's status to `done: <one line>` and add any decision made. The
+   plan goes in the same commit as the work, and doing it first means the tree that is reviewed is the tree that is
+   committed (the commit hook may still add a changelog line after it).
+5. **Review**, as the commit gate says for the current `review.mode`: stage the change in one call (only the bucket's own
+   files: never `git add -A` blindly, and check `git diff --cached --name-only` in that same call; generated files such
    as `e2e-out/`, `node_modules/` or build output must not go in, and a leftover from another branch's run shows up as
-   untracked after a switch), run
-   `node scripts/check-review-gate.mjs --staged`, and if there is no clean record start the `reviewer` subagent
-   (give it the handoff path with the bucket) and have the builder fix every blocking finding. At most 3 review rounds, then stop (section 4). Record the
-   final result as the commit gate describes.
-5. **Update `PLAN.md`:** set the bucket's status to `done: <one line>` and add any decision made. The plan goes in
-   the same commit as the work.
+   untracked after a switch) together with `node scripts/check-review-gate.mjs --staged`, and if there is no clean record
+   start the `reviewer` subagent (give it the handoff path with the bucket) and have the builder fix every blocking
+   finding. At most 3 review rounds, then stop (section 4). Record the final result as the commit gate describes.
 6. **Commit** once per bucket, following the commit gate (a clear message; the changelog bump and entry through
-   `CHANGELOG_BUMP` and `CHANGELOG_ENTRY` when the hook asks, see `changelog-bump`). If a hook fails, fix the
-   cause. Never use `--no-verify`.
+   `CHANGELOG_BUMP` and `CHANGELOG_ENTRY` when the hook asks, see `changelog-bump`). Recording the review and committing
+   can be one call. If a hook fails, fix the cause. Never use `--no-verify`.
 
 Never change an existing test to make it pass (see the test-discipline rule). If a test looks wrong, stop.
 
@@ -108,8 +113,9 @@ files. Screenshots stay in `.claude/factory/shots/<id>/`: tell the user where. Y
 
 **`factory.mode` is `pr`:**
 
-1. For each branch run `node scripts/factory-guard.mjs push-check --branch <branch> --default-branch <default>`.
-   Exit 1 means stop (section 4). When any bucket has screenshots, check `factory-screenshots` the same way.
+1. For each branch run `node scripts/factory-guard.mjs push-check --branch <branch> --default-branch <default>`, all
+   in one call (and the screenshots' `e2e-shots.mjs publish` of step 4 in the same call, once the checks pass). Exit 1
+   means stop (section 4). When any bucket has screenshots, check `factory-screenshots` the same way.
 2. If `factory.pushConfirm` is `ask`, or you are in single-agent mode with `review.mode` `required`, list the
    branches (and `factory-screenshots`, when there are screenshots) and the PR titles, and ask the user for a yes
    before any push. On anything but a clear yes, stop.
@@ -126,8 +132,8 @@ files. Screenshots stay in `.claude/factory/shots/<id>/`: tell the user where. Y
 ## 3. Watch CI, bottom layer first
 
 For each pull request, bottom to top: **[host: wait for CI]**. Judge by the exit code, not the text. If it says no
-checks were reported, wait a minute and look once more; if there are still none, tell the user there is no CI to
-watch and finish.
+checks were reported, wait a minute and look once more, as one command for every PR (`sleep 60; <the checks command
+for each PR>`); if there are still none, tell the user there is no CI to watch and finish.
 
 - Exit 0: this layer is green. Go on to the next.
 - Exit 1: the layer is red.
@@ -160,7 +166,7 @@ retry around a block and do not hide a failure.
 
 ## 5. Finish
 
-When every layer is green, tell the user:
+When every layer is green (or there was no CI to watch), tell the user, in about fifteen lines at most:
 
 - each pull request with its link, and what its bucket delivered;
 - what was verified, with the real commands and counts, and what was not run (for example e2e);

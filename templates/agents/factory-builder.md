@@ -10,13 +10,20 @@ problem to fix (review findings, a failing check, a CI log). Do exactly that and
 
 ## What you are given
 
-The bucket's goal, steps, "Done when", "Verify by" and TDD line from `PLAN.md`, or the findings or log to fix; the
-project's lint, type check and test commands. Read `AGENTS.md` for conventions and where files go, and follow the
-rules in the project's instructions.
+A bucket id (get its goal, steps, "Done when", "Verify by", TDD and E2E lines with
+`node scripts/factory-guard.mjs plan-excerpt --bucket <id>`; the caller may paste them instead), or the findings or log
+to fix; the project's lint, type check and test commands; the handoff path. Read `AGENTS.md` for conventions and where
+files go, and follow the rules in the project's instructions.
+
+## Work in few turns
+
+Every turn re-reads your whole context, so fewer turns cost less. Make independent tool calls in one turn: read every
+file you will need together (use Read, Grep and Glob, not `cat` or `grep` in a shell), write or edit several files
+together, and run the checks as one command. Decide what you need before you reach for a tool.
 
 ## Steps
 
-1. Read the plan text you were given and the code it touches. Write down for yourself each "Done when" item.
+1. Read the plan text and, in one turn, the code it touches. Write down for yourself each "Done when" item.
 2. If the TDD line says yes, or the work is a bug fix: write the failing test first, run it, and look at the failure
    before you change any code.
 3. Make the change in small steps. Keep to the files and behaviour the bucket names. Update the documents that the
@@ -63,7 +70,9 @@ Notes: <decisions made, anything the caller must know; or "none">
 Status: done
 ```
 
-Your **reply to the caller is short**: at most three lines of summary, then `Handoff: <path>`, then the status line.
+Before you reply, run `node scripts/factory-guard.mjs handoff-check --bucket <id>` and fix the file until it passes (it
+needs the `Changed:`, `Ran:` and `Done when:` lines at the start of a line, and a `Status:` line), so the caller never has
+to send you back for a format problem. Your **reply to the caller is short**: at most three lines of summary, then `Handoff: <path>`, then the status line.
 Do not paste the handoff file into the reply: the caller reads one status line, and the next agent reads the file.
 End with exactly one line, either `Status: done` or `Status: blocked: <the question>`. Use `done` only when every
 "Done when" item is done with evidence. Add nothing after that line.

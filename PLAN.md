@@ -143,6 +143,17 @@ Baseline, run phase only: orchestrator 68 turns, about 1,263,000 input-token equ
 (4) about 584,000; **total about 1,847,000**. Caveats: the baseline orchestrator carried the planning (context started at 89,800;
 the new one starts near 63,000 plus the plan excerpt), which is intended (lever 1), so report orchestrator turns and cost per turn
 separately; one run each, so differences within about 15% are noise; the price ratios are assumed.
+**Round 2 (user's request after round 1, 2026-11-11: "drop the orchestrator turns as much as we can without losing quality").** From the
+round 1 turn list: preflight run twice, two turns of `gh stack`/branch probing, the plan excerpt printed and pasted into the builder
+prompts, a status-text turn after each background subagent report (4 or 5 turns), a handoff-format round trip (SendMessage), PLAN
+edit after the review (stale record), six turns of push and PR (two from stale refs of my own cleanup), a two-step CI wait. Changes:
+`preflight --json` once; the builder fetches its own plan and runs `handoff-check` itself; subagents in the foreground; "go straight
+on" (no status turn); PLAN update before staging and review; one call to stage and gate, one to record and commit; one call for all
+push-checks plus the screenshot publish; one `sleep 60; checks` command; a shorter final report; the builder is told to batch reads
+and edits and to use Read/Grep rather than shell `cat`. Expected: orchestrator about 24 to 26 turns; target at most 34. Quality
+guards unchanged: the orchestrator still verifies once and the reviewer is still independent. Round 2 is compared with round 1 and
+with the baseline; at about 1,136,000 the total can only drop by about 10% to 15% more, which is the noise level.
+
 **Success (agreed in words by the user: "significantly lower"; thresholds proposed by me, to confirm):** total cost at least 30%
 lower than 1,847,000 (at most about 1,290,000), orchestrator turns at most half of 68, **and** the same outcome: two buckets built,
 reviews with 0 blocking findings, lint, types and unit tests green, e2e 3 of 3 with screenshots, nothing merged, no guarantee skipped.
