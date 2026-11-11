@@ -111,6 +111,11 @@ The preflight lists the buckets still to build. For each one:
    - **No known bug leaves this step.** Have a builder fix every blocking finding **and** every `[bug]` finding (a race, a
      missed case, a broken test, an accessibility failure), and anything wrong you noticed yourself. Only `[nit]` findings
      (style, naming, taste) may stay; list them in the PR. Do not defer a bug to the PR text.
+   - **"The plan does not cover that case" is not a reason to leave a `[bug]`.** Defining what happens on a bad input
+     (a wrong type, an out-of-range number, an empty value) is fixing the bug, not adding scope: have the builder make it
+     fail clearly (an explicit error with a clear message) and add a test for it, and say so in the PR. Stop and ask
+     (section 4) only when the right behaviour is a real choice for the owner, with several reasonable answers that change
+     what the feature means (for example, a missing input could mean "use a default" or "refuse").
    - After any fix, verify again (step 3, once) and have the reviewer read the fix: a fix that was never reviewed or
      re-run is not done. A short re-review of the changed files is enough.
    - At most 3 fix rounds, then stop (section 4) and name the bug that remains. Record the final result as the commit

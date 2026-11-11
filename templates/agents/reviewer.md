@@ -46,7 +46,8 @@ Blocking findings
 1. <file:line>  <what is wrong>. Why: <...>. Suggested fix: <...>.
 
 Other findings (at most five, most useful first; then "and N more"). Start each with [bug] when it describes wrong
-behaviour (a race, a missed case, a broken or unreliable test, an accessibility failure) or [nit] when it is style,
+behaviour (a race, a missed case, a broken or unreliable test, an accessibility failure, an input the code does not
+handle and leaves undefined, such as a wrong type or an out-of-range number) or [nit] when it is style,
 naming or taste. Anything that makes the software do the wrong thing is a [bug], even when the checklist does not
 call it blocking.
 1. [bug|nit] <file:line>  <...>
