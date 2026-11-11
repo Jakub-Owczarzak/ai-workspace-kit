@@ -240,6 +240,9 @@ describe('projectCommands and recordBaseline', () => {
   it('projectCommands reads the labelled lines of a fenced block and skips placeholders and prose', () => {
     assert.deepEqual(projectCommands(AGENTS), { lint: 'npm run lint', typecheck: 'npm run typecheck', test: 'npm test', build: 'npm run build' });
     assert.deepEqual(projectCommands('```\n<lint>   # lint\n```'), {});
+    const real = '```\nnpm install      # install dependencies\nnpm run start    # dev server\nnpm run lint     # expo lint\nnpm run typecheck\nnpm run test\nnpm run build    # expo export\nnpm run e2e      # e2e\n```';
+    assert.deepEqual(projectCommands(real), { lint: 'npm run lint', typecheck: 'npm run typecheck', test: 'npm run test', build: 'npm run build' }, 'a block that names scripts, not labels');
+    assert.deepEqual(projectCommands('```\nnpm test\nnpm run type-check\n```'), { test: 'npm test', typecheck: 'npm run type-check' });
     assert.deepEqual(projectCommands(undefined), {});
   });
 

@@ -158,11 +158,15 @@ export function projectCommands(agentsText) {
       continue;
     }
     if (!inFence) continue;
-    const match = line.match(/^\s*(\S.*?)\s+#\s*(.+?)\s*$/);
+    const match = line.match(/^\s*(\S.*?)(?:\s+#\s*(.+?))?\s*$/);
     if (!match || match[1].startsWith('<')) continue;
-    for (const [name, pattern] of COMMAND_LABELS) {
-      if (pattern.test(match[2]) && !found[name]) found[name] = match[1];
-    }
+    const [, command, label = ''] = match;
+    // The comment names the command (`npm run lint   # lint`); without a helpful comment the script name does
+    // (`npm run typecheck`, `npm test`), which is how most projects write the block.
+    const byLabel = COMMAND_LABELS.find(([, pattern]) => pattern.test(label));
+    const script = command.match(/^(?:npm|pnpm|yarn|bun)(?:\s+run)?\s+(lint|type-?check|test|build)\b/i);
+    const name = byLabel ? byLabel[0] : script ? script[1].toLowerCase().replace('-', '') : null;
+    if (name && !found[name]) found[name] = command;
   }
   return found;
 }
