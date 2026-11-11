@@ -27,6 +27,8 @@ const COLOR = {
   team: '#a371f7',
   org: '#db61a2',
   off: '#57606a',
+  browser: '#2ea043',
+  native: '#bc6c25',
 };
 const FONT = "'Segoe UI', -apple-system, BlinkMacSystemFont, Helvetica, Arial, sans-serif";
 
@@ -317,7 +319,120 @@ const TDD = {
   footer: 'Never skip, delete, weaken or loosen a failing test to get to green. If a test looks wrong, the assistant stops and asks you.',
 };
 
-export const DIAGRAMS = { solo: SOLO, team: TEAM, org: ORG, tdd: TDD };
+// ---- the factory diagrams ----------------------------------------------------------------------------------------
+// The factory is a layer on a profile (off by default). These show what changes once you start it by hand.
+
+const FACTORY_LOOPS = [
+  { name: 'fail', from: 2, to: 1, y: LOOP_TOP + 44, arriveOffset: 0, color: COLOR.orange, limitX: lay8.centerX(3), label: 'FAIL: real output to a new builder, 3 times at most' },
+  { name: 'changes', from: 3, to: 1, y: LOOP_TOP + 92, arriveOffset: -17, color: COLOR.blue, limitX: lay8.centerX(7), label: 'CHANGES: a builder fixes every blocking finding, then a reviewer reads it again (3 rounds at most)' },
+  { name: 'ci', from: 7, to: 1, y: LOOP_TOP + 140, arriveOffset: -34, color: COLOR.hard, limitX: WIDTH - 40, label: 'RED CI: the log goes to a builder, then fix, review, push. At the cap: stop and write a report' },
+];
+const FACTORY_FOOTER = 'The factory never merges, deploys or force-pushes. A person merges the pull requests, bottom layer first. It is off until you set factory.mode.';
+
+const F_BUILD = { title: 'Build', sub: 'fresh builder per bucket', actors: ['AI'] };
+const F_VERIFY = { title: 'Verify', sub: 'by the orchestrator', actors: ['AI'], note: 'lint, types and the whole suite run again here. The builder\'s report is not trusted' };
+const F_COMMIT = { title: 'Commit', sub: 'one per bucket, hooks', actors: ['AI', 'RUN'], hard: true, note: 'through the normal hooks, never --no-verify. The plan file goes in the same commit' };
+const F_PR = { title: 'Pull request', sub: 'or a stack', actors: ['AI'], conditional: true, note: 'pr mode only: gh stack, or chained MRs on GitLab. Bodies come from the real diff' };
+
+const FACTORY_SOLO = {
+  ariaLabel: 'Factory in the solo profile: you approve the plan and start it, then builders, verification, review, commits, push, pull requests and CI watching run without prompts; nothing is merged',
+  title: 'Factory on solo: approve the plan, then it runs',
+  subtitle: 'After you approve the plan and start /wk-run-factory, agents build to pull requests with no prompts. You merge.',
+  entry: 'you start',
+  stages: [
+    { title: 'Plan', sub: 'approved by you', actors: ['YOU', 'AI'], note: 'you approve the anchor, the buckets and each "Done when". Preflight checks them' },
+    { ...F_BUILD, note: 'one subagent per bucket, told only the bucket. It edits files and never commits or pushes' },
+    F_VERIFY,
+    { title: 'Review', sub: 'advisory', actors: ['AI'], note: 'a fresh reviewer reads the staged change. Blocking findings are fixed first' },
+    F_COMMIT,
+    { title: 'Push', sub: 'feature branches only', actors: ['AI', 'RUN'], hard: true, conditional: true, note: 'factory.mode pr only. push-check and the pre-push hook refuse the protected branch' },
+    F_PR,
+    { title: 'Watch CI', sub: 'bottom layer first', actors: ['RUN', 'AI'], conditional: true, note: 'red: up to 3 fixes (factory.ciFixAttempts), then it stops. Green: you merge' },
+  ],
+  loops: FACTORY_LOOPS,
+  footer: FACTORY_FOOTER,
+};
+
+const FACTORY_TEAM = {
+  ariaLabel: 'Factory in the team profile: plan mode and the test guard stay on while builders, review, commits, push, pull requests and CI watching run; nothing is merged',
+  title: 'Factory on team: plan mode and the test guard stay on',
+  subtitle: 'Solo, plus plan mode and a guard that refuses edits to existing tests while the builders work.',
+  entry: 'you start',
+  stages: [
+    { title: 'Plan', sub: 'plan mode', actors: ['YOU', 'AI'], hard: true, note: 'nothing is edited until you accept the plan. Each bucket needs a "Done when"' },
+    { ...F_BUILD, hard: true, note: 'test first for bug fixes and new logic. The guard refuses edits to existing tests' },
+    F_VERIFY,
+    { title: 'Review', sub: 'advisory', actors: ['AI'], note: 'a fresh reviewer reads the staged change. Blocking findings are fixed first' },
+    F_COMMIT,
+    { title: 'Push', sub: 'feature branches only', actors: ['AI', 'RUN'], hard: true, conditional: true, note: 'factory.mode pr only. push-check and the pre-push hook refuse the protected branch' },
+    F_PR,
+    { title: 'Watch CI', sub: 'bottom layer first', actors: ['RUN', 'AI'], conditional: true, note: 'red: up to 3 fixes (factory.ciFixAttempts), then it stops. Green: your team merges' },
+  ],
+  loops: FACTORY_LOOPS,
+  footer: FACTORY_FOOTER,
+};
+
+const FACTORY_ORG = {
+  ariaLabel: 'Factory in the org profile: required review record, a yes from a person before any push, and fewer CI fix attempts; nothing is merged',
+  title: 'Factory on org: a record and a yes before anything is pushed',
+  subtitle: 'Team, plus a required review record for the exact contents and a person who says yes before each push.',
+  entry: 'you start',
+  stages: [
+    { title: 'Plan', sub: 'anchor + measures', actors: ['YOU', 'AI'], hard: true, note: 'anchor plus success measurements. Plan mode: you accept before any edit' },
+    { ...F_BUILD, hard: true, note: 'test first for bug fixes and new logic. The guard refuses edits to existing tests' },
+    F_VERIFY,
+    { title: 'Review', sub: 'required', actors: ['AI'], note: 'fresh reviewer, plus a record for these exact contents. Self-review is refused' },
+    F_COMMIT,
+    { title: 'Push', sub: 'you say yes first', actors: ['YOU', 'RUN'], hard: true, conditional: true, note: 'pushConfirm ask: waits for your yes. No clean review record: refused' },
+    F_PR,
+    { title: 'Watch CI', sub: 'bottom layer first', actors: ['RUN', 'AI'], conditional: true, note: 'red: up to 2 fixes, then it stops. Often a policy issue here' },
+  ],
+  loops: FACTORY_LOOPS,
+  footer: FACTORY_FOOTER,
+};
+
+// ---- the end-to-end test and screenshot path ---------------------------------------------------------------------
+
+const lay6e = layoutFor(6);
+const E2E = {
+  ariaLabel: 'End-to-end tests and screenshots: the bucket is marked E2E yes, a builder writes the tests, the orchestrator runs them, checks the screenshots, publishes them and puts them in the pull request',
+  title: 'E2E tests and screenshots: an option for every profile',
+  subtitle: 'Set tests.e2e to browser or native. It works with the factory on or off. Only buckets marked "E2E: yes" run it.',
+  height: 720,
+  stages: [
+    { title: 'Mark', sub: 'E2E: yes in the plan', actors: ['YOU', 'AI'], note: 'the plan marks the buckets that change what a user sees. The preflight reads the mark' },
+    { title: 'Write', sub: 'tests with the bucket', actors: ['AI'], note: 'the builder gets the project e2e command and writes the e2e tests together with the code' },
+    { title: 'Run', sub: 'by the orchestrator', actors: ['AI', 'RUN'], hard: true, note: 'old PNGs deleted first, then the real command. No browser or device: stop and say what is missing' },
+    { title: 'Look', sub: 'open one or two PNGs', actors: ['AI'], note: 'check the screenshot shows what the bucket promised, not only that the command passed' },
+    { title: 'Publish', sub: 'factory-screenshots branch', actors: ['RUN'], conditional: true, note: 'factory pr mode: e2e-shots publish, linked by commit SHA. Otherwise the PNGs stay local' },
+    { title: 'In the PR', sub: 'under Verification', actors: ['AI'], conditional: true, note: 'the command, its real result and the images. It says they were published, not seen in a browser' },
+  ],
+  loops: [
+    { name: 'fail', from: 2, to: 1, y: LOOP_TOP + 44, arriveOffset: 0, color: COLOR.orange, limitX: lay6e.centerX(3), label: 'FAILS: real output to a new builder, 3 times at most' },
+    { name: 'wrong', from: 3, to: 1, y: LOOP_TOP + 92, arriveOffset: -17, color: COLOR.blue, limitX: WIDTH - 40, label: 'THE PICTURE IS WRONG: back to the builder, then run it again' },
+  ],
+  panel: {
+    y: 420,
+    title: 'What each setting does',
+    rows: [
+      { label: 'BROWSER', text: 'Playwright in a headless browser. Proven (Playwright 1.65), including a live factory run with screenshots in the pull request.' },
+      { label: 'NATIVE', text: 'Maestro against a simulator or device that you supply and run. Written from the documentation: not verified on a device, and never called verified.' },
+      { label: 'OFF', text: 'tests.e2e = off (the default in every profile): no e2e step, nothing published. A pull request says "e2e not run" and why.' },
+    ],
+  },
+  footer: 'The kit never turns e2e on by itself: it needs a tool installed in your project.',
+};
+
+export const DIAGRAMS = {
+  solo: SOLO,
+  team: TEAM,
+  org: ORG,
+  tdd: TDD,
+  'factory-solo': FACTORY_SOLO,
+  'factory-team': FACTORY_TEAM,
+  'factory-org': FACTORY_ORG,
+  e2e: E2E,
+};
 
 export function renderAll() {
   return Object.fromEntries(Object.entries(DIAGRAMS).map(([name, spec]) => [`flow-${name}.svg`, buildDiagram(spec)]));

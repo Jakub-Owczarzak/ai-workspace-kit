@@ -66,7 +66,7 @@ A row's status is the weakest honest word for it: if one step of a practice diff
 | `REVIEW.md` defines what blocks and what does not, what to skip, and a nit cap | `templates/REVIEW.md` | Covered | read only; the reviews above used it as their checklist |
 | The agent that wrote the code cannot approve it | `templates/scripts/check-review-gate.mjs` | Differs by decision: the record is an attestation the same assistant can write | unit tests |
 | Branch protection with a human approval | none; `templates/hooks/pre-push` blocks direct pushes to the protected branch on this machine | Out of scope by decision: GitHub offers no protection for private repositories on the free plan, and the kit does not read it | not tried |
-| Hooks as approval gates | `templates/hooks/pre-push` and `check-review-gate.mjs` (control `review.mode`) | Partly: local, and fails open | unit tests, including the hook template run with `sh`; a real `git push` through it is not yet run |
+| Hooks as approval gates | `templates/hooks/pre-push` and `check-review-gate.mjs` (control `review.mode`) | Partly: local, and fails open | unit tests, including the hook template run with `sh`; real pushes of factory branches went through it on GitHub and GitLab scratch repos (2026-11-11, `docs/factory-rehearsal.md`); a refusal of the protected branch in a real push is covered by the tests and by `factory-guard push-check`, not by a real push |
 | Managed settings for an enterprise | none | Out of scope by decision | not tried |
 | CI/CD and deployment | `templates/workflows/release_bump.yaml`, `skills/changelog-bump/SKILL.md` | Partly: a version bump and changelog only, no deploy pipeline | unit tests (changelog); a real project's history shows release pull requests from `release/next` (v0.1.2) |
 
@@ -92,19 +92,26 @@ A row's status is the weakest honest word for it: if one step of a practice diff
    exempt from the planning gate to bring the two closer.
 7. **Left out:** Claude in CI, managed settings, worktrees and parallel sessions, Maintain-stage plays, and
    reading GitHub branch protection.
+8. **The factory (opt-in) lets agents push feature branches and open pull requests.** By default the kit still
+   has a person push. With `factory.mode: pr` the agents push feature branches and watch CI; they never merge,
+   deploy or push the protected branch, and org asks for a yes before each push. This is a deliberate step past the
+   default flow, not a playbook practice, so it is not in the scorecard above (`docs/factory.md`).
 
 ## Kit additions beyond the playbook
 
 The workflow profile (`.claude/workflow.json`, `docs/workflow-profiles.md`), `update-workspace-kit` (push and
 pull between a project and the kit), `write-project-overview` with `overview-check.mjs`, the stack pack for
 Expo, `figma-sync`, `changelog-bump`, `pr-description`, `readable-fix-plan`, and the harsh
-`ultra-code-quality-review`.
+`ultra-code-quality-review`. Added in the factory work: the `run-factory` skill with `factory-guard.mjs` and the
+`factory-builder` agent (build to pull requests or stacks, GitHub and GitLab, CI watching with a fix cap),
+`e2e-tests` with `e2e-shots.mjs` (Playwright proven, Maestro written from documentation and not verified), and
+single-agent flows for Cursor, Codex, OpenCode and Cline (not run).
 
 ## What this page does not claim
 
 - That any of this improves results; it shows what exists and how it was checked.
 - That a model-reported answer will repeat; each is one sample.
-- Pieces not yet run: plan mode, a real `git push` through the pre-push hook, the `setup-workspace` skill with
+- Pieces not yet run: plan mode, the `setup-workspace` skill with
   the newest pieces, and a pull into a project that already has its own overview and skills. A project that
   has pulled the kit holds it as of its last pull (`.claude/workspace-kit/.kit-version`).
 

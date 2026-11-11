@@ -1,0 +1,116 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 620" width="1200" height="620" role="img" aria-label="Factory in the solo profile: you approve the plan and start it, then builders, verification, review, commits, push, pull requests and CI watching run without prompts; nothing is merged" font-family="'Segoe UI', -apple-system, BlinkMacSystemFont, Helvetica, Arial, sans-serif">
+<title>Factory in the solo profile: you approve the plan and start it, then builders, verification, review, commits, push, pull requests and CI watching run without prompts; nothing is merged</title>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#9da7b3"/></marker><marker id="arrow-entry" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#e3b341"/></marker><marker id="arrow-fail" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#f0883e"/></marker><marker id="arrow-changes" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#58a6ff"/></marker><marker id="arrow-ci" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#f85149"/></marker></defs>
+<rect x="1" y="1" width="1198" height="618" rx="16" fill="#0d1117" stroke="#3d444d" stroke-width="2"/>
+<text x="37" y="48" font-size="24" font-weight="700" fill="#e6edf3">Factory on solo: approve the plan, then it runs</text>
+<text x="37" y="72" font-size="14" fill="#9da7b3">After you approve the plan and start /wk-run-factory, agents build to pull requests with no prompts. You merge.</text>
+<line x1="12" y1="238" x2="58" y2="238" stroke="#e3b341" stroke-width="1.8" marker-end="url(#arrow-entry)"/>
+<text x="12" y="230" font-size="11.5" font-weight="700" fill="#e3b341">you start</text>
+<text x="120" y="110" text-anchor="middle" font-size="12" fill="#9da7b3">you approve the</text>
+<text x="120" y="125" text-anchor="middle" font-size="12" fill="#9da7b3">anchor, the buckets</text>
+<text x="120" y="140" text-anchor="middle" font-size="12" fill="#9da7b3">and each "Done</text>
+<text x="120" y="155" text-anchor="middle" font-size="12" fill="#9da7b3">when". Preflight</text>
+<text x="120" y="170" text-anchor="middle" font-size="12" fill="#9da7b3">checks them</text>
+<rect x="62" y="196" width="116" height="84" rx="12" fill="#161b22" stroke="#3d444d" stroke-width="1.4"/>
+<text x="120" y="234" text-anchor="middle" font-size="16" font-weight="700" fill="#e6edf3">Plan</text>
+<text x="120" y="252" text-anchor="middle" font-size="12" fill="#9da7b3">approved by you</text>
+<rect x="70" y="187" width="32" height="17" rx="8.5" fill="#e3b341"/><text x="86" y="199.2" text-anchor="middle" font-size="10.5" font-weight="700" fill="#0d1117">YOU</text>
+<rect x="107" y="187" width="25" height="17" rx="8.5" fill="#58a6ff"/><text x="119.5" y="199.2" text-anchor="middle" font-size="10.5" font-weight="700" fill="#0d1117">AI</text>
+<line x1="181" y1="238" x2="198.28571428571428" y2="238" stroke="#9da7b3" stroke-width="1.6" marker-end="url(#arrow)"/>
+<text x="260.2857142857143" y="110" text-anchor="middle" font-size="12" fill="#9da7b3">one subagent per</text>
+<text x="260.2857142857143" y="125" text-anchor="middle" font-size="12" fill="#9da7b3">bucket, told only</text>
+<text x="260.2857142857143" y="140" text-anchor="middle" font-size="12" fill="#9da7b3">the bucket. It edits</text>
+<text x="260.2857142857143" y="155" text-anchor="middle" font-size="12" fill="#9da7b3">files and never</text>
+<text x="260.2857142857143" y="170" text-anchor="middle" font-size="12" fill="#9da7b3">commits or pushes</text>
+<rect x="202.28571428571428" y="196" width="116" height="84" rx="12" fill="#161b22" stroke="#3d444d" stroke-width="1.4"/>
+<text x="260.2857142857143" y="234" text-anchor="middle" font-size="16" font-weight="700" fill="#e6edf3">Build</text>
+<text x="260.2857142857143" y="252" text-anchor="middle" font-size="12" fill="#9da7b3">fresh builder</text>
+<text x="260.2857142857143" y="266" text-anchor="middle" font-size="12" fill="#9da7b3">per bucket</text>
+<rect x="210.28571428571428" y="187" width="25" height="17" rx="8.5" fill="#58a6ff"/><text x="222.78571428571428" y="199.2" text-anchor="middle" font-size="10.5" font-weight="700" fill="#0d1117">AI</text>
+<line x1="321.2857142857143" y1="238" x2="338.57142857142856" y2="238" stroke="#9da7b3" stroke-width="1.6" marker-end="url(#arrow)"/>
+<text x="400.57142857142856" y="110" text-anchor="middle" font-size="12" fill="#9da7b3">lint, types and the</text>
+<text x="400.57142857142856" y="125" text-anchor="middle" font-size="12" fill="#9da7b3">whole suite run</text>
+<text x="400.57142857142856" y="140" text-anchor="middle" font-size="12" fill="#9da7b3">again here. The</text>
+<text x="400.57142857142856" y="155" text-anchor="middle" font-size="12" fill="#9da7b3">builder's report is</text>
+<text x="400.57142857142856" y="170" text-anchor="middle" font-size="12" fill="#9da7b3">not trusted</text>
+<rect x="342.57142857142856" y="196" width="116" height="84" rx="12" fill="#161b22" stroke="#3d444d" stroke-width="1.4"/>
+<text x="400.57142857142856" y="234" text-anchor="middle" font-size="16" font-weight="700" fill="#e6edf3">Verify</text>
+<text x="400.57142857142856" y="252" text-anchor="middle" font-size="12" fill="#9da7b3">by the</text>
+<text x="400.57142857142856" y="266" text-anchor="middle" font-size="12" fill="#9da7b3">orchestrator</text>
+<rect x="350.57142857142856" y="187" width="25" height="17" rx="8.5" fill="#58a6ff"/><text x="363.07142857142856" y="199.2" text-anchor="middle" font-size="10.5" font-weight="700" fill="#0d1117">AI</text>
+<line x1="461.57142857142856" y1="238" x2="478.85714285714283" y2="238" stroke="#9da7b3" stroke-width="1.6" marker-end="url(#arrow)"/>
+<text x="540.8571428571429" y="110" text-anchor="middle" font-size="12" fill="#9da7b3">a fresh reviewer</text>
+<text x="540.8571428571429" y="125" text-anchor="middle" font-size="12" fill="#9da7b3">reads the staged</text>
+<text x="540.8571428571429" y="140" text-anchor="middle" font-size="12" fill="#9da7b3">change. Blocking</text>
+<text x="540.8571428571429" y="155" text-anchor="middle" font-size="12" fill="#9da7b3">findings are fixed</text>
+<text x="540.8571428571429" y="170" text-anchor="middle" font-size="12" fill="#9da7b3">first</text>
+<rect x="482.85714285714283" y="196" width="116" height="84" rx="12" fill="#161b22" stroke="#3d444d" stroke-width="1.4"/>
+<text x="540.8571428571429" y="234" text-anchor="middle" font-size="16" font-weight="700" fill="#e6edf3">Review</text>
+<text x="540.8571428571429" y="252" text-anchor="middle" font-size="12" fill="#9da7b3">advisory</text>
+<rect x="490.85714285714283" y="187" width="25" height="17" rx="8.5" fill="#58a6ff"/><text x="503.35714285714283" y="199.2" text-anchor="middle" font-size="10.5" font-weight="700" fill="#0d1117">AI</text>
+<line x1="601.8571428571429" y1="238" x2="619.1428571428571" y2="238" stroke="#9da7b3" stroke-width="1.6" marker-end="url(#arrow)"/>
+<text x="681.1428571428571" y="110" text-anchor="middle" font-size="12" fill="#9da7b3">through the normal</text>
+<text x="681.1428571428571" y="125" text-anchor="middle" font-size="12" fill="#9da7b3">hooks, never</text>
+<text x="681.1428571428571" y="140" text-anchor="middle" font-size="12" fill="#9da7b3">--no-verify. The</text>
+<text x="681.1428571428571" y="155" text-anchor="middle" font-size="12" fill="#9da7b3">plan file goes in</text>
+<text x="681.1428571428571" y="170" text-anchor="middle" font-size="12" fill="#9da7b3">the same commit</text>
+<rect x="623.1428571428571" y="196" width="116" height="84" rx="12" fill="#161b22" stroke="#f85149" stroke-width="2"/>
+<text x="681.1428571428571" y="234" text-anchor="middle" font-size="16" font-weight="700" fill="#e6edf3">Commit</text>
+<text x="681.1428571428571" y="252" text-anchor="middle" font-size="12" fill="#9da7b3">one per bucket,</text>
+<text x="681.1428571428571" y="266" text-anchor="middle" font-size="12" fill="#9da7b3">hooks</text>
+<rect x="631.1428571428571" y="187" width="25" height="17" rx="8.5" fill="#58a6ff"/><text x="643.6428571428571" y="199.2" text-anchor="middle" font-size="10.5" font-weight="700" fill="#0d1117">AI</text>
+<rect x="661.1428571428571" y="187" width="32" height="17" rx="8.5" fill="#3fb950"/><text x="677.1428571428571" y="199.2" text-anchor="middle" font-size="10.5" font-weight="700" fill="#0d1117">RUN</text>
+<rect x="693.1428571428571" y="271" width="38" height="17" rx="8.5" fill="#f85149"/><text x="712.1428571428571" y="283.2" text-anchor="middle" font-size="10.5" font-weight="700" fill="#ffffff">HARD</text>
+<line x1="742.1428571428571" y1="238" x2="759.4285714285713" y2="238" stroke="#9da7b3" stroke-width="1.6" marker-end="url(#arrow)"/>
+<text x="821.4285714285713" y="110" text-anchor="middle" font-size="12" fill="#9da7b3">factory.mode pr</text>
+<text x="821.4285714285713" y="125" text-anchor="middle" font-size="12" fill="#9da7b3">only. push-check and</text>
+<text x="821.4285714285713" y="140" text-anchor="middle" font-size="12" fill="#9da7b3">the pre-push hook</text>
+<text x="821.4285714285713" y="155" text-anchor="middle" font-size="12" fill="#9da7b3">refuse the protected</text>
+<text x="821.4285714285713" y="170" text-anchor="middle" font-size="12" fill="#9da7b3">branch</text>
+<rect x="763.4285714285713" y="196" width="116" height="84" rx="12" fill="#161b22" stroke="#f85149" stroke-width="2" stroke-dasharray="6 4"/>
+<text x="821.4285714285713" y="234" text-anchor="middle" font-size="16" font-weight="700" fill="#e6edf3">Push</text>
+<text x="821.4285714285713" y="252" text-anchor="middle" font-size="12" fill="#9da7b3">feature branches</text>
+<text x="821.4285714285713" y="266" text-anchor="middle" font-size="12" fill="#9da7b3">only</text>
+<rect x="771.4285714285713" y="187" width="25" height="17" rx="8.5" fill="#58a6ff"/><text x="783.9285714285713" y="199.2" text-anchor="middle" font-size="10.5" font-weight="700" fill="#0d1117">AI</text>
+<rect x="801.4285714285713" y="187" width="32" height="17" rx="8.5" fill="#3fb950"/><text x="817.4285714285713" y="199.2" text-anchor="middle" font-size="10.5" font-weight="700" fill="#0d1117">RUN</text>
+<rect x="833.4285714285713" y="271" width="38" height="17" rx="8.5" fill="#f85149"/><text x="852.4285714285713" y="283.2" text-anchor="middle" font-size="10.5" font-weight="700" fill="#ffffff">HARD</text>
+<line x1="882.4285714285713" y1="238" x2="899.7142857142856" y2="238" stroke="#9da7b3" stroke-width="1.6" marker-end="url(#arrow)"/>
+<text x="961.7142857142857" y="110" text-anchor="middle" font-size="12" fill="#9da7b3">pr mode only: gh</text>
+<text x="961.7142857142857" y="125" text-anchor="middle" font-size="12" fill="#9da7b3">stack, or chained</text>
+<text x="961.7142857142857" y="140" text-anchor="middle" font-size="12" fill="#9da7b3">MRs on GitLab.</text>
+<text x="961.7142857142857" y="155" text-anchor="middle" font-size="12" fill="#9da7b3">Bodies come from the</text>
+<text x="961.7142857142857" y="170" text-anchor="middle" font-size="12" fill="#9da7b3">real diff</text>
+<rect x="903.7142857142857" y="196" width="116" height="84" rx="12" fill="#161b22" stroke="#3d444d" stroke-width="1.4" stroke-dasharray="6 4"/>
+<text x="961.7142857142857" y="234" text-anchor="middle" font-size="16" font-weight="700" fill="#e6edf3">Pull request</text>
+<text x="961.7142857142857" y="252" text-anchor="middle" font-size="12" fill="#9da7b3">or a stack</text>
+<rect x="911.7142857142857" y="187" width="25" height="17" rx="8.5" fill="#58a6ff"/><text x="924.2142857142857" y="199.2" text-anchor="middle" font-size="10.5" font-weight="700" fill="#0d1117">AI</text>
+<line x1="1022.7142857142857" y1="238" x2="1040" y2="238" stroke="#9da7b3" stroke-width="1.6" marker-end="url(#arrow)"/>
+<text x="1102" y="125" text-anchor="middle" font-size="12" fill="#9da7b3">red: up to 3 fixes</text>
+<text x="1102" y="140" text-anchor="middle" font-size="12" fill="#9da7b3">(factory.ciFixAttempts),</text>
+<text x="1102" y="155" text-anchor="middle" font-size="12" fill="#9da7b3">then it stops.</text>
+<text x="1102" y="170" text-anchor="middle" font-size="12" fill="#9da7b3">Green: you merge</text>
+<rect x="1044" y="196" width="116" height="84" rx="12" fill="#161b22" stroke="#3d444d" stroke-width="1.4" stroke-dasharray="6 4"/>
+<text x="1102" y="234" text-anchor="middle" font-size="16" font-weight="700" fill="#e6edf3">Watch CI</text>
+<text x="1102" y="252" text-anchor="middle" font-size="12" fill="#9da7b3">bottom layer</text>
+<text x="1102" y="266" text-anchor="middle" font-size="12" fill="#9da7b3">first</text>
+<rect x="1052" y="187" width="32" height="17" rx="8.5" fill="#3fb950"/><text x="1068" y="199.2" text-anchor="middle" font-size="10.5" font-weight="700" fill="#0d1117">RUN</text>
+<rect x="1089" y="187" width="25" height="17" rx="8.5" fill="#58a6ff"/><text x="1101.5" y="199.2" text-anchor="middle" font-size="10.5" font-weight="700" fill="#0d1117">AI</text>
+<path d="M 400.57142857142856 282 V 324 H 260.2857142857143 V 284" fill="none" stroke="#f0883e" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow-fail)"/>
+<text x="284.2857142857143" y="341" font-size="12.5" fill="#f0883e">FAIL: real output to a new builder, 3</text>
+<text x="284.2857142857143" y="356" font-size="12.5" fill="#f0883e">times at most</text>
+<path d="M 540.8571428571429 282 V 372 H 243.28571428571428 V 284" fill="none" stroke="#58a6ff" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow-changes)"/>
+<text x="284.2857142857143" y="389" font-size="12.5" fill="#58a6ff">CHANGES: a builder fixes every blocking finding, then a reviewer reads it again (3 rounds at most)</text>
+<path d="M 1102 282 V 420 H 226.28571428571428 V 284" fill="none" stroke="#f85149" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow-ci)"/>
+<text x="284.2857142857143" y="437" font-size="12.5" fill="#f85149">RED CI: the log goes to a builder, then fix, review, push. At the cap: stop and write a report</text>
+<rect x="37" y="484" width="32" height="17" rx="8.5" fill="#e3b341"/><text x="53" y="496.2" text-anchor="middle" font-size="10.5" font-weight="700" fill="#0d1117">YOU</text>
+<text x="79" y="497" font-size="12.5" fill="#9da7b3">a person decides or acts: approves, asks, pushes, merges</text>
+<rect x="597" y="484" width="25" height="17" rx="8.5" fill="#58a6ff"/><text x="609.5" y="496.2" text-anchor="middle" font-size="10.5" font-weight="700" fill="#0d1117">AI</text>
+<text x="632" y="497" font-size="12.5" fill="#9da7b3">the assistant, working under the rules and skills</text>
+<rect x="37" y="510" width="32" height="17" rx="8.5" fill="#3fb950"/><text x="53" y="522.2" text-anchor="middle" font-size="10.5" font-weight="700" fill="#0d1117">RUN</text>
+<text x="79" y="523" font-size="12.5" fill="#9da7b3">a script, a git hook or a CI job</text>
+<rect x="597" y="510" width="38" height="17" rx="8.5" fill="#f85149"/><text x="616" y="522.2" text-anchor="middle" font-size="10.5" font-weight="700" fill="#ffffff">HARD</text>
+<text x="645" y="523" font-size="12.5" fill="#9da7b3">something blocks (only where the hook or tool is installed)</text>
+<rect x="37" y="536" width="34" height="17" rx="6" fill="none" stroke="#9da7b3" stroke-width="1.4" stroke-dasharray="4 3"/>
+<text x="81" y="549" font-size="12.5" fill="#9da7b3">dashed box: happens only in some cases (the note says when)</text>
+<text x="37" y="576" font-size="12.5" fill="#9da7b3">The factory never merges, deploys or force-pushes. A person merges the pull requests, bottom layer first. It is off until you set factory.mode.</text>
+</svg>

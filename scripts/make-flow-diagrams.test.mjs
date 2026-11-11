@@ -63,6 +63,30 @@ describe('workflow diagrams', () => {
     assert.match(off.text, /pre-commit hook runs the tests/);
   });
 
+  it('the three factory diagrams share eight stages, push is a hard stop, and nothing merges', () => {
+    const names = ['factory-solo', 'factory-team', 'factory-org'];
+    const titles = names.map((name) => DIAGRAMS[name].stages.map((stage) => stage.title));
+    for (const list of titles) assert.equal(list.length, 8);
+    assert.deepEqual(titles[0], titles[1]);
+    assert.deepEqual(titles[1], titles[2]);
+    for (const name of names) {
+      const push = DIAGRAMS[name].stages.find((stage) => stage.title === 'Push');
+      assert.equal(push.hard, true, `${name}: push is a hard stop`);
+      assert.equal(push.conditional, true, `${name}: push happens only in factory.mode pr`);
+      assert.match(DIAGRAMS[name].footer, /never merges/);
+    }
+    const orgPush = DIAGRAMS['factory-org'].stages.find((stage) => stage.title === 'Push');
+    assert.match(orgPush.note, /pushConfirm ask/);
+  });
+
+  it('the e2e path is conditional on publishing, names both tools, and says native is not verified', () => {
+    const titles = DIAGRAMS.e2e.stages.map((stage) => stage.title);
+    assert.deepEqual(titles, ['Mark', 'Write', 'Run', 'Look', 'Publish', 'In the PR']);
+    const labels = DIAGRAMS.e2e.panel.rows.map((row) => row.label);
+    assert.deepEqual(labels, ['BROWSER', 'NATIVE', 'OFF']);
+    assert.match(DIAGRAMS.e2e.panel.rows[1].text, /not verified/);
+  });
+
   it('no note, subtitle or loop label is long enough to collide with a neighbour', () => {
     for (const [name, spec] of Object.entries(DIAGRAMS)) {
       const lay = layoutFor(spec.stages.length);

@@ -1,0 +1,87 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 720" width="1200" height="720" role="img" aria-label="End-to-end tests and screenshots: the bucket is marked E2E yes, a builder writes the tests, the orchestrator runs them, checks the screenshots, publishes them and puts them in the pull request" font-family="'Segoe UI', -apple-system, BlinkMacSystemFont, Helvetica, Arial, sans-serif">
+<title>End-to-end tests and screenshots: the bucket is marked E2E yes, a builder writes the tests, the orchestrator runs them, checks the screenshots, publishes them and puts them in the pull request</title>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#9da7b3"/></marker><marker id="arrow-entry" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#e3b341"/></marker><marker id="arrow-fail" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#f0883e"/></marker><marker id="arrow-wrong" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#58a6ff"/></marker></defs>
+<rect x="1" y="1" width="1198" height="718" rx="16" fill="#0d1117" stroke="#3d444d" stroke-width="2"/>
+<text x="37" y="48" font-size="24" font-weight="700" fill="#e6edf3">E2E tests and screenshots: an option for every profile</text>
+<text x="37" y="72" font-size="14" fill="#9da7b3">Set tests.e2e to browser or native. It works with the factory on or off. Only buckets marked "E2E: yes" run it.</text>
+<text x="137" y="125" text-anchor="middle" font-size="12" fill="#9da7b3">the plan marks the buckets</text>
+<text x="137" y="140" text-anchor="middle" font-size="12" fill="#9da7b3">that change what a user</text>
+<text x="137" y="155" text-anchor="middle" font-size="12" fill="#9da7b3">sees. The preflight reads</text>
+<text x="137" y="170" text-anchor="middle" font-size="12" fill="#9da7b3">the mark</text>
+<rect x="62" y="196" width="150" height="84" rx="12" fill="#161b22" stroke="#3d444d" stroke-width="1.4"/>
+<text x="137" y="234" text-anchor="middle" font-size="16" font-weight="700" fill="#e6edf3">Mark</text>
+<text x="137" y="252" text-anchor="middle" font-size="12" fill="#9da7b3">E2E: yes in the plan</text>
+<rect x="70" y="187" width="32" height="17" rx="8.5" fill="#e3b341"/><text x="86" y="199.2" text-anchor="middle" font-size="10.5" font-weight="700" fill="#0d1117">YOU</text>
+<rect x="107" y="187" width="25" height="17" rx="8.5" fill="#58a6ff"/><text x="119.5" y="199.2" text-anchor="middle" font-size="10.5" font-weight="700" fill="#0d1117">AI</text>
+<line x1="215" y1="238" x2="247.6" y2="238" stroke="#9da7b3" stroke-width="1.6" marker-end="url(#arrow)"/>
+<text x="326.6" y="125" text-anchor="middle" font-size="12" fill="#9da7b3">the builder gets the project</text>
+<text x="326.6" y="140" text-anchor="middle" font-size="12" fill="#9da7b3">e2e command and writes the</text>
+<text x="326.6" y="155" text-anchor="middle" font-size="12" fill="#9da7b3">e2e tests together with the</text>
+<text x="326.6" y="170" text-anchor="middle" font-size="12" fill="#9da7b3">code</text>
+<rect x="251.6" y="196" width="150" height="84" rx="12" fill="#161b22" stroke="#3d444d" stroke-width="1.4"/>
+<text x="326.6" y="234" text-anchor="middle" font-size="16" font-weight="700" fill="#e6edf3">Write</text>
+<text x="326.6" y="252" text-anchor="middle" font-size="12" fill="#9da7b3">tests with the bucket</text>
+<rect x="259.6" y="187" width="25" height="17" rx="8.5" fill="#58a6ff"/><text x="272.1" y="199.2" text-anchor="middle" font-size="10.5" font-weight="700" fill="#0d1117">AI</text>
+<line x1="404.6" y1="238" x2="437.2" y2="238" stroke="#9da7b3" stroke-width="1.6" marker-end="url(#arrow)"/>
+<text x="516.2" y="125" text-anchor="middle" font-size="12" fill="#9da7b3">old PNGs deleted first, then</text>
+<text x="516.2" y="140" text-anchor="middle" font-size="12" fill="#9da7b3">the real command. No browser</text>
+<text x="516.2" y="155" text-anchor="middle" font-size="12" fill="#9da7b3">or device: stop and say what</text>
+<text x="516.2" y="170" text-anchor="middle" font-size="12" fill="#9da7b3">is missing</text>
+<rect x="441.2" y="196" width="150" height="84" rx="12" fill="#161b22" stroke="#f85149" stroke-width="2"/>
+<text x="516.2" y="234" text-anchor="middle" font-size="16" font-weight="700" fill="#e6edf3">Run</text>
+<text x="516.2" y="252" text-anchor="middle" font-size="12" fill="#9da7b3">by the orchestrator</text>
+<rect x="449.2" y="187" width="25" height="17" rx="8.5" fill="#58a6ff"/><text x="461.7" y="199.2" text-anchor="middle" font-size="10.5" font-weight="700" fill="#0d1117">AI</text>
+<rect x="479.2" y="187" width="32" height="17" rx="8.5" fill="#3fb950"/><text x="495.2" y="199.2" text-anchor="middle" font-size="10.5" font-weight="700" fill="#0d1117">RUN</text>
+<rect x="545.2" y="271" width="38" height="17" rx="8.5" fill="#f85149"/><text x="564.2" y="283.2" text-anchor="middle" font-size="10.5" font-weight="700" fill="#ffffff">HARD</text>
+<line x1="594.2" y1="238" x2="626.8" y2="238" stroke="#9da7b3" stroke-width="1.6" marker-end="url(#arrow)"/>
+<text x="705.8" y="125" text-anchor="middle" font-size="12" fill="#9da7b3">check the screenshot shows</text>
+<text x="705.8" y="140" text-anchor="middle" font-size="12" fill="#9da7b3">what the bucket promised,</text>
+<text x="705.8" y="155" text-anchor="middle" font-size="12" fill="#9da7b3">not only that the command</text>
+<text x="705.8" y="170" text-anchor="middle" font-size="12" fill="#9da7b3">passed</text>
+<rect x="630.8" y="196" width="150" height="84" rx="12" fill="#161b22" stroke="#3d444d" stroke-width="1.4"/>
+<text x="705.8" y="234" text-anchor="middle" font-size="16" font-weight="700" fill="#e6edf3">Look</text>
+<text x="705.8" y="252" text-anchor="middle" font-size="12" fill="#9da7b3">open one or two PNGs</text>
+<rect x="638.8" y="187" width="25" height="17" rx="8.5" fill="#58a6ff"/><text x="651.3" y="199.2" text-anchor="middle" font-size="10.5" font-weight="700" fill="#0d1117">AI</text>
+<line x1="783.8" y1="238" x2="816.4" y2="238" stroke="#9da7b3" stroke-width="1.6" marker-end="url(#arrow)"/>
+<text x="895.4" y="125" text-anchor="middle" font-size="12" fill="#9da7b3">factory pr mode: e2e-shots</text>
+<text x="895.4" y="140" text-anchor="middle" font-size="12" fill="#9da7b3">publish, linked by commit</text>
+<text x="895.4" y="155" text-anchor="middle" font-size="12" fill="#9da7b3">SHA. Otherwise the PNGs stay</text>
+<text x="895.4" y="170" text-anchor="middle" font-size="12" fill="#9da7b3">local</text>
+<rect x="820.4" y="196" width="150" height="84" rx="12" fill="#161b22" stroke="#3d444d" stroke-width="1.4" stroke-dasharray="6 4"/>
+<text x="895.4" y="234" text-anchor="middle" font-size="16" font-weight="700" fill="#e6edf3">Publish</text>
+<text x="895.4" y="252" text-anchor="middle" font-size="12" fill="#9da7b3">factory-screenshots</text>
+<text x="895.4" y="266" text-anchor="middle" font-size="12" fill="#9da7b3">branch</text>
+<rect x="828.4" y="187" width="32" height="17" rx="8.5" fill="#3fb950"/><text x="844.4" y="199.2" text-anchor="middle" font-size="10.5" font-weight="700" fill="#0d1117">RUN</text>
+<line x1="973.4" y1="238" x2="1006" y2="238" stroke="#9da7b3" stroke-width="1.6" marker-end="url(#arrow)"/>
+<text x="1085" y="125" text-anchor="middle" font-size="12" fill="#9da7b3">the command, its real result</text>
+<text x="1085" y="140" text-anchor="middle" font-size="12" fill="#9da7b3">and the images. It says they</text>
+<text x="1085" y="155" text-anchor="middle" font-size="12" fill="#9da7b3">were published, not seen in</text>
+<text x="1085" y="170" text-anchor="middle" font-size="12" fill="#9da7b3">a browser</text>
+<rect x="1010" y="196" width="150" height="84" rx="12" fill="#161b22" stroke="#3d444d" stroke-width="1.4" stroke-dasharray="6 4"/>
+<text x="1085" y="234" text-anchor="middle" font-size="16" font-weight="700" fill="#e6edf3">In the PR</text>
+<text x="1085" y="252" text-anchor="middle" font-size="12" fill="#9da7b3">under Verification</text>
+<rect x="1018" y="187" width="25" height="17" rx="8.5" fill="#58a6ff"/><text x="1030.5" y="199.2" text-anchor="middle" font-size="10.5" font-weight="700" fill="#0d1117">AI</text>
+<path d="M 516.2 282 V 324 H 326.6 V 284" fill="none" stroke="#f0883e" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow-fail)"/>
+<text x="350.6" y="341" font-size="12.5" fill="#f0883e">FAILS: real output to a new builder, 3 times at most</text>
+<path d="M 705.8 282 V 372 H 309.6 V 284" fill="none" stroke="#58a6ff" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow-wrong)"/>
+<text x="350.6" y="389" font-size="12.5" fill="#58a6ff">THE PICTURE IS WRONG: back to the builder, then run it again</text>
+<text x="37" y="420" font-size="15" font-weight="700" fill="#e6edf3">What each setting does</text>
+<rect x="37" y="438" width="58" height="17" rx="8.5" fill="#2ea043"/><text x="66" y="450.2" text-anchor="middle" font-size="10.5" font-weight="700" fill="#ffffff">BROWSER</text>
+<text x="107" y="451" font-size="12.5" fill="#9da7b3">Playwright in a headless browser. Proven (Playwright 1.65), including a live factory run with screenshots in the pull request.</text>
+<rect x="37" y="466" width="52" height="17" rx="8.5" fill="#bc6c25"/><text x="63" y="478.2" text-anchor="middle" font-size="10.5" font-weight="700" fill="#ffffff">NATIVE</text>
+<text x="101" y="479" font-size="12.5" fill="#9da7b3">Maestro against a simulator or device that you supply and run. Written from the documentation: not verified on a device, and never called</text>
+<text x="101" y="495" font-size="12.5" fill="#9da7b3">verified.</text>
+<rect x="37" y="510" width="32" height="17" rx="8.5" fill="#57606a"/><text x="53" y="522.2" text-anchor="middle" font-size="10.5" font-weight="700" fill="#ffffff">OFF</text>
+<text x="81" y="523" font-size="12.5" fill="#9da7b3">tests.e2e = off (the default in every profile): no e2e step, nothing published. A pull request says "e2e not run" and why.</text>
+<rect x="37" y="584" width="32" height="17" rx="8.5" fill="#e3b341"/><text x="53" y="596.2" text-anchor="middle" font-size="10.5" font-weight="700" fill="#0d1117">YOU</text>
+<text x="79" y="597" font-size="12.5" fill="#9da7b3">a person decides or acts: approves, asks, pushes, merges</text>
+<rect x="597" y="584" width="25" height="17" rx="8.5" fill="#58a6ff"/><text x="609.5" y="596.2" text-anchor="middle" font-size="10.5" font-weight="700" fill="#0d1117">AI</text>
+<text x="632" y="597" font-size="12.5" fill="#9da7b3">the assistant, working under the rules and skills</text>
+<rect x="37" y="610" width="32" height="17" rx="8.5" fill="#3fb950"/><text x="53" y="622.2" text-anchor="middle" font-size="10.5" font-weight="700" fill="#0d1117">RUN</text>
+<text x="79" y="623" font-size="12.5" fill="#9da7b3">a script, a git hook or a CI job</text>
+<rect x="597" y="610" width="38" height="17" rx="8.5" fill="#f85149"/><text x="616" y="622.2" text-anchor="middle" font-size="10.5" font-weight="700" fill="#ffffff">HARD</text>
+<text x="645" y="623" font-size="12.5" fill="#9da7b3">something blocks (only where the hook or tool is installed)</text>
+<rect x="37" y="636" width="34" height="17" rx="6" fill="none" stroke="#9da7b3" stroke-width="1.4" stroke-dasharray="4 3"/>
+<text x="81" y="649" font-size="12.5" fill="#9da7b3">dashed box: happens only in some cases (the note says when)</text>
+<text x="37" y="676" font-size="12.5" fill="#9da7b3">The kit never turns e2e on by itself: it needs a tool installed in your project.</text>
+</svg>

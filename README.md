@@ -11,26 +11,85 @@ It grew out of day-to-day work with an AI assistant, was made independent of any
 was then aligned with Anthropic's
 [AI-native SDLC playbook](https://claude.com/resources/articles/the-ai-native-sdlc-playbook).
 
-## Quick start
+## Quick setup
 
-Needs Node 18 or newer. In the project folder:
+Needs Node 18 or newer and git. Five minutes, in this order. Commands go in a terminal in your project folder;
+the quoted prompts are pasted into your AI tool (Claude Code, Cursor, Codex, OpenCode or Cline) opened on that
+same folder.
+
+**1. Install the kit's files** (copies them into `.claude/workspace-kit/` and touches nothing else):
 
 ```text
-npx ai-workspace-kit init        # copies the kit into .claude/workspace-kit/ and touches nothing else
+npx ai-workspace-kit init
 ```
 
-Then open your AI tool in that folder and say:
+**2. Set up the workspace.** Paste this into your AI tool:
 
 > Read `.claude/workspace-kit/skills/setup-workspace/SKILL.md` and follow it.
 
-The assistant asks which tools and which profile (solo, team or org) you use, explains every switchable rule,
-skill, hook and check in a line or two together with what it changes in your workflow, shows a dry run, and
-installs only what you choose. It never overwrites a file of yours. More in [section 8](#8-install-and-use).
+The assistant asks which tools and which profile you use (**solo** for one owner, **team** for a few
+developers, **org** for strict policies), explains every switchable rule, skill, hook and check in a line or two
+together with what it changes in your workflow, shows a dry run, and installs only what you choose. It never
+overwrites a file of yours. More in [section 8](#8-install-and-use).
 
-> **Status: `ai-workspace-kit` is on npm.** It is an early version (0.x), so expect rough edges and
-> [tell us about them](https://github.com/Jakub-Owczarzak/ai-workspace-kit/issues/new/choose). The command above
-> installs it. To remove everything it installed again, see [Uninstall](#uninstall). How releases are made:
-> [`RELEASING.md`](RELEASING.md).
+**3. Check it.** Paste:
+
+> Run `node scripts/workflow-config.mjs` and tell me which profile is active and what each control is set to.
+
+**4. Plan your first piece of work.** Paste:
+
+> Use the goal-first-planner skill. I want to <describe the goal>. Interview me, then plan it in small buckets.
+
+**5. Optional: let agents carry an approved plan to pull requests** (the [factory](#the-factory-an-optional-layer)).
+It is off until you turn it on. Paste:
+
+> In `.claude/workflow.json` set `factory.mode` to `local`, show me the result with `node scripts/workflow-config.mjs`,
+> and explain what `local` and `pr` do. Do not start the factory yet.
+
+Then, with an approved `PLAN.md`, start it by hand with `/wk-run-factory` (Codex: `$wk-run-factory`). It builds,
+verifies, reviews and commits each bucket; in `pr` mode it also pushes feature branches, opens the pull requests and
+watches CI. It never merges. Details and what is proven: [`docs/factory.md`](docs/factory.md).
+
+**6. Optional: end-to-end tests and screenshots** (works with the factory on or off). Paste:
+
+> Read the `wk-e2e-tests` skill and set `tests.e2e` to `browser` for this project. Tell me what it needs installed
+> first.
+
+### Optional: stop the constant "allow this command?" pop-ups
+
+Claude Code asks before it runs most shell commands. You can pre-approve the ones you trust once, for every
+project, in your user settings file (`~/.claude/settings.json`, on Windows `C:\Users\<you>\.claude\settings.json`):
+
+```json
+{
+  "permissions": {
+    "defaultMode": "acceptEdits",
+    "allow": ["Bash(npm run *)", "Bash(npm test *)", "Bash(git status *)", "Bash(git diff *)", "Bash(git add *)", "Bash(git commit *)"],
+    "ask": ["Bash(git push *)", "Bash(git reset --hard *)"],
+    "deny": ["Bash(rm -rf /*)", "Bash(rm -rf ~*)"]
+  }
+}
+```
+
+Merge it into the file if you already have one, restart the session, and run `/permissions` to see which rule
+comes from which file. The full list, why prompts keep coming back (for example `cd` plus `>>` always asks) and the
+shell habits that avoid them: [`docs/permissions.md`](docs/permissions.md).
+
+> **Warning: this is your decision and your responsibility.** Pre-approving commands gives an AI agent the right
+> to run them without asking you, and broad rules (`node *`, `python *`, `sed *`, `cp *`, `mv *`) let it run any
+> script or change any file those programs can reach. A wrong or manipulated instruction can then do real damage.
+> Allow only what you would let run unattended, keep your work in git, and keep credentials you cannot afford to
+> lose out of reach. Anthropic advises the most permissive modes only inside a container or a virtual machine. The
+> kit does not write these settings for you, and its own guards (the pre-commit and pre-push hooks, the protected
+> branch, "never merge") do not replace your judgment. If you run the factory in `pr` mode, `git push` under `ask`
+> is a sensible brake: moving it to `allow` means it pushes without asking.
+
+> **Status: `ai-workspace-kit` is on npm.** Recent additions: the factory, optional end-to-end tests, GitLab support
+> and single-agent flows for other tools (the README stays version-independent on purpose; the version is in
+> `package.json`). It is an early version (0.x), so expect rough edges and
+> [tell us about them](https://github.com/Jakub-Owczarzak/ai-workspace-kit/issues/new/choose). To remove everything
+> the kit installed, see [Uninstall](#uninstall). How releases are made: [`RELEASING.md`](RELEASING.md). What is
+> proven and what is not: [section 11](#11-how-it-was-checked-and-what-is-not-proven).
 
 **See how the workflow runs:** [flow diagrams for solo, team and org](#the-flow-in-each-profile-what-is-automated-what-needs-you): each step, who does it (you, the assistant or a script), what blocks, and where you decide.
 
@@ -40,6 +99,7 @@ operating system you used and what the installer printed; those details make a r
 
 ## Contents
 
+0. [Quick setup](#quick-setup), including [fewer approval pop-ups](#optional-stop-the-constant-allow-this-command-pop-ups) and its warning
 1. [What it is, and what it is not](#1-what-it-is-and-what-it-is-not)
 2. [Why it was built](#2-why-it-was-built)
 3. [What it is based on](#3-what-it-is-based-on)
@@ -48,6 +108,7 @@ operating system you used and what the installer printed; those details make a r
 6. [The skills and how they connect](#6-the-skills-and-how-they-connect)
 7. [Solo, team and org: what turns on and off](#7-solo-team-and-org-what-turns-on-and-off)
    - [Flow diagrams: what is automated, what needs you](#the-flow-in-each-profile-what-is-automated-what-needs-you)
+   - [The factory, an optional layer](#the-factory-an-optional-layer), and [end-to-end tests](#end-to-end-tests-and-screenshots)
 8. [Install and use](#8-install-and-use)
 9. [Keeping the kit up to date](#9-keeping-the-kit-up-to-date)
 10. [Design principles](#10-design-principles)
@@ -137,7 +198,7 @@ folder; the setup prompt and the `apply` program then put each piece you chose w
                                                           v
  rules/        8 short rules          --apply-->    a marked block in CLAUDE.md (Claude Code alone)
                                                     or in AGENTS.md (any other tool)
- skills/       10 skills              --apply-->    .claude/skills/wk-<name>/   (or .agents/skills/, .cline/skills/)
+ skills/       12 skills              --apply-->    .claude/skills/wk-<name>/   (or .agents/skills/, .cline/skills/)
  templates/    AGENTS.md, PLAN.md,    --apply-->    AGENTS.md, PLAN.md, REVIEW.md, CHANGELOG.md (only if missing),
                REVIEW.md, agents/,                  .claude/agents/reviewer.md, .claude/workflow.json,
                workflow.json, hooks/                a marked block in your git hooks (pre-commit, pre-push)
@@ -395,7 +456,10 @@ changelog or the lock file are skipped. Skill: `changelog-bump`.
    pushed   (the hook fails open: no git, a crash, or no node on the PATH never stops a push)
 ```
 
-Assistants commit when asked and never push; a person pushes.
+Assistants commit when asked and never push; a person pushes. **The one exception is the opt-in
+[factory](#the-factory-an-optional-layer)**: when you set `factory.mode` to `pr` and start it by hand, it may push
+**feature branches** (never the protected branch, which the hook still refuses) and open pull requests. It never
+merges.
 
 ### Step 7: pull request and release
 
@@ -444,7 +508,7 @@ Skills involved: `pr-description`, `changelog-bump`. Template: `templates/workfl
 
 ## 6. The skills and how they connect
 
-Ten skills. In a project they are installed as `wk-<name>` (so `/wk-pr-description`); this page uses the plain
+Twelve skills (`run-factory` and `e2e-tests` are the newest). In a project they are installed as `wk-<name>` (so `/wk-pr-description`); this page uses the plain
 names. **Started by hand** means only you can start it (`/name`); otherwise Claude may pick it from its
 description. The profile does not install or remove skills; you choose the skills at setup, and the profile
 changes how strictly the workflow uses them.
@@ -678,8 +742,9 @@ pre-commit hook still runs the tests. Only the rule "write the failing test firs
 | Refresh the overview (`write-project-overview`) | yes | yes | yes | **Approves line by line**; only approved lines change |
 | Design sync (`figma-sync`, if used) | yes | yes | yes | **Approves** the plan before anything is drawn or written |
 | Approve the setup preview (`apply --dry-run`) | yes | yes | yes | **Says yes** before anything is installed |
-| Push | yes | yes | yes | **Pushes**; assistants never push |
-| Open the pull request, merge | yes | yes | yes | **Does it**; the kit drafts the text only |
+| Push | yes | yes | yes | **Pushes**; assistants never push (unless you started the factory in `pr` mode: then feature branches only, and in org it asks for a yes first) |
+| Open the pull request, merge | yes | yes | yes | **Merges** always; the kit drafts the text, and the factory (if you started it) opens the pull requests |
+| Start the factory (`/wk-run-factory`) | optional | optional | optional | **Starts it by hand**; that is the approval to carry the approved plan through |
 | Merge the release PR (if the release workflow is installed) | yes | yes | yes | **Merges**; that is the release |
 
 What runs without a person, in every profile: the always-on rules and the router, the verification and
@@ -702,7 +767,70 @@ The controls, as a table:
 | Static checks: skill lint, `@` imports (`static.checks`) | on | on | on |
 | Checks that run `claude -p` (`claude.runChecks`) | off (opt-in) | off (opt-in) | off (opt-in) |
 | Plan mode as the session default | not offered | offered | offered |
+| Factory (`factory.mode`) | `off` | `off` | `off` (opt in; org asks before each push and allows 2 CI fixes) |
+| End-to-end tests (`tests.e2e`) | `off` | `off` | `off` (opt in: `browser` or `native`) |
 | Commit hook, push hook, changelog | your install choice, the same in every profile | | |
+
+### The factory, an optional layer
+
+The profiles above end with "you push". The **factory** is an opt-in layer on top of any profile for people who want
+the assistants to carry an approved plan further. **It is off in every profile** (`factory.mode: off`). You turn it
+on, approve a plan, and start it by hand with `/wk-run-factory`. Then, without further prompts:
+
+1. a fresh **builder** subagent builds each bucket of the plan, and never commits or pushes;
+2. the orchestrator runs lint, types and the tests itself and does not trust the builder's report;
+3. a fresh **reviewer** subagent reads the change (blocking findings go back to a builder, three rounds at most);
+4. one commit per bucket, through the normal hooks;
+5. in `factory.mode: pr`: `push-check`, then it pushes **feature branches only**, opens the pull request or a **stack**
+   of them (`gh stack` on GitHub, chained merge requests on GitLab, one PR per bucket where neither works), and watches
+   CI, bottom layer first. A red layer gets a capped number of fixes (`factory.ciFixAttempts`: 3, org 2), then it stops
+   and writes a report. In `local` mode it writes the PR text and stops before any push.
+
+**It never merges, never deploys, never force-pushes, and the pre-push hook still refuses the protected branch.**
+A person merges, bottom layer first.
+
+What changes per profile:
+
+| | solo | team | org |
+|---|---|---|---|
+| Plan | you approve it | plan mode: no edit until you accept | plan mode, plus success measurements |
+| Builders | fresh subagent per bucket | same, and the test guard refuses edits to existing tests | same as team |
+| Review | `advisory` | `advisory` | `required`: a recorded result for the exact contents; a self-review does not count |
+| Push (`pr` mode) | automatic (`pushConfirm: auto`) | automatic | asks you for a clear yes first (`pushConfirm: ask`) |
+| CI fix attempts | 3 | 3 | 2 |
+
+![Factory on solo: you approve the plan and start it, then builders, verification, review, commits, push, pull requests and CI watching run without prompts; nothing is merged](docs/diagrams/flow-factory-solo.svg)
+
+![Factory on team: plan mode and the test guard stay on while builders, review, commits, push, pull requests and CI watching run; nothing is merged](docs/diagrams/flow-factory-team.svg)
+
+![Factory on org: required review record, a yes from a person before any push, and fewer CI fix attempts; nothing is merged](docs/diagrams/flow-factory-org.svg)
+
+**What is proven, and what is not** (details and the exact list: [`docs/factory.md`](docs/factory.md),
+[`docs/factory-rehearsal.md`](docs/factory-rehearsal.md)):
+
+| Proven in a live run | Not proven |
+|---|---|
+| GitHub: a two-bucket stack with `gh stack`, a red lower layer, a fix, a restack, green CI | The one-PR-per-bucket fallback without `gh stack`; `prLayout: single`; `factory.mode: local`; `pushConfirm: ask` |
+| GitLab (gitlab.com): chained merge requests, a red bottom layer, a fix, a no-force restack, green | A self-managed GitLab server |
+| The CI fix cap and the stop report (`factory-guard.mjs`) | The cap reached in a real pipeline; the `org` profile end to end |
+| Browser e2e with screenshots in the PR body | Native e2e; any tool other than Claude Code (Cursor, Codex, OpenCode, Cline were written from their documentation and not run) |
+
+Outside Claude Code the factory runs as a **single agent**: the same steps as separate passes, with no fresh context
+and no independent reader. Its review is a labeled self-review, which the gate does not count under
+`review.mode: required`, so the push stops and asks you. Each subagent also carries a fixed prompt prefix that is
+re-read every turn, so even a small change costs real tokens; measuring and reducing that is planned work
+([`PLAN.md`](PLAN.md)).
+
+#### End-to-end tests and screenshots
+
+`tests.e2e` is an option for **every profile, with the factory on or off**: `browser` (Playwright in a headless
+browser) or `native` (Maestro against a simulator or device you supply). It is `off` by default because it needs a
+tool installed in your project; the kit never turns it on. Only buckets the plan marks `E2E: yes` run it. In the
+factory, the screenshots go to a separate `factory-screenshots` branch and appear in the PR body under Verification,
+with a plain statement that the images were published, not seen in a browser. Browser e2e is proven; native is
+written from the tool's documentation and **not verified on a device**.
+
+![End-to-end path: the bucket is marked E2E yes, a builder writes the tests, the orchestrator runs them, checks the screenshots, publishes them and puts them in the pull request](docs/diagrams/flow-e2e.svg)
 
 ### Turning pieces on and off: what changes in the flow
 
@@ -751,6 +879,8 @@ Precedence: environment variable, then `overrides`, then the profile default. A 
 | Test-edit guard | `tests.guard` is `on` (team and org), the PreToolUse entry is in `.claude/settings.json`, and fix mode was started with `start`; it blocks edits made by Claude (Edit, Write, MultiEdit) |
 | Pre-push: protected branch | Always, if you installed the push hook and named a protected branch at setup |
 | Pre-push: review gate | `review.mode` is `required` (org by default) |
+| Factory `push-check` | `factory.mode` is `pr`: anything but a feature branch is refused; a stop is written to `.claude/factory/report.md` |
+| Factory push confirmation | `factory.pushConfirm` is `ask` (org by default), or a single-agent run under `review.mode: required` |
 
 Everything else is a rule or a warning. A hook that cannot run (no git, a crash, no `node`) allows the action
 and says so; a broken profile file falls back to `solo` with a warning.
@@ -970,7 +1100,8 @@ all or nothing. To get a newer kit, use `init --force` as above. The skill has n
 Numbers are from 2026-11-10 unless a line says otherwise; they change as the kit does.
 
 - **Tests:** `npm test` runs every `*.test.mjs` file in its own process, with a time limit and closed stdin:
-  318 tests, all pass, on Node 22 and on Node 18 (Windows). None calls Claude. They include real runs in
+  451 tests, all pass on Node 22 (Windows, 2026-11-11; the 318 reported earlier also passed on Node 18, which was not
+  re-run for the factory work). None calls Claude. They include real runs in
   throw-away git repositories, a hook run through a symlink, and the installer's collision cases: a skill with
   the same name, a hand-written `CLAUDE.md`, a `settings.json` with comments, a `git-lfs` pre-push hook, and an
   older copy of the kit.
@@ -984,7 +1115,7 @@ Numbers are from 2026-11-10 unless a line says otherwise; they change as the kit
   (`6481ca0`, `2c5369d`, `e4a94f2`). The repository is private, where macOS minutes are billed at a higher rate;
   the cause is not confirmed. A cancelled macOS job says nothing about the code, so check that all six jobs ran
   before reading a CI result as proof of portability.
-- **Skill lint:** 10 skills, 0 errors, 0 warnings. This checks structure only; it does not prove a skill triggers.
+- **Skill lint:** 12 skills, 0 errors, 0 warnings. This checks structure only; it does not prove a skill triggers.
 - **A real project, on a copy:** `the Expo starter project`, which already had an older kit copy, plain-named
   skills, husky hooks, imported rules and a wired guard hook. `init` refused until `--force`. `apply` replaced
   nothing the project owned, did not add what its hook already ran, and a second run changed nothing. With
@@ -1041,18 +1172,23 @@ package ([section 9](#9-keeping-the-kit-up-to-date)).
    catalog/options.json      every switchable option, explained in plain words (read by the questionnaire)
    rules/                    8 always-on rules: readable-code, repo-tidiness, docs-fresh, commit-gate,
                              verification, test-discipline, skill-routing, ui-change-flagging
-   skills/                   10 skills, each with SKILL.md (and triggers.json for the model-invocable ones)
+   skills/                   12 skills, each with SKILL.md (and triggers.json for the model-invocable ones);
+                             run-factory has references/ for GitHub and GitLab, e2e-tests for Playwright and Maestro
    templates/
      AGENTS.md CLAUDE.md PLAN.md REVIEW.md BACKLOG.md FIGMA-SYNC.md CHANGELOG.md workflow.json
      agents/reviewer.md      the reviewer subagent
+     agents/factory-builder.md  the builder subagent the factory starts for each bucket
      hooks/                  pre-commit and pre-push wrappers
      workflows/              release_bump.yaml
      scripts/                the checks, the profile resolver and their tests
    docs/                     workflow-profiles, config-checks, test-discipline, project-overview,
-                             review-gate, playbook-mapping, setup-prompt
+                             review-gate, playbook-mapping, setup-prompt, factory, permissions,
+                             factory-host-interface, factory-spike, factory-rehearsal, diagrams/ (generated SVGs)
    adapters/                 where each piece goes: Claude Code, Codex and AGENTS.md readers, Cursor, OpenCode, Cline
    stacks/expo-react-native/ routing rows and an always-on rule for one framework (optional)
-   scripts/                  kit development only, not shipped: run-tests.mjs, ci-smoke.mjs
+   scripts/                  kit development only, not shipped: run-tests.mjs, ci-smoke.mjs, make-flow-diagrams.mjs,
+                             token-probe.mjs
+   PLAN.md                   the plan for the factory work, with the decision log and the token findings
    .github/workflows/ci.yml  tests and the install smoke test on 3 operating systems and 2 Node versions
    .github/workflows/publish.yml   publishes to npm when a version tag is pushed (guards: the tag matches
                              package.json, the commit is on main, the tests pass)

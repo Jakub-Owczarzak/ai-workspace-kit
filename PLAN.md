@@ -6,12 +6,14 @@ the current bucket's "Done when") to check a change against what was agreed.
 
 ## Resume here (read this first in a new session)
 
-**Where we are (2026-11-11).** Buckets 1 to 6 are done and verified; Bucket 7 (docs and diagrams) is next, then 8 to 10.
-Run `npm test` (451 pass) and `node scripts/ci-smoke.mjs` (ok) to confirm the state before you start.
+**Where we are (2026-11-11).** Buckets 1 to 7 are done and verified; Buckets 8 to 10 are next (8: real-project trial; 9: final
+test round and token report; 10: tuning). Run `npm test` (453 pass) and `node scripts/ci-smoke.mjs` (ok) first.
+The token measurement of the registered `factory-builder` and `reviewer` agents is still open: it needs a fresh session in a
+project where the kit's agents are installed (they are not registered in a session that started before they existed).
 
-**Nothing is committed.** The kit repo is on `main` with 21 modified and 11 new files (this `PLAN.md`; `docs/factory-*.md`;
-`skills/e2e-tests/`, `skills/run-factory/`; `templates/agents/factory-builder.md`; `templates/scripts/e2e-shots*`,
-`factory-guard*`). Ask the user whether to commit on a feature branch and open a pull request; do not commit to `main`.
+**Branch `feat/factory-variant`.** Buckets 1 to 6 are committed (`e0503ae`). Bucket 7 is **uncommitted** (README, `docs/factory.md`,
+`docs/permissions.md`, 4 SVGs, mapping, version 0.2.0). Nothing is pushed, no pull request, no tag, nothing published to npm. Ask
+before any of those; do not commit to `main`.
 
 **The user's standing instructions**
 - Plan each bucket first and get approval of its key decisions (use `goal-first-planner`); checkpoint after each.
@@ -196,14 +198,14 @@ Every bucket also updates the catalog, the installer, uninstall and tests for wh
 | 4b | E2E skill, recipes, rule, factory wiring | `e2e-tests` skill: browser (Playwright) recipe, native (Maestro) guide marked unverified on a device; an e2e step in the commit gate; the factory runs e2e for `E2E: yes` buckets and puts screenshots in the PR body; template, planner, catalog and AGENTS template updates. Usable with factory off | done: 431 tests pass; browser recipe proven (Playwright 1.65); live factory run with an `E2E: yes` bucket on GitHub; native guide written from the docs and marked unverified; see `docs/factory-rehearsal.md` |
 | 5 | GitLab host | A GitLab adapter: MRs, pipelines through `glab`, chained-MR stacks | done: 441 tests pass; preflight accepts GitLab; `clean-log`; host reference files; live run on gitlab.com (red bottom layer, fix, no-force restack, green); scratch projects deleted; see `docs/factory-rehearsal.md` |
 | 6 | Other tools, degraded mode | Single-agent factory flow for Cursor, Codex, OpenCode and Cline, plus updated `adapters/` | done: 451 tests pass; single-agent section, preflight notes, `record --self-review`, Codex hand-start file, five adapter sections written from documentation dated 2026-11-11; a single-agent dry run in `local` mode; none of the four tools run |
-| 7 | Docs and diagrams | README sections, profile tables, the rewritten push principle, new SVGs, playbook mapping | todo |
+| 7 | Docs and diagrams | README sections, profile tables, the rewritten push principle, new SVGs, playbook mapping | done: 453 tests pass, smoke ok; Quick setup chapter first in the README (prompts, no-pop-up settings, responsibility warning), `docs/factory.md`, `docs/permissions.md`, 4 new generated SVGs (factory solo, team, org, e2e), playbook mapping, version 0.2.0 (not tagged or published) |
 | 8 | Real-project trial | A full run on a real project, with a short report | todo |
 | 9 | Final test round, with token measurement | Everything re-tested from a clean tarball install, plus the paths no run has covered yet (matrix below), run on a real-sized project; a token report by role, bucket and step | todo |
 | 10 | Token tuning | From the Bucket 9 report: change the process to spend fewer tokens, re-run the same scenario, compare before and after, and keep only changes that do not weaken a guarantee | todo |
 
 ## Current bucket
 
-**Bucket 7: Docs and diagrams** (plan not yet presented; present and get approval before building; Buckets 3 to 6 are done)
+**Bucket 7: Docs and diagrams** (done 2026-11-11, with the user's decisions: short README section plus `docs/factory.md`; 4 new diagrams; bump to 0.2.0; a Quick setup chapter first, with the no-approval-pop-up settings from the user's own working setup and a warning that the access is the user's responsibility. The next bucket to plan is 8.) Original plan:
 - Goal: The README, the profile tables and the SVG diagrams describe the factory, e2e, GitLab and the other tools as
   they now are, with the "assistants never push" wording made conditional on the factory, and every claim marked
   proven or not.
