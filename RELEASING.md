@@ -90,15 +90,19 @@ needs `id-token: write` (it has it), npm 11.5.1 or later (it installs one) and t
    tagged commit is not on `main`, or if a test fails. If the version is already on npm it skips the publish.
 5. Check the result in a throw-away folder: `npx ai-workspace-kit@latest init --dry-run`.
 
-Trusted publishing has not worked yet, and the rehearsal below cannot prove that it will. The run for `v0.1.1` was green,
-but its publish step was **skipped** ("Is this version already on npm?": 0.1.1 had been published by hand first). The run
-for `v0.2.0` (2026-11-11) was the first to reach `npm publish`: it signed the provenance statement and then failed with
-`npm error 404 Not Found - PUT https://registry.npmjs.org/ai-workspace-kit`. That error means npm did not accept the
-workflow's identity. Check the *Trusted Publisher* fields on npmjs.com exactly (organization or user, repository, workflow
-file name `publish.yml`); note that the publish job runs in an environment named `npm`, so if you set an *Environment name*
-it must be `npm`; and that the configuration was saved less than 2 days before the first publish. After fixing it, open the
-failed run under **Actions > publish** and choose *Re-run failed jobs*. A green run is not proof of a publish: look for the
-`+ ai-workspace-kit@<version>` line and the new version on npm.
+**What happened the first time.** The run for `v0.1.1` was green, but its publish step was **skipped** ("Is this version
+already on npm?": 0.1.1 had been published by hand first), so it proved nothing. `v0.2.0` (2026-11-11) was the first run to
+reach `npm publish`. It failed the first time with `npm error 404 Not Found - PUT https://registry.npmjs.org/ai-workspace-kit`
+after signing the provenance statement: npm had no Trusted Publisher for the package yet. The fix was on npmjs.com: the
+package > *Settings* > *Trusted Publisher* > GitHub Actions, with the fields in the table above, the *Environment name*
+`npm` (the publish job runs in an environment of that name, so a value here must be `npm`) and **Allow `npm publish`**
+ticked (the workflow publishes directly; without it npm refuses). Then **Actions > publish** > the failed run > *Re-run
+failed jobs*. It published, and the new version showed as **Validating** on npmjs.com (npm's automated review) for a few
+minutes before it went live with a provenance attestation. The trusted publisher stays *Pending validation* until the
+first publish succeeds, and expires if that does not happen within 2 days.
+
+A green run is not proof of a publish: look for the `+ ai-workspace-kit@<version>` line, then wait for the version to
+leave *Validating* and check `npm view ai-workspace-kit versions --json`.
 
 ## Rehearsal (publishes nothing)
 
