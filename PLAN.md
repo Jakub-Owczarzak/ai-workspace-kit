@@ -154,6 +154,23 @@ and edits and to use Read/Grep rather than shell `cat`. Expected: orchestrator a
 guards unchanged: the orchestrator still verifies once and the reviewer is still independent. Round 2 is compared with round 1 and
 with the baseline; at about 1,136,000 the total can only drop by about 10% to 15% more, which is the noise level.
 
+**Quality check and round 3 (2026-11-11).** A blind review of the three finished versions (round 1 = A, baseline = B, round 2 = C;
+one model reading diffs, one sample each, nothing run) ranked correctness A, B, C: real bugs 0 to 1 / 2 / 3, "Done when" met 10 / 10 /
+9. Round 2's weak points: a load race left unfixed, a probable language-menu overlap (no `zIndex`), a looser e2e. All three e2e tests
+could pass before the saved value loaded. Round 2's cheaper builder (21 turns) is consistent with a quality cost but this cannot prove
+it (the same builder took 24, 38 and 21 turns). Built after that (committed, 462 tests): `[bug]`/`[nit]` tags in the reviewer's report;
+the rule "no known bug leaves the review step" (a builder fixes every blocking and `[bug]` finding, then verify and a re-review of the
+fix, 3 rounds at most; only nits go in the PR); `factory-guard.mjs baseline` (which checks already fail at the start, so a pre-existing
+failure is named in the PRs and a check that passed must still pass); a "wait for the load before asserting absence" note in the
+Playwright recipe. Git tags `kit-round1` (0b68431) and `kit-round2` (3f7fdbc) mark the earlier kit states.
+**Round 3 = the same scenario on `<trial clone>` with the current kit. Decision rule set by the user: if the result is worse than
+round 1, revert the changes and release the round 1 kit.** My reading of "worse": quality first. Round 3 is worse than round 1 if the
+blind review finds more real bugs than round 1's (0 to 1), a "Done when" item unmet, a known bug left in a PR, or a failing check that
+passed at the start. Cost is reported and must stay at least 30% below the baseline (at most about 1,290,000), otherwise it is
+reported as a failure of the token goal, not of quality. To revert: `git checkout kit-round1 -- skills/run-factory templates/agents
+templates/scripts/factory-guard.mjs templates/scripts/factory-guard.test.mjs skills/e2e-tests docs/factory.md` (then fix the tests and
+docs that name later features); releasing it (tag, push, publish) is the user's step.
+
 **Success (agreed in words by the user: "significantly lower"; thresholds proposed by me, to confirm):** total cost at least 30%
 lower than 1,847,000 (at most about 1,290,000), orchestrator turns at most half of 68, **and** the same outcome: two buckets built,
 reviews with 0 blocking findings, lint, types and unit tests green, e2e 3 of 3 with screenshots, nothing merged, no guarantee skipped.

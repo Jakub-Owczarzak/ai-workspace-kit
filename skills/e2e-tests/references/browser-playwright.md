@@ -69,6 +69,13 @@ Save them to `e2e-out/` with names that read as alt text (`login-error.png`, `se
 
 ## 5. Things that go wrong
 
+- **A test that asserts something is absent can pass for the wrong reason.** After a reload, a saved choice is usually
+  read asynchronously, so `toHaveCount(0)` or `not.toBeVisible()` right after the page appears can pass before the saved
+  value has loaded, and then it could not catch a persistence bug. First wait for a positive sign that the page has
+  finished loading (a heading, a control that only renders after the load, `waitForLoadState('networkidle')` for a
+  page that fetches), and only then assert the absence. For a persistence test, prove it both ways: after the change
+  and reload the state is the saved one, and with nothing saved it is the default.
+
 - A browser is cached per Playwright version. After upgrading the package, run `npx playwright install chromium` again.
 - `NO_COLOR` and `FORCE_COLOR` together print a harmless warning.
 - Tests that depend on the time, random data or the network are flaky; fix the data or mock the request. Do not
