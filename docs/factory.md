@@ -28,8 +28,11 @@ stops without changing anything (a dirty tree, a bucket without "Done when", an 
 3. The orchestrator verifies by itself, once per bucket (lint, types, tests, the bucket's "Verify by", in one batched
    call) and does not trust the builder's report. `factory-guard.mjs handoff-check` confirms the handoff is
    complete. For a bucket marked `E2E: yes` it also runs the end-to-end command.
-4. A fresh `reviewer` subagent reads the staged change and the handoff; blocking findings go back to a builder (at
-   most 3 rounds).
+4. A fresh `reviewer` subagent reads the staged change and the handoff. Every blocking finding and every finding tagged
+   `[bug]` (wrong behaviour: a race, a missed case, a broken test) goes back to a builder and is verified and re-reviewed
+   (at most 3 rounds); only `[nit]` findings (style, taste) may remain, and they are listed in the PR. **No known bug is
+   left for the PR text.** Before anything is built, `factory-guard.mjs baseline` records which project checks already
+   fail, so a pre-existing failure is named as such in the PR and a check that passed at the start must still pass.
 5. One commit per bucket, through the normal hooks (never `--no-verify`).
 6. After the last bucket: `local` mode writes the PR text to `.claude/factory/pr-<id>.md` and stops. `pr` mode
    runs `push-check` (feature branches only), pushes, opens the PR or stack, writes the bodies from the real diff,

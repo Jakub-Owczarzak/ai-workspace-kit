@@ -45,8 +45,11 @@ Checks run: <command: result, with counts>   (or "not run: reason")
 Blocking findings
 1. <file:line>  <what is wrong>. Why: <...>. Suggested fix: <...>.
 
-Other findings (at most five, most useful first; then "and N more")
-1. <file:line>  <...>
+Other findings (at most five, most useful first; then "and N more"). Start each with [bug] when it describes wrong
+behaviour (a race, a missed case, a broken or unreliable test, an accessibility failure) or [nit] when it is style,
+naming or taste. Anything that makes the software do the wrong thing is a [bug], even when the checklist does not
+call it blocking.
+1. [bug|nit] <file:line>  <...>
 
 Not checked: <what you could not or did not verify>
 

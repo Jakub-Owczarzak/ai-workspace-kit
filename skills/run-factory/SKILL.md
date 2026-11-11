@@ -30,6 +30,12 @@ run the plain form as well: the JSON holds the same `problems` and `notes`).
   Read the `pr-description` skill: its rules write the PR bodies.
   When `tests.e2e` is not `off` and a bucket is marked `E2E: yes`, read the `e2e-tests` skill too. The preflight
   JSON (`preflight --json`) gives each bucket an `e2e` flag and the project's `e2eCommand`.
+- **Baseline.** After a passing preflight, run `node scripts/factory-guard.mjs baseline` once, in the same turn as the
+  other starting reads. It runs the project's lint, type check, test and build commands from `AGENTS.md` and records
+  which already fail (`.claude/factory/baseline.json`). A check that fails at the start **and still fails the same way
+  at the end** is pre-existing: it is not this run's to fix unless the plan says so, and every PR body names it
+  ("`npm run build` already failed before this change: <reason>"). A check that passed at the start must pass at the
+  end. If the baseline run leaves untracked files that are not git-ignored, say so and do not commit them.
 - **The host.** The preflight JSON says which host this is: `host` is `github` or `gitlab`. Read
   `references/github.md` or `references/gitlab.md` next to this file. It holds the commands for each step marked
   **[host: ...]** below. On GitLab a pull request is called a merge request; this skill says "PR" for both.
@@ -97,8 +103,14 @@ The preflight lists the buckets still to build. For each one:
    files: never `git add -A` blindly, and check `git diff --cached --name-only` in that same call; generated files such
    as `e2e-out/`, `node_modules/` or build output must not go in, and a leftover from another branch's run shows up as
    untracked after a switch) together with `node scripts/check-review-gate.mjs --staged`, and if there is no clean record
-   start the `reviewer` subagent (give it the handoff path with the bucket) and have the builder fix every blocking
-   finding. At most 3 review rounds, then stop (section 4). Record the final result as the commit gate describes.
+   start the `reviewer` subagent (give it the handoff path with the bucket).
+   - **No known bug leaves this step.** Have a builder fix every blocking finding **and** every `[bug]` finding (a race, a
+     missed case, a broken test, an accessibility failure), and anything wrong you noticed yourself. Only `[nit]` findings
+     (style, naming, taste) may stay; list them in the PR. Do not defer a bug to the PR text.
+   - After any fix, verify again (step 3, once) and have the reviewer read the fix: a fix that was never reviewed or
+     re-run is not done. A short re-review of the changed files is enough.
+   - At most 3 fix rounds, then stop (section 4) and name the bug that remains. Record the final result as the commit
+     gate describes.
 6. **Commit** once per bucket, following the commit gate (a clear message; the changelog bump and entry through
    `CHANGELOG_BUMP` and `CHANGELOG_ENTRY` when the hook asks, see `changelog-bump`). Recording the review and committing
    can be one call. If a hook fails, fix the cause. Never use `--no-verify`.
@@ -121,7 +133,9 @@ files. Screenshots stay in `.claude/factory/shots/<id>/`: tell the user where. Y
    before any push. On anything but a clear yes, stop.
 3. Push and open the pull requests: **[host: open]**.
 4. Write each PR body to a file and set it: **[host: description]**. The body follows `pr-description`:
-   what changed, real verification output, known gaps. Under verification say what was run and what was not.
+   what changed, real verification output, known gaps. Under verification say what was run and what was not. Known gaps
+   are the things that could not be done or checked (a phone, an unreviewed translation, a pre-existing failing check),
+   the `[nit]` findings that were left, and nothing else: a known bug is fixed before this step, not listed here.
    - For a bucket that ran e2e, publish its screenshots first:
      `node scripts/e2e-shots.mjs publish --dir .claude/factory/shots/<id> --subdir <branch>`. Put the Markdown it
      prints under Verification, with the e2e command and its real result. Say plainly that the images were

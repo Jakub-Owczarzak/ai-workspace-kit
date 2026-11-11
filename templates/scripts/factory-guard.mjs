@@ -3,6 +3,8 @@
 // in every session and can be tested without an assistant.
 //
 //   node scripts/factory-guard.mjs preflight [--json]     Is a factory run allowed here, and what is left to build?
+//   node scripts/factory-guard.mjs baseline               Run the project's lint, type check, test and build commands once
+//                                                         at the start and record which already fail (.claude/factory/baseline.json)
 //   node scripts/factory-guard.mjs plan-excerpt [--bucket <id>]   The Intent Anchor and the pending buckets' plans (or one
 //                                                         bucket's), so a run does not read the whole PLAN.md
 //   node scripts/factory-guard.mjs handoff-check --bucket <id>   Is .claude/factory/handoff/<id>.md complete and done? 0/1
@@ -133,6 +135,69 @@ export function e2eCommand(agentsText) {
     if (match && !match[1].startsWith('<')) return match[1];
   }
   return null;
+}
+
+const COMMAND_LABELS = [
+  ['lint', /^lint\b/i],
+  ['typecheck', /^(?:type[ -]?check|types?)\b/i],
+  ['test', /^tests?\b/i],
+  ['build', /^build\b/i],
+];
+
+/**
+ * The project's lint, type check, test and build commands from the Commands block of AGENTS.md: lines inside a fenced
+ * code block that end with a comment naming the command (`npm run lint   # lint`). Unfilled `<placeholder>` lines are
+ * skipped. Returns `{ lint, typecheck, test, build }` with only the ones found.
+ */
+export function projectCommands(agentsText) {
+  const found = {};
+  let inFence = false;
+  for (const line of String(agentsText ?? '').split(/\r?\n/)) {
+    if (/^\s*```/.test(line)) {
+      inFence = !inFence;
+      continue;
+    }
+    if (!inFence) continue;
+    const match = line.match(/^\s*(\S.*?)\s+#\s*(.+?)\s*$/);
+    if (!match || match[1].startsWith('<')) continue;
+    for (const [name, pattern] of COMMAND_LABELS) {
+      if (pattern.test(match[2]) && !found[name]) found[name] = match[1];
+    }
+  }
+  return found;
+}
+
+/**
+ * Run the project's commands once, before anything is built, and write what happened to
+ * `.claude/factory/baseline.json`: `{ commands: { <name>: { command, exit, tail } } }`. A check that already fails at the
+ * start is "pre-existing": it is named in every PR and is not this run's to fix unless the plan says so; a check that
+ * passes at the start must pass at the end. `run` is replaceable for tests. Never throws.
+ */
+export function recordBaseline(root, { run = defaultRun, timeoutMs = 600000 } = {}) {
+  let agents = '';
+  try {
+    agents = readFileSync(join(root, 'AGENTS.md'), 'utf8');
+  } catch {
+    // No AGENTS.md: nothing to run.
+  }
+  const commands = {};
+  for (const [name, command] of Object.entries(projectCommands(agents))) {
+    const result = run(command, { cwd: root, timeoutMs });
+    const output = `${result.stdout ?? ''}${result.stderr ?? ''}`.trimEnd().split(/\r?\n/).slice(-3).join('\n');
+    commands[name] = { command, exit: result.status ?? 1, tail: output.slice(-400) };
+  }
+  const state = { recordedAt: new Date().toISOString(), commands };
+  try {
+    mkdirSync(join(root, FACTORY_DIR), { recursive: true });
+    writeFileSync(join(root, FACTORY_DIR, 'baseline.json'), `${JSON.stringify(state, null, 2)}\n`);
+  } catch {
+    // Not writable: the result is still printed.
+  }
+  return state;
+}
+
+function defaultRun(command, { cwd, timeoutMs }) {
+  return spawnSync(command, { cwd, shell: true, encoding: 'utf8', timeout: timeoutMs, stdio: ['ignore', 'pipe', 'pipe'] });
 }
 
 /**
@@ -553,6 +618,16 @@ function main(argv) {
       console.log(writeReport(options.root, { reason: options.reason, details }));
       return 0;
     }
+    case 'baseline': {
+      const state = recordBaseline(options.root);
+      const names = Object.keys(state.commands);
+      if (names.length === 0) console.log('baseline: no lint, type check, test or build command found in AGENTS.md');
+      for (const name of names) {
+        const entry = state.commands[name];
+        console.log(`${name}: ${entry.exit === 0 ? 'passes' : `FAILS (exit ${entry.exit})`} at the start  [${entry.command}]`);
+      }
+      return 0;
+    }
     case 'plan-excerpt': {
       let plan = '';
       try {
@@ -601,7 +676,7 @@ function main(argv) {
       return 0;
     }
     default:
-      console.error('usage: factory-guard.mjs preflight | plan-excerpt [--bucket <id>] | handoff-check --bucket <id> | attempt --key <name> | push-check --branch <name> | report --reason <text> | reset | clean-log [--lines <n>] < log  [--root <dir>]');
+      console.error('usage: factory-guard.mjs preflight | baseline | plan-excerpt [--bucket <id>] | handoff-check --bucket <id> | attempt --key <name> | push-check --branch <name> | report --reason <text> | reset | clean-log [--lines <n>] < log  [--root <dir>]');
       return 2;
   }
 }

@@ -21,8 +21,10 @@ import {
   planExcerpt,
   planProblems,
   preflight,
+  projectCommands,
   readState,
   recordAttempt,
+  recordBaseline,
   remoteHostname,
   resetState,
   statePath,
@@ -218,6 +220,57 @@ describe('e2eCommand', () => {
 
   it('does not take a command from prose or a line that only mentions e2e in passing', () => {
     assert.equal(e2eCommand('We run e2e tests on CI.\nnpm test   # tests, not e2e-free'), null);
+  });
+});
+
+describe('projectCommands and recordBaseline', () => {
+  const AGENTS = [
+    '**Commands**',
+    '```',
+    '<install>       # install dependencies',
+    'npm run lint    # lint',
+    'npm run typecheck   # type check (if any)',
+    'npm test        # tests',
+    'npm run e2e     # e2e',
+    'npm run build   # build',
+    '```',
+    'npm run ignored   # lint',
+  ].join('\n');
+
+  it('projectCommands reads the labelled lines of a fenced block and skips placeholders and prose', () => {
+    assert.deepEqual(projectCommands(AGENTS), { lint: 'npm run lint', typecheck: 'npm run typecheck', test: 'npm test', build: 'npm run build' });
+    assert.deepEqual(projectCommands('```\n<lint>   # lint\n```'), {});
+    assert.deepEqual(projectCommands(undefined), {});
+  });
+
+  it('recordBaseline runs each command once and records which already fail', () => {
+    withProject((root) => {
+      const calls = [];
+      const run = (command) => {
+        calls.push(command);
+        return command === 'npm run build' ? { status: 1, stdout: '', stderr: 'Unsupported platform\n' } : { status: 0, stdout: 'ok\n', stderr: '' };
+      };
+      const state = recordBaseline(root, { run });
+      assert.deepEqual(calls, ['npm run lint', 'npm run typecheck', 'npm test', 'npm run build']);
+      assert.equal(state.commands.lint.exit, 0);
+      assert.equal(state.commands.build.exit, 1);
+      assert.match(state.commands.build.tail, /Unsupported platform/);
+      assert.deepEqual(JSON.parse(readFileSync(join(root, '.claude', 'factory', 'baseline.json'), 'utf8')).commands.build.exit, 1);
+    }, { files: { 'AGENTS.md': AGENTS } });
+  });
+
+  it('recordBaseline without AGENTS.md records nothing and does not throw', () => {
+    withProject((root) => {
+      assert.deepEqual(recordBaseline(root, { run: () => assert.fail('nothing should run') }).commands, {});
+    });
+  });
+
+  it('the baseline command line runs real commands and says which fail', () => {
+    withProject((root) => {
+      const out = execFileSync(process.execPath, [GUARD, 'baseline', '--root', root], { encoding: 'utf8' });
+      assert.match(out, /lint: passes at the start/);
+      assert.match(out, /build: FAILS \(exit 3\) at the start/);
+    }, { files: { 'AGENTS.md': '```\nnode -e "process.exit(0)"   # lint\nnode -e "process.exit(3)"   # build\n```\n' } });
   });
 });
 
