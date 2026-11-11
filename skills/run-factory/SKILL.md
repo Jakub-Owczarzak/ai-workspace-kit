@@ -159,7 +159,10 @@ for each PR>`); if there are still none, tell the user there is no CI to watch a
      `gh stack submit` leaves the top branch checked out, and a fix started on the wrong branch is wasted), tell the
      builder the branch name, give it the failure output and let it fix the cause.
      Verify yourself, review as in section 1 (a quick pass for a small fix), and commit.
-  4. Push the fix: **[host: push a fix]**. When you changed a lower layer of a stack, the layers above must contain
+  4. Push the fix: **[host: push a fix]**. When `factory.pushConfirm` is `ask`, this push needs a yes too (the setting
+     means a person agrees before **each** push, not once per run): name each branch and the subject of the new commit
+     and wait for a clear yes; anything else stops the run (section 4). The merge commit of a by-hand restack is part of
+     the same push. When you changed a lower layer of a stack, the layers above must contain
      it before they are pushed: **[host: restack]**, or, without a stack tool, restack by hand (below).
   5. Watch the same layer again from the start of this list.
 

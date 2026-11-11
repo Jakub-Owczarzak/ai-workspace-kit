@@ -175,3 +175,34 @@ builder checks the branch name before it edits.
 Tokens (input-token equivalents, assumed price ratios): the orchestrator 50 turns, about 532,000; eight subagents (three builders,
 three quick or full reviews and two CI-fix builders and reviews), about 241,000; total about 773,000 for a very small project. The
 orchestrator is again about 70% of it, and each CI fix cycle costs about ten of its turns.
+
+## The org profile with a CI fix and a restack under required review (Bucket 9, scenario 2, 2026-11-11)
+
+The same kind of scratch repository, the `org` profile (`review.mode: required`, `factory.pushConfirm: ask`,
+`factory.ciFixAttempts: 2`), a two-bucket plan (`trim`, `repeat`), CI jobs `test` and `docs` (the docs check is the one the
+local tests do not run). Registered agents, a fresh session on Sonnet 5.5, started by `/wk-run-factory`.
+
+| Step | Result |
+|---|---|
+| Build, verify, review | Both buckets built; the reviewer found one real `[bug]` in `repeat` (an invalid `times` was undefined); a builder fixed it with an explicit `RangeError` and four tests and a second review confirmed it; 10 of 10 tests (the plan asked for at least 4) |
+| Push confirmation | The run stopped with both branches committed, listed them with the PR targets and asked for a yes before any push; nothing was pushed before the reply |
+| Open | The branches were created with `git switch -c` and the PRs with plain `git push` and `gh pr create`, chained (the first onto the start branch, the second onto the first): the route without `gh stack` |
+| CI | A GitHub Actions outage left the runs queued for about 45 minutes; closing and reopening each PR started fresh checks; `docs` failed on both PRs, `test` passed |
+| Fix and restack | One attempt per branch (2 allowed): a fresh builder added the README line on the lower branch, a reviewer read it, it was recorded and pushed; the upper branch got the fix by `git merge` (a merge commit, no force push), a reviewer read that too, and it was pushed |
+| Gate | Eight review records were written for the run (each commit, each fix, the merge); the pre-push hook let every push through |
+| End | `test` and `docs` green on both PRs; nothing merged |
+
+What this proved: `pushConfirm: ask` stops before the first push; a recorded review for each pushed tip, including a merge
+commit, satisfies the required gate; the by-hand restack works under `review.mode: required`; a real `[bug]` from the reviewer
+is fixed and re-reviewed before any PR; the chained-PR route without `gh stack` works with CI.
+
+Found and fixed: the CI-fix pushes went out on the earlier approval, without a new yes, although the documentation says
+`ask` means a yes before **each** push. The skill now says each fix push needs its own yes.
+
+Found, not fixed: a fresh session cannot resume at the CI step (the preflight says every bucket is done). The user had to stay
+in the same session through the outage. Not proven: the cap reached by the counter in a live loop, `prLayout: single`,
+`factory.mode: local`.
+
+Tokens (input-token equivalents, assumed ratios): orchestrator 64 turns, about 718,000; ten subagents, about 309,000 (builders
+about 179,000, reviewers about 130,000); total about 1,027,000. The subagents' first prompt was about 12,000 to 13,000 here
+against 19,000 to 20,000 in the Expo project, which is the size of the project's own instructions (`AGENTS.md` and the rules).

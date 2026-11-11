@@ -810,10 +810,10 @@ What changes per profile:
 
 | Proven in a live run | Not proven |
 |---|---|
-| GitHub: a two-bucket stack with `gh stack`, a red lower layer, a fix, a restack, green CI. Chained PRs opened with plain `git push` and `gh pr create` (the route without `gh stack`) | CI on those chained PRs (the run that opened them met a GitHub Actions outage); `prLayout: single`; `factory.mode: local` |
+| GitHub: a two-bucket stack with `gh stack`, a red lower layer, a fix, a restack, green CI. Chained PRs opened with plain `git push` and `gh pr create` (the route without `gh stack`), with CI, a fix and a restack | `prLayout: single`; `factory.mode: local` |
 | GitLab (gitlab.com): chained merge requests, a red bottom layer, a fix, a no-force restack, green | A self-managed GitLab server |
 | A real CI pipeline with a fixable and an unfixable red check: found, read, fixed by a fresh builder, re-reviewed, restacked by merge with no force push; a stop with a written report for a check that needs an outside approval (twice) | The CI cap reached by the attempt counter in a live loop (both live stops were the agent's judgment; the counter is covered by tests and an earlier rehearsal) |
-| `org` profile, as far as it ran: `pushConfirm: ask` waited for a yes before any push, a recorded review for each branch passed the pre-push gate, and a `[bug]` from the reviewer was fixed and re-reviewed before any PR | The `org` CI fix and the restack under `review.mode: required` |
+| `org` profile, end to end on a small project: `pushConfirm: ask` stopped before the first push, a `[bug]` from the reviewer was fixed and re-reviewed before any PR, a recorded review for every pushed tip (a CI fix and a merge commit included) passed the required pre-push gate, and the by-hand restack worked | `org` on a large project; a yes for each later push (the skill now asks, not yet run) |
 | The kit's own tests and install smoke test on Ubuntu, macOS and Windows with Node 18 and 22 (CI, all six jobs green); an install matrix from the packed tarball, 12 combinations (Windows only) | The matrix on macOS and Linux (it is not part of CI yet) |
 | Browser e2e with screenshots in the PR body | Native e2e; any tool other than Claude Code (Cursor, Codex, OpenCode, Cline were written from their documentation and not run) |
 
