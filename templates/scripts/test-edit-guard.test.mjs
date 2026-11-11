@@ -268,7 +268,8 @@ describe('the real hook in a throw-away git repo', () => {
       mkdirSync(join(root, 'scripts'));
       copyFileSync(join(HERE, 'test-edit-guard.mjs'), join(root, 'scripts', 'test-edit-guard.mjs'));
       copyFileSync(join(HERE, 'workflow-config.mjs'), join(root, 'scripts', 'workflow-config.mjs'));
-      writeFileSync(join(root, 'ok.test.js'), "import { test } from 'node:test';\ntest('ok', () => {});\n");
+      // .mjs: a .js file with `import` only works without a package.json on newer Node versions (not on Node 18).
+      writeFileSync(join(root, 'ok.test.mjs'), "import { test } from 'node:test';\ntest('ok', () => {});\n");
       const env = { ...process.env };
       delete env.NODE_TEST_CONTEXT;
       const result = spawnSync(process.execPath, ['--test'], { cwd: root, encoding: 'utf8', timeout: 60000, env });
