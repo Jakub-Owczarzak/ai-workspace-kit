@@ -810,9 +810,11 @@ What changes per profile:
 
 | Proven in a live run | Not proven |
 |---|---|
-| GitHub: a two-bucket stack with `gh stack`, a red lower layer, a fix, a restack, green CI | The one-PR-per-bucket fallback without `gh stack`; `prLayout: single`; `factory.mode: local`; `pushConfirm: ask` |
+| GitHub: a two-bucket stack with `gh stack`, a red lower layer, a fix, a restack, green CI. Chained PRs opened with plain `git push` and `gh pr create` (the route without `gh stack`) | CI on those chained PRs (the run that opened them met a GitHub Actions outage); `prLayout: single`; `factory.mode: local` |
 | GitLab (gitlab.com): chained merge requests, a red bottom layer, a fix, a no-force restack, green | A self-managed GitLab server |
-| The CI fix cap and the stop report (`factory-guard.mjs`) | The cap reached in a real pipeline; the `org` profile end to end |
+| A real CI pipeline with a fixable and an unfixable red check: found, read, fixed by a fresh builder, re-reviewed, restacked by merge with no force push; a stop with a written report for a check that needs an outside approval (twice) | The CI cap reached by the attempt counter in a live loop (both live stops were the agent's judgment; the counter is covered by tests and an earlier rehearsal) |
+| `org` profile, as far as it ran: `pushConfirm: ask` waited for a yes before any push, a recorded review for each branch passed the pre-push gate, and a `[bug]` from the reviewer was fixed and re-reviewed before any PR | The `org` CI fix and the restack under `review.mode: required` |
+| The kit's own tests and install smoke test on Ubuntu, macOS and Windows with Node 18 and 22 (CI, all six jobs green); an install matrix from the packed tarball, 12 combinations (Windows only) | The matrix on macOS and Linux (it is not part of CI yet) |
 | Browser e2e with screenshots in the PR body | Native e2e; any tool other than Claude Code (Cursor, Codex, OpenCode, Cline were written from their documentation and not run) |
 
 Outside Claude Code the factory runs as a **single agent**: the same steps as separate passes, with no fresh context

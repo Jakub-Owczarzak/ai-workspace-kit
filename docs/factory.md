@@ -88,11 +88,13 @@ everything as it is.
 
 ## What has not been run
 
-`prLayout: single`; the stack fallback without `gh stack`; `factory.mode: local`; `factory.pushConfirm: ask`; a
-builder returning `blocked`; a review with blocking findings across the 3-round limit; the CI cap reached in a
-real pipeline; the by-hand restack under `review.mode: required`; the `--self-review` block in a real push; the
-`org` profile end to end; native e2e; any non-Claude tool. The unit tests cover the guard script; the live runs
-above cover the rest.
+`prLayout: single`; `factory.mode: local`; CI on the chained PRs opened without `gh stack` (the run that opened them met
+a GitHub Actions outage); a builder returning `blocked`; a review with blocking findings across the 3-round limit; the
+CI cap reached by the attempt counter in a live loop (both live stops were the agent's judgment about a check that needs
+an outside approval); the by-hand restack under `review.mode: required`; the `--self-review` block in a real push; the
+`org` CI fix and restack; native e2e; any non-Claude tool (see `docs/other-tools-checklist.md`). The unit tests cover
+the guard script; the live runs above cover the rest. What the last round did prove is in
+`docs/factory-rehearsal.md` (the CI fix loop on a repository with CI) and `docs/factory-trial.md`.
 
 ## Cost
 
