@@ -69,6 +69,9 @@ Save them to `e2e-out/` with names that read as alt text (`login-error.png`, `se
 
 ## 5. Things that go wrong
 
+- **A dev server that watches the project folder can break when screenshots are written.** Metro (Expo) restarted or failed
+  while PNGs appeared in `e2e-out/`, and an e2e run that passed for the builder failed for the caller. Exclude the folder
+  from the watcher (for Metro, a `blockList` entry in `metro.config.js`) and run the command from a clean `e2e-out/`.
 - **A test that asserts something is absent can pass for the wrong reason.** After a reload, a saved choice is usually
   read asynchronously, so `toHaveCount(0)` or `not.toBeVisible()` right after the page appears can pass before the saved
   value has loaded, and then it could not catch a persistence bug. First wait for a positive sign that the page has

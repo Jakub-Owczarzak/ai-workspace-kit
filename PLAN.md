@@ -171,6 +171,12 @@ reported as a failure of the token goal, not of quality. To revert: `git checkou
 templates/scripts/factory-guard.mjs templates/scripts/factory-guard.test.mjs skills/e2e-tests docs/factory.md` (then fix the tests and
 docs that name later features); releasing it (tag, push, publish) is the user's step.
 
+**Round 3 result (2026-11-11): not worse than round 1, so no revert.** Total about 1,139,000 (-38% against the baseline, the same as
+round 1; the quality rules cost about 20% more than round 2); orchestrator 40 turns. Second blind review (four anonymised diffs):
+correctness rank round 3, round 1, baseline, round 2; real bugs 0 / 0 / 1 / 1; round 3's e2e is the only one that waits for the load
+before asserting absence. The kit stays at the current state (`f35c8e9` and later); `kit-round1` and `kit-round2` tags remain as
+fallbacks. Details in `docs/factory-trial.md`.
+
 **Success (agreed in words by the user: "significantly lower"; thresholds proposed by me, to confirm):** total cost at least 30%
 lower than 1,847,000 (at most about 1,290,000), orchestrator turns at most half of 68, **and** the same outcome: two buckets built,
 reviews with 0 blocking findings, lint, types and unit tests green, e2e 3 of 3 with screenshots, nothing merged, no guarantee skipped.

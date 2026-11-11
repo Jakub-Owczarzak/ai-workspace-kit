@@ -165,3 +165,45 @@ Reading it honestly:
    same outcome. Cost per orchestrator turn is about the same (13,000 in round 2 against 18,600 in the baseline).
 4. **Quality caveats that stay:** no screenshot was opened; a known race was left unfixed (disclosed); the review record
    is again older than the committed tree; the CI loop, native e2e and the `org` profile are still not exercised.
+
+### Round 3 (quality rules added) and the second blind review
+
+Changes made after the round 2 blind review (`docs/factory-trial.md` above): reviewer findings tagged `[bug]`/`[nit]`; no known bug
+leaves the review step (a builder fixes it, then verify and a re-review of the fix); `factory-guard.mjs baseline`; a "wait for the
+load before asserting absence" note in the Playwright recipe. Run on `trial/factory-compare3`, same project, plan, model, start.
+
+| | Baseline | Round 1 | Round 2 | **Round 3** |
+|---|---|---|---|---|
+| Orchestrator turns | 68 | 38 | 34 | 40 |
+| Orchestrator cost (equiv.) | about 1,263,000 | about 482,000 | about 447,000 | about 542,000 |
+| Subagents (cost, count) | about 584,000 (4) | about 654,000 (4) | about 495,000 (4) | about 597,000 (6) |
+| **Total** | about 1,847,000 | about 1,136,000 | about 942,000 | **about 1,139,000** |
+| Against the baseline | | -38% | -49% | **-38%** |
+
+The six round 3 subagents: two builders, three reviewers (one re-review of the fixes) and a fix builder.
+
+**Second blind review** (a fresh agent, four anonymised diffs, reading code only, nothing run; the first review's labels were
+not reused). Round 3 was P, round 1 Q, baseline R, round 2 S.
+
+| | Round 3 | Round 1 | Baseline | Round 2 |
+|---|---|---|---|---|
+| "Done when" met (of 10; the "seen failing first" item is unverifiable from a diff in all four) | 9 | 9 | 9 | 9 |
+| Real bugs | **0** | 0 | 1 (imports the gallery that is deleted with its tab) | 1 (small load race) |
+| Nits | 3 | 3 | 4 | 4 |
+| Correctness rank | **1** | 2 | 3 | 4 |
+| Maintainability rank | **1** | 2 | 4 | 3 |
+
+- **Round 3 is not worse than round 1: it ranks first, round 1 second, and the two are close.** The decision rule set by the user
+  (revert to the round 1 kit if round 3 is worse) is therefore not triggered, and the kit stays as it is.
+- What put round 3 ahead: its e2e is the only one of the four that waits for the saved value to load before asserting the card is
+  absent (the other three could pass before the load, so they could not catch a persistence bug), it has the most complete unit
+  tests, and a Metro config that keeps the dev server from watching `e2e-out/`.
+- All four render the card only after the load, so a user with nothing saved sees it appear after launch and the content below
+  shifts. The round 3 run found this itself (a review bug: `AGENTS.md` claimed the card "never flashes"), corrected the document and
+  re-reviewed it; the behaviour remains, documented.
+- The orchestrator's own verification earned its place in round 3: the builder said the e2e passed, it failed twice when run, and a
+  fix builder added the Metro config.
+- Cost: the quality rules cost about 20% more than round 2 (one fix round, a re-review, an extra builder); the total is the same as
+  round 1 and still 38% below the baseline.
+- Caveats: one run per version; the reviewer is a model reading diffs; "9 of 10" is the same in all four because one item cannot be
+  judged from code. Differences between the versions are small. CI, native e2e and the `org` profile are still not exercised.
