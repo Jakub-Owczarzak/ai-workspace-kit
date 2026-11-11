@@ -90,8 +90,15 @@ needs `id-token: write` (it has it), npm 11.5.1 or later (it installs one) and t
    tagged commit is not on `main`, or if a test fails. If the version is already on npm it skips the publish.
 5. Check the result in a throw-away folder: `npx ai-workspace-kit@latest init --dry-run`.
 
-The first release made this way (0.1.1, on 2026-11-10) went through the workflow and published, so trusted publishing
-works; the rehearsal below publishes nothing.
+Trusted publishing has not worked yet, and the rehearsal below cannot prove that it will. The run for `v0.1.1` was green,
+but its publish step was **skipped** ("Is this version already on npm?": 0.1.1 had been published by hand first). The run
+for `v0.2.0` (2026-11-11) was the first to reach `npm publish`: it signed the provenance statement and then failed with
+`npm error 404 Not Found - PUT https://registry.npmjs.org/ai-workspace-kit`. That error means npm did not accept the
+workflow's identity. Check the *Trusted Publisher* fields on npmjs.com exactly (organization or user, repository, workflow
+file name `publish.yml`); note that the publish job runs in an environment named `npm`, so if you set an *Environment name*
+it must be `npm`; and that the configuration was saved less than 2 days before the first publish. After fixing it, open the
+failed run under **Actions > publish** and choose *Re-run failed jobs*. A green run is not proof of a publish: look for the
+`+ ai-workspace-kit@<version>` line and the new version on npm.
 
 ## Rehearsal (publishes nothing)
 
