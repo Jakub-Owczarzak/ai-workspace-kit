@@ -985,7 +985,7 @@ Numbers are from 2026-11-10 unless a line says otherwise; they change as the kit
   the cause is not confirmed. A cancelled macOS job says nothing about the code, so check that all six jobs ran
   before reading a CI result as proof of portability.
 - **Skill lint:** 10 skills, 0 errors, 0 warnings. This checks structure only; it does not prove a skill triggers.
-- **A real project, on a copy:** `react-naitive-starter-pack`, which already had an older kit copy, plain-named
+- **A real project, on a copy:** `the Expo starter project`, which already had an older kit copy, plain-named
   skills, husky hooks, imported rules and a wired guard hook. `init` refused until `--force`. `apply` replaced
   nothing the project owned, did not add what its hook already ran, and a second run changed nothing. With
   the project's own `node_modules`, its type check and 58 tests gave the same results before and after, and a

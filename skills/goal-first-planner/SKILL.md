@@ -73,6 +73,7 @@ Output: <what the user will be able to see/run>
 Done when: <acceptance criteria>
 Verify by: <test, command, demo, or review method>
 TDD: <yes | no — yes when the acceptance criteria are fixed here and a mistake is costly; see the test-discipline rule when the project has it>
+E2E: <yes | no — yes when the bucket changes what a user sees or does and the project uses end-to-end tests (`tests.e2e` is not off); see the e2e-tests skill when the project has it>
 Review focus: <optional — failure modes this plan implies that no step tests>
 Consumes / Produces: <optional — what this bucket needs from earlier ones and hands to later ones>
 Risks / open questions: <bullets>
@@ -81,7 +82,7 @@ Key decisions in this bucket: <each with chosen option + 1-line why + alternativ
 
 Check the plan twice before presenting it: could an engineer who has never seen this conversation implement the change from the plan alone? And, for a plan of code work, is it shorter than the code it describes? (A plan longer than the code has written the code.)
 
-Ask the user to approve or adjust any key decision explicitly. When approved, copy this block into the "Current bucket" section of `PLAN.md` (the `reviewer` subagent compares the change with its "Done when"), then execute the bucket.
+Ask the user to approve or adjust any key decision explicitly. When approved, copy this block into the "Current bucket" section of `PLAN.md` (the `reviewer` subagent compares the change with its "Done when"), then execute the bucket. If the user wants the factory to build several buckets without further prompts (the `run-factory` skill), plan each pending bucket this way, get each approved, and keep one block per bucket in `PLAN.md` (`**Bucket <id>: <name>**` with a "Done when" line); the factory refuses a bucket that has none.
 
 ## Phase 5 — Checkpoint (after every bucket)
 

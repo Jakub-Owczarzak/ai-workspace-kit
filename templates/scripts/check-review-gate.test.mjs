@@ -14,8 +14,17 @@ const TREE = 'a'.repeat(40);
 describe('record text', () => {
   it('round-trips the header through parseRecord', () => {
     const text = buildRecordText({ tree: TREE, blocking: 2, summary: 'two issues', findings: '- a\n- b', now: new Date('2026-11-09T10:00:00Z') });
-    assert.deepEqual(parseRecord(text), { tree: TREE, reviewedAt: '2026-11-09T10:00:00.000Z', blocking: 2, summary: 'two issues' });
+    assert.deepEqual(parseRecord(text), { tree: TREE, reviewedAt: '2026-11-09T10:00:00.000Z', blocking: 2, summary: 'two issues', selfReview: false });
     assert.match(text, /\n\n- a\n- b\n$/);
+  });
+
+  it('marks a record written by the author, and a summary cannot forge or hide that mark', () => {
+    const self = buildRecordText({ tree: TREE, blocking: 0, selfReview: true, summary: 'self-review: no fresh reader' });
+    assert.match(self, /^Self-review: yes$/m);
+    assert.equal(parseRecord(self).selfReview, true);
+    const independent = buildRecordText({ tree: TREE, blocking: 0, summary: 'fine\nSelf-review: yes' });
+    assert.equal(parseRecord(independent).selfReview, false, 'a newline in the summary cannot add the header');
+    assert.equal(parseRecord(buildRecordText({ tree: TREE, blocking: 0 })).selfReview, false);
   });
 
   it('reads a missing or non-numeric Blocking field as null', () => {
@@ -74,6 +83,28 @@ describe('evaluateGate', () => {
     const result = evaluateGate({ mode: 'required', tree: TREE, record: { ...goodRecord, blocking: null } });
     assert.equal(result.exitCode, 1);
     assert.match(result.message, /no valid "Blocking:" count/);
+  });
+
+  it('does not accept a self-review as the second reader in required mode, and says what to do', () => {
+    const result = evaluateGate({ mode: 'required', tree: TREE, record: { ...goodRecord, selfReview: true } });
+    assert.equal(result.status, 'blocked');
+    assert.equal(result.exitCode, 1);
+    assert.match(result.message, /self-review/i);
+    assert.match(result.message, /independent/i);
+    assert.match(result.message, /REVIEW_MODE=off git push/);
+  });
+
+  it('only reminds about a self-review in advisory mode, and stays silent in off mode', () => {
+    const advisory = evaluateGate({ mode: 'advisory', tree: TREE, record: { ...goodRecord, selfReview: true } });
+    assert.equal(advisory.status, 'reminder');
+    assert.equal(advisory.exitCode, 0);
+    assert.match(advisory.message, /self-review/i);
+    assert.equal(evaluateGate({ mode: 'off', tree: TREE, record: { ...goodRecord, selfReview: true } }).status, 'off');
+  });
+
+  it('still reports blocking findings first when a self-review also has some', () => {
+    const result = evaluateGate({ mode: 'required', tree: TREE, record: { ...goodRecord, blocking: 2, selfReview: true } });
+    assert.match(result.message, /2 unresolved blocking/);
   });
 });
 
@@ -180,6 +211,30 @@ describe('real runs in a throw-away git repository', () => {
       const checked = run(root, [], 'required');
       assert.equal(checked.status, 0);
       assert.match(checked.stdout, /review-gate: ok/);
+    });
+  });
+
+  it('records a self-review with --self-review: required mode blocks the push, advisory only reminds, an independent record passes', () => {
+    withRepository(({ root, git }) => {
+      writeFileSync(join(root, 'code.txt'), 'two\n');
+      git('add', '.');
+      const recorded = run(root, ['record', '--blocking', '0', '--summary', 'self-review: no fresh reader', '--self-review'], 'required');
+      assert.equal(recorded.status, 0, recorded.stderr);
+
+      const required = run(root, ['--staged'], 'required');
+      assert.equal(required.status, 1);
+      assert.match(required.stdout, /self-review/i);
+      assert.match(required.stdout, /independent/i);
+
+      const advisory = run(root, ['--staged'], 'advisory');
+      assert.equal(advisory.status, 0);
+      assert.match(advisory.stdout, /self-review/i);
+
+      // An independent review of the same content, recorded without the flag, replaces it and passes.
+      assert.equal(run(root, ['record', '--blocking', '0', '--summary', 'independent review'], 'required').status, 0);
+      const independent = run(root, ['--staged'], 'required');
+      assert.equal(independent.status, 0);
+      assert.match(independent.stdout, /review-gate: ok/);
     });
   });
 

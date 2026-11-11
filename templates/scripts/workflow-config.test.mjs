@@ -68,6 +68,66 @@ describe('profile tables', () => {
   });
 });
 
+describe('factory and e2e controls', () => {
+  it('leave the factory and e2e off in every profile, so nothing changes until a project opts in', () => {
+    for (const profile of PROFILE_NAMES) {
+      assert.equal(PROFILES[profile]['factory.mode'], 'off', `${profile} factory.mode`);
+      assert.equal(PROFILES[profile]['tests.e2e'], 'off', `${profile} tests.e2e`);
+    }
+  });
+
+  it('give solo and team the same factory preset and make org ask before a push with fewer CI retries', () => {
+    for (const profile of ['solo', 'team']) {
+      assert.equal(PROFILES[profile]['factory.prLayout'], 'stack');
+      assert.equal(PROFILES[profile]['factory.ciFixAttempts'], 3);
+      assert.equal(PROFILES[profile]['factory.pushConfirm'], 'auto');
+    }
+    assert.equal(PROFILES.org['factory.prLayout'], 'stack');
+    assert.equal(PROFILES.org['factory.ciFixAttempts'], 2);
+    assert.equal(PROFILES.org['factory.pushConfirm'], 'ask');
+    for (const profile of PROFILE_NAMES) assert.equal(PROFILES[profile]['factory.host'], 'auto');
+  });
+
+  it('accept the documented values and reject others with a warning, falling back to the profile', () => {
+    assert.deepEqual(normalizeValue(CONTROL_SPECS['factory.mode'], 'LOCAL'), { ok: true, value: 'local' });
+    assert.deepEqual(normalizeValue(CONTROL_SPECS['factory.mode'], 'pr'), { ok: true, value: 'pr' });
+    assert.equal(normalizeValue(CONTROL_SPECS['factory.mode'], 'merge').ok, false);
+    assert.deepEqual(normalizeValue(CONTROL_SPECS['tests.e2e'], 'native'), { ok: true, value: 'native' });
+    assert.equal(normalizeValue(CONTROL_SPECS['tests.e2e'], 'device').ok, false);
+    assert.equal(normalizeValue(CONTROL_SPECS['factory.host'], 'bitbucket').ok, false);
+    const resolved = resolveControls({ overrides: { 'factory.mode': 'merge' } }, {});
+    assert.equal(resolved.controls['factory.mode'].value, 'off');
+    assert.equal(resolved.warnings.length, 1);
+  });
+
+  it('read zero CI fix attempts as "report only" and reject negative or non-numeric values', () => {
+    const spec = CONTROL_SPECS['factory.ciFixAttempts'];
+    assert.deepEqual(normalizeValue(spec, 0), { ok: true, value: 0 });
+    assert.equal(normalizeValue(spec, -1).ok, false);
+    assert.equal(normalizeValue(spec, 'three').ok, false);
+  });
+
+  it('take a profile preset, an override and an environment variable in that order of strength', () => {
+    const org = resolveControls({ profile: 'org' }, {});
+    assert.deepEqual(org.controls['factory.pushConfirm'], { value: 'ask', source: 'profile:org' });
+    const overridden = resolveControls({ profile: 'org', overrides: { 'factory.pushConfirm': 'auto' } }, {});
+    assert.deepEqual(overridden.controls['factory.pushConfirm'], { value: 'auto', source: 'overrides' });
+    const fromEnvironment = resolveControls(
+      { profile: 'solo', overrides: { 'factory.mode': 'local' } },
+      { FACTORY_MODE: 'pr', FACTORY_CI_FIX_ATTEMPTS: '5', TEST_E2E: 'browser' },
+    );
+    assert.deepEqual(fromEnvironment.controls['factory.mode'], { value: 'pr', source: 'env:FACTORY_MODE' });
+    assert.deepEqual(fromEnvironment.controls['factory.ciFixAttempts'], { value: 5, source: 'env:FACTORY_CI_FIX_ATTEMPTS' });
+    assert.deepEqual(fromEnvironment.controls['tests.e2e'], { value: 'browser', source: 'env:TEST_E2E' });
+  });
+
+  it('have no control that merges or deploys: a person merges', () => {
+    const names = Object.keys(CONTROL_SPECS);
+    assert.deepEqual(names.filter((name) => /merge|deploy|release/i.test(name)), []);
+    assert.deepEqual(CONTROL_SPECS['factory.mode'].allowed, ['off', 'local', 'pr']);
+  });
+});
+
 describe('normalizeValue', () => {
   it('accepts a choice case-insensitively and rejects others', () => {
     const spec = CONTROL_SPECS['docs.check'];

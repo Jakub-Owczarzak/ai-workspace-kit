@@ -25,6 +25,7 @@
 <lint>          # lint
 <typecheck>     # type check (if any)
 <test>          # tests
+<e2e>           # e2e (end-to-end tests, only if the project uses them; see the e2e-tests skill)
 <build>         # build
 ```
 Run lint, type check and tests before declaring any task done.

@@ -19,3 +19,15 @@ Notes:
 - Skills in `.claude/skills/` are listed in every session by name and description, so install only the
   pieces the project uses.
 - Plan mode as a project default is not read by the VS Code extension; the soft planning rule still applies.
+
+## The factory (`wk-run-factory`)
+
+Full support, and the only tool where it was run: two rehearsals on GitHub and one on GitLab (see
+`docs/factory-rehearsal.md`).
+
+| Piece | How it works in Claude Code |
+|---|---|
+| Starting it | By hand only: `disable-model-invocation: true` in the skill, started as `/wk-run-factory`. |
+| Builder and reviewer | Subagents with a fresh context: `.claude/agents/factory-builder.md` and `.claude/agents/reviewer.md`, installed by `factory-core` and `review-gate`. |
+| Hosts | GitHub (`gh`, optional `gh stack`) and GitLab (`glab`), through the skill's host reference files. |
+| Not verified | The images in a logged-in browser; the by-hand restack under `review.mode` `required`; self-managed GitLab. |
