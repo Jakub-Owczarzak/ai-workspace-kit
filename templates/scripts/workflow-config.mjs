@@ -57,12 +57,59 @@ export const CONTROL_SPECS = {
     description:
       'test-first policy (off = no rule, bugs = a bug fix starts with a failing test, on = new logic too); a bucket marked "TDD: yes" in the plan opts in even when this says bugs',
   },
+  'tests.e2e': {
+    type: 'choice',
+    allowed: ['off', 'browser', 'native'],
+    env: 'TEST_E2E',
+    description:
+      'end-to-end UI tests and screenshots (off = none, browser = Playwright in a headless browser, native = Maestro against a platform the user supplies and runs: Expo, Android Studio, Xcode or a device)',
+  },
   'review.mode': {
     type: 'choice',
     allowed: ['off', 'advisory', 'required'],
     env: 'REVIEW_MODE',
     description:
       'independent review by the reviewer subagent against REVIEW.md before a commit (off = only on request, advisory = run it and remind at push, required = the pre-push hook blocks a push whose content has no clean review record)',
+  },
+  'factory.mode': {
+    type: 'choice',
+    allowed: ['off', 'local', 'pr'],
+    env: 'FACTORY_MODE',
+    description:
+      'after the plan is approved, agents carry the work through without further prompts (off = you drive each step, local = build, test, review, commit and write the PR text, then stop before any push, pr = also push, open the PR or stack and watch CI; nothing is ever merged or deployed)',
+  },
+  'factory.prLayout': {
+    type: 'choice',
+    allowed: ['single', 'stack'],
+    env: 'FACTORY_PR_LAYOUT',
+    description:
+      'how a multi-bucket plan becomes pull requests (single = one PR for the whole plan, stack = one layer per bucket: `gh stack` on GitHub, chained merge requests on GitLab, one PR per bucket where stacking is unavailable)',
+  },
+  'factory.ciFixAttempts': {
+    type: 'number',
+    env: 'FACTORY_CI_FIX_ATTEMPTS',
+    description:
+      'how many times the factory may fix a red CI run and push again before it stops and reports (0 = watch and report only)',
+  },
+  'factory.host': {
+    type: 'choice',
+    allowed: ['auto', 'github', 'gitlab'],
+    env: 'FACTORY_HOST',
+    description: 'which code host the factory talks to (auto = read it from the git remote)',
+  },
+  'factory.pushConfirm': {
+    type: 'choice',
+    allowed: ['auto', 'ask'],
+    env: 'FACTORY_PUSH_CONFIRM',
+    description:
+      'whether the factory pushes by itself (auto) or stops for your yes before each push (ask); only used when factory.mode is pr',
+  },
+  'factory.fastFix': {
+    type: 'choice',
+    allowed: ['off', 'docs'],
+    env: 'FACTORY_FAST_FIX',
+    description:
+      'whether the factory may fix a tiny documentation-only problem itself with a self-check (docs) or must always use a builder and an independent re-review (off); only used when factory.mode is on',
   },
   'claude.runChecks': {
     type: 'boolean',
@@ -85,7 +132,14 @@ export const PROFILES = {
     'docs.sizeWarnChars': 40000,
     'tests.guard': 'off',
     'tests.tdd': 'bugs',
+    'tests.e2e': 'off',
     'review.mode': 'advisory',
+    'factory.mode': 'off',
+    'factory.prLayout': 'stack',
+    'factory.ciFixAttempts': 3,
+    'factory.host': 'auto',
+    'factory.pushConfirm': 'auto',
+    'factory.fastFix': 'docs',
     'claude.runChecks': false,
     'static.checks': true,
   },
@@ -95,7 +149,14 @@ export const PROFILES = {
     'docs.sizeWarnChars': 40000,
     'tests.guard': 'on',
     'tests.tdd': 'on',
+    'tests.e2e': 'off',
     'review.mode': 'advisory',
+    'factory.mode': 'off',
+    'factory.prLayout': 'stack',
+    'factory.ciFixAttempts': 3,
+    'factory.host': 'auto',
+    'factory.pushConfirm': 'auto',
+    'factory.fastFix': 'docs',
     'claude.runChecks': false,
     'static.checks': true,
   },
@@ -105,7 +166,14 @@ export const PROFILES = {
     'docs.sizeWarnChars': 40000,
     'tests.guard': 'on',
     'tests.tdd': 'on',
+    'tests.e2e': 'off',
     'review.mode': 'required',
+    'factory.mode': 'off',
+    'factory.prLayout': 'stack',
+    'factory.ciFixAttempts': 2,
+    'factory.host': 'auto',
+    'factory.pushConfirm': 'ask',
+    'factory.fastFix': 'off',
     'claude.runChecks': false,
     'static.checks': true,
   },

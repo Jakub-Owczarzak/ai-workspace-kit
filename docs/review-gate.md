@@ -32,10 +32,17 @@ machine: no GitHub call, no CI, no API key.
 Reviewed-tree: <git tree id>
 Reviewed-at: <time>
 Blocking: <number>
+Self-review: yes          (only when recorded with --self-review)
 Summary: <one line>
 
 <the reviewer's findings>
 ```
+
+**Self-review.** In a tool that cannot start a reviewer subagent, the assistant reviews its own change in a separate
+pass and records it with `record --self-review`. `advisory` mode reminds that it is a self-review; `required` mode does
+not accept it as the second reader and blocks the push until an independent review is recorded (or a person pushes
+once with `REVIEW_MODE=off`). The mark is a flag the assistant sets about itself, so like the rest of the record it is
+an attestation, not proof.
 
 It names a git **tree**, which identifies the exact file contents. So a review of the staged change still
 matches the commit made right after it, and any later edit makes the record stale and needs a new review.

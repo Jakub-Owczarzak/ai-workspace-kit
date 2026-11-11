@@ -82,16 +82,16 @@ needs `id-token: write` (it has it), npm 11.5.1 or later (it installs one) and t
    ```text
    git switch main
    git pull
-   git tag v0.1.1
-   git push origin v0.1.1
+   git tag v0.2.0
+   git push origin v0.2.0
    ```
 
 4. Watch **Actions > publish**. It refuses, and publishes nothing, if the tag does not match `package.json`, if the
    tagged commit is not on `main`, or if a test fails. If the version is already on npm it skips the publish.
 5. Check the result in a throw-away folder: `npx ai-workspace-kit@latest init --dry-run`.
 
-The first release made this way (0.1.1) is the real test of trusted publishing: the rehearsal below cannot prove
-that npm accepts the workflow's identity.
+The first release made this way (0.1.1, on 2026-11-10) went through the workflow and published, so trusted publishing
+works; the rehearsal below publishes nothing.
 
 ## Rehearsal (publishes nothing)
 

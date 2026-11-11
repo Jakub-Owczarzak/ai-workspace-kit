@@ -268,7 +268,12 @@ function startedDirectly() {
   }
 }
 
-if (process.argv[1] && startedDirectly()) {
+// `node --test` runs every file named `test-*.mjs`, and this file is named like that. Started by Node's test runner
+// (NODE_TEST_CONTEXT is set) there is no hook input and stdin stays open, so reading it would hang `npm test` in a
+// project whose test script is a bare `node --test`. Do nothing in that case.
+const startedByTestRunner = Boolean(process.env.NODE_TEST_CONTEXT);
+
+if (process.argv[1] && startedDirectly() && !startedByTestRunner) {
   const [command, ...args] = process.argv.slice(2);
   try {
     if (command) {

@@ -30,7 +30,8 @@ what order things are true. Fill the tables in section 2 for this project (the s
 - **Flag user-visible UI changes** in the pending list of the design-sync file, in the same turn (only if
   the project uses `figma-sync`).
 - **Commit order:** fix lint, type and test errors → run the review → run the design sync (when rows are
-  pending) → commit → a human pushes. Details in the project's commit-gate rule.
+  pending) → commit → a human pushes (only a factory run the user started, with `factory.mode` `pr`, pushes
+  feature branches itself). Details in the project's commit-gate rule.
 - **Report verification honestly:** say what was run and what was not.
 - **Planning gate:** when `planning.gates` is `anchor` or `full` (its value in `overrides` of
   `.claude/workflow.json`, else the profile default: `solo` and `team` anchor, `org` full), no production code
@@ -50,6 +51,8 @@ what order things are true. Fill the tables in section 2 for this project (the s
 | `pr-description` | Writing the pull request text from the real diff (never opens the PR) |
 | `changelog-bump` | A commit needs a changelog entry, or a release should bump the version |
 | `figma-sync` | UI changes are pending in the design-sync file, or the user asks to align the design with the app |
+| `e2e-tests` | Adding, running or fixing end-to-end UI tests, or a pull request needs screenshots (only when `tests.e2e` is not `off`) |
+| `run-factory` | Only when the user starts it by hand: carry an approved plan through build, review, commit and (when `factory.mode` is `pr`) pull requests and CI |
 | `update-workspace-kit` | A change added or improved something reusable (skill, rule, hook script, template), or the user asks to update the kit, pull the latest kit, or check drift |
 
 ### 2.2 Project skills (add rows for this project)

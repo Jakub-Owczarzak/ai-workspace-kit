@@ -15,8 +15,10 @@
 //   node check-review-gate.mjs --commit <sha>  check the content of that commit; the pre-push hook runs this for the
 //                                              tip of every ref being pushed (only the tip is checked, not each commit)
 //   node check-review-gate.mjs --staged        check the staged content (what the next commit will contain)
-//   node check-review-gate.mjs record --blocking <number> --summary "<one line>" [--findings-file <path>]
-//                                              record a finished review of the staged content
+//   node check-review-gate.mjs record --blocking <number> --summary "<one line>" [--findings-file <path>] [--self-review]
+//                                              record a finished review of the staged content. --self-review marks a
+//                                              review written by the agent that made the change (no subagent was
+//                                              available): `required` mode does not accept it as the second reader
 // Environment: REVIEW_MODE=off|advisory|required overrides the profile for one command.
 
 import { execFileSync } from 'node:child_process';
@@ -32,8 +34,10 @@ export function recordPathFor(root, tree) {
 }
 
 /** The text of a record: three header lines, an optional summary line, then the reviewer's findings. */
-export function buildRecordText({ tree, blocking, summary = '', findings = '', now = new Date() }) {
+export function buildRecordText({ tree, blocking, summary = '', findings = '', now = new Date(), selfReview = false }) {
   const header = [`Reviewed-tree: ${tree}`, `Reviewed-at: ${now.toISOString()}`, `Blocking: ${blocking}`];
+  // Set only by `record --self-review`: the review was written by the agent that made the change.
+  if (selfReview) header.push('Self-review: yes');
   // One line only: a newline in the summary could otherwise add a forged header field such as "Blocking: 0".
   if (summary !== '') header.push(`Summary: ${summary.replace(/\s*[\r\n]+\s*/g, ' ')}`);
   return `${header.join('\n')}\n\n${findings.trim()}\n`;
@@ -48,6 +52,8 @@ export function parseRecord(text) {
     reviewedAt: field('Reviewed-at'),
     blocking: blockingText !== null && /^\d+$/.test(blockingText) ? Number(blockingText) : null,
     summary: field('Summary'),
+    // Read from the header block only, so text in the findings below it can neither set nor hide the mark.
+    selfReview: /^Self-review:[ \t]*yes$/im.test(text.split(/\r?\n\r?\n/)[0]),
   };
 }
 
@@ -69,6 +75,8 @@ export function evaluateGate({ mode, tree, record }) {
     problem = `the review record for tree ${shortId(tree)} has no valid "Blocking:" count. Record the review again: ${recordCommand}`;
   } else if (record.blocking > 0) {
     problem = `the review record for tree ${shortId(tree)} shows ${record.blocking} unresolved blocking finding(s). Fix them, review again and record it.`;
+  } else if (record.selfReview) {
+    problem = `the review record for tree ${shortId(tree)} is a self-review, written by the agent that made the change. This mode wants an independent review: have a person or a fresh reviewer review the change and record it without --self-review.`;
   }
 
   if (problem === null) {
@@ -135,8 +143,9 @@ function runRecord(root, argv) {
   const tree = readTree(root, { staged: true });
   const path = recordPathFor(root, tree);
   mkdirSync(join(root, RECORDS_FOLDER), { recursive: true });
-  writeFileSync(path, buildRecordText({ tree, blocking: Number(blockingText), summary: valueOf(argv, '--summary') ?? '', findings }));
-  console.log(`review-gate: recorded review of tree ${shortId(tree)} (${blockingText} blocking) in ${path}`);
+  const selfReview = argv.includes('--self-review');
+  writeFileSync(path, buildRecordText({ tree, blocking: Number(blockingText), summary: valueOf(argv, '--summary') ?? '', findings, selfReview }));
+  console.log(`review-gate: recorded ${selfReview ? 'self-review' : 'review'} of tree ${shortId(tree)} (${blockingText} blocking) in ${path}`);
   return 0;
 }
 

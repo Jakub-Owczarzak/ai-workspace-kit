@@ -93,6 +93,21 @@
       "requires": ["rule.test-discipline"]
     },
     {
+      "id": "control.tests.e2e",
+      "kind": "control",
+      "control": "tests.e2e",
+      "title": "End-to-end UI tests and screenshots",
+      "what": "Lets the assistant test the interface the way a user would, and take screenshots of UI changes for the pull request.",
+      "impact": "off: no end-to-end tests. browser: Playwright drives a headless browser; Playwright is installed in your project when you choose this. native: Maestro runs against a platform you supply and run yourself (Expo, Android Studio, Xcode or a device); the kit only prepares the way to connect it, and this path is not verified on a device. Works with or without the factory.",
+      "values": {
+        "off": "No end-to-end tests",
+        "browser": "Playwright in a headless browser",
+        "native": "Maestro against your own native platform (you supply and run it)"
+      },
+      "touches": [".claude/workflow.json"],
+      "requires": ["skill.e2e-tests"]
+    },
+    {
       "id": "control.review.mode",
       "kind": "control",
       "control": "review.mode",
@@ -106,6 +121,83 @@
       },
       "touches": [".claude/workflow.json", "pre-push hook", "scripts/check-review-gate.mjs"],
       "requires": ["review-gate"]
+    },
+    {
+      "id": "control.factory.mode",
+      "kind": "control",
+      "control": "factory.mode",
+      "title": "Factory: automatic delivery after the plan",
+      "what": "Once you approve the plan, agents and subagents carry the work through build, tests, review and commit without asking for each step, and can push and open the pull request.",
+      "impact": "off: you drive every step (the default). local: everything up to the commits and the PR text, then it stops before any push. pr: also pushes a branch, opens the PR or a stack of PRs and watches CI. Nothing is ever merged or deployed; a person merges. The planning step still needs your approval.",
+      "values": {
+        "off": "You drive each step",
+        "local": "Builds, tests, reviews and commits; stops before any push",
+        "pr": "Also pushes, opens the PR or stack and watches CI; never merges"
+      },
+      "touches": [".claude/workflow.json"]
+    },
+    {
+      "id": "control.factory.prLayout",
+      "kind": "control",
+      "control": "factory.prLayout",
+      "title": "Factory: one PR or a stack",
+      "what": "Decides how a plan with several features becomes pull requests.",
+      "impact": "single: one PR for the whole plan. stack: one layer per bucket, each reviewable on its own. On GitHub this uses 'gh stack'; on GitLab it uses chained merge requests; where neither is available it opens one PR per bucket.",
+      "values": {
+        "single": "One PR for the whole plan",
+        "stack": "One stacked layer per bucket"
+      },
+      "touches": [".claude/workflow.json"]
+    },
+    {
+      "id": "control.factory.ciFixAttempts",
+      "kind": "control",
+      "control": "factory.ciFixAttempts",
+      "title": "Factory: CI fix attempts",
+      "what": "How many times the factory may fix a failing CI run and push again before it stops and tells you.",
+      "impact": "A number; 0 means it only watches CI and reports. A cap keeps a broken pipeline from looping forever.",
+      "valueHint": "number of attempts, 0 = watch and report only",
+      "touches": [".claude/workflow.json"]
+    },
+    {
+      "id": "control.factory.host",
+      "kind": "control",
+      "control": "factory.host",
+      "title": "Factory: code host",
+      "what": "Which code host the factory pushes to and opens pull requests on.",
+      "impact": "auto reads it from the git remote. github uses the gh command; gitlab uses glab. You sign in to the host yourself; the kit never stores a token.",
+      "values": {
+        "auto": "Read it from the git remote",
+        "github": "GitHub (gh)",
+        "gitlab": "GitLab (glab)"
+      },
+      "touches": [".claude/workflow.json"]
+    },
+    {
+      "id": "control.factory.pushConfirm",
+      "kind": "control",
+      "control": "factory.pushConfirm",
+      "title": "Factory: confirm before pushing",
+      "what": "Whether the factory pushes by itself or waits for your yes before each push. Only used when the factory is set to pr.",
+      "impact": "auto: it pushes feature branches itself (the pre-push hook still refuses the protected branch). ask: it stops and asks before every push.",
+      "values": {
+        "auto": "Pushes feature branches by itself",
+        "ask": "Asks before every push"
+      },
+      "touches": [".claude/workflow.json"]
+    },
+    {
+      "id": "control.factory.fastFix",
+      "kind": "control",
+      "control": "factory.fastFix",
+      "title": "Factory: small documentation fixes without a subagent",
+      "what": "Whether the factory may fix a tiny documentation-only problem itself (for example a CI check that wants a README line) instead of starting a builder and a reviewer. Only used when the factory is on.",
+      "impact": "docs: a fix that touches only documentation files (Markdown, README, docs/, CHANGELOG) and at most 10 changed lines is made by the orchestrator, checked by `factory-guard.mjs fast-check`, verified, and labelled in the pull request as a self-checked fast fix; it saves a builder and a reviewer. off: every fix goes to a fresh builder and an independent re-review. Anything that touches code always goes to a builder.",
+      "values": {
+        "off": "Every fix goes to a builder and an independent re-review",
+        "docs": "A tiny documentation-only fix is made and self-checked by the orchestrator"
+      },
+      "touches": [".claude/workflow.json"]
     },
     {
       "id": "control.claude.runChecks",
@@ -377,6 +469,51 @@
       "default": true,
       "installs": ["templates/agents/reviewer.md", "templates/REVIEW.md", "templates/scripts/check-review-gate.mjs"],
       "touches": [".claude/agents/reviewer.md", "REVIEW.md", "scripts/check-review-gate.mjs", ".claude/reviews/ (git-ignored)"]
+    },
+    {
+      "id": "factory-core",
+      "kind": "agent",
+      "title": "Factory guard and builder",
+      "what": "A script that decides whether an automatic delivery run (the factory) may start, lists what is left to build in the plan, counts CI fix attempts against a cap, refuses pushes to the protected branch, and writes a stop report; plus the builder subagent that builds one bucket of the plan in a fresh context.",
+      "impact": "Only used when the factory is on (factory.mode is local or pr). It never merges or deploys. Keeps its counts and report in .claude/factory/, which is git-ignored. The builder subagent is a Claude Code feature.",
+      "default": false,
+      "requires": ["check.static"],
+      "installs": ["templates/scripts/factory-guard.mjs", "templates/agents/factory-builder.md"],
+      "touches": ["scripts/factory-guard.mjs", ".claude/agents/factory-builder.md", ".claude/factory/ (git-ignored)"]
+    },
+    {
+      "id": "skill.e2e-tests",
+      "kind": "skill",
+      "source": "skills/e2e-tests",
+      "installAs": "wk-e2e-tests",
+      "title": "End-to-end tests and screenshots",
+      "what": "Sets up and runs end-to-end UI tests the way a user would, and takes screenshots for pull requests. Browser: Playwright in a headless browser (proven). Native: Maestro against a platform you supply and run yourself (Expo, Android Studio, Xcode or a device); written from the documentation and not verified on a device.",
+      "impact": "Nothing runs until you set tests.e2e to browser or native. It asks before installing Playwright (about 40 seconds the first time). Works with or without the factory.",
+      "default": false,
+      "requires": ["check.e2e-shots"],
+      "touches": [".claude/skills/wk-e2e-tests/"]
+    },
+    {
+      "id": "skill.run-factory",
+      "kind": "skill",
+      "source": "skills/run-factory",
+      "installAs": "wk-run-factory",
+      "title": "Run the factory",
+      "what": "After you approve the plan, carries it through build, tests, review and commit with a fresh builder agent per bucket, then (in pr mode) pushes, opens the pull request or a stack of them and watches CI. Started only by you, with /wk-run-factory. Never merges or deploys.",
+      "impact": "Nothing happens until you start it and set factory.mode to local or pr. It pushes only feature branches and stops at a cap on CI fixes. Needs the reviewer, the PR description skill and the factory guard, which are added for you.",
+      "default": false,
+      "requires": ["factory-core", "review-gate", "skill.pr-description"],
+      "touches": [".claude/skills/wk-run-factory/"]
+    },
+    {
+      "id": "check.e2e-shots",
+      "kind": "check",
+      "title": "Screenshot helper",
+      "what": "A script that publishes the screenshots from an end-to-end run to a branch of their own and builds the Markdown that shows them in a pull request.",
+      "impact": "Only used when you run end-to-end tests (tests.e2e is browser or native). The images never reach main or your feature branch; one extra branch, factory-screenshots, is pushed. It needs no Claude and no network apart from that push.",
+      "default": false,
+      "installs": ["templates/scripts/e2e-shots.mjs"],
+      "touches": ["scripts/e2e-shots.mjs", "the factory-screenshots branch on your remote"]
     },
     {
       "id": "check.static",

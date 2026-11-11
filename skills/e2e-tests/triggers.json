@@ -1,0 +1,15 @@
+{
+  "should": [
+    "Add an end-to-end test for the login screen",
+    "Take screenshots of the new settings page for the pull request",
+    "Set up Playwright for this project",
+    "Why is the e2e test failing after my UI change?",
+    "Write a Maestro flow for the checkout screen"
+  ],
+  "shouldNot": [
+    "Write a unit test for the price calculation",
+    "Write a pull request description for this branch",
+    "Add a changelog entry for this commit",
+    "Refactor the date helper into smaller functions"
+  ]
+}

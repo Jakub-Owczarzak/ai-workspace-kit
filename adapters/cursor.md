@@ -23,3 +23,18 @@ alwaysApply: false
 ```
 
 With `alwaysApply: true` a rule is always included and `globs` and `description` are ignored.
+
+## The factory (`wk-run-factory`) in Cursor
+
+**Not verified.** On 2026-11-11 the pages that the Cursor documentation index lists for skills, rules and subagents
+all returned "not found" when fetched, so nothing below is confirmed from a current page. It rests on the notes above
+(dated 2026-11-10) and on how the other tools work.
+
+| Piece | Status |
+|---|---|
+| Skill location | `.agents/skills`, per the notes above, where the kit installs `wk-run-factory`, its `references/` and the scripts. |
+| Starting it | Unknown. Whether a skill can be made hand-start only, and how a user starts one, was not confirmed. The skill's first lines tell the agent not to run unless the user asked. |
+| Subagents | Unknown. The kit assumes none, so the factory runs in single-agent mode ("Without subagents" in the skill). |
+| Hosts | GitHub and GitLab, as in Claude Code; the scripts are plain Node. |
+
+Re-check Cursor's documentation before relying on any of this.

@@ -150,14 +150,14 @@ describe('the real hook in a throw-away git repo', () => {
   }
 
   const script = (root, ...args) =>
-    spawnSync('node', ['scripts/test-edit-guard.mjs', ...args], { cwd: root, encoding: 'utf8', env: { ...process.env, ALLOW_TEST_EDITS: '', CLAUDE_PROJECT_DIR: '' } });
+    spawnSync('node', ['scripts/test-edit-guard.mjs', ...args], { cwd: root, encoding: 'utf8', env: { ...process.env, ALLOW_TEST_EDITS: '', CLAUDE_PROJECT_DIR: '', NODE_TEST_CONTEXT: '' } });
 
   const hook = (root, filePath, env = {}) =>
     spawnSync('node', ['scripts/test-edit-guard.mjs'], {
       cwd: root,
       encoding: 'utf8',
       input: JSON.stringify({ tool_name: 'Edit', cwd: root, tool_input: { file_path: join(root, filePath) } }),
-      env: { ...process.env, ALLOW_TEST_EDITS: '', CLAUDE_PROJECT_DIR: '', ...env },
+      env: { ...process.env, ALLOW_TEST_EDITS: '', CLAUDE_PROJECT_DIR: '', NODE_TEST_CONTEXT: '', ...env },
     });
 
   function inRepo(workflowJson, callback) {
@@ -241,7 +241,7 @@ describe('the real hook in a throw-away git repo', () => {
   it('fails open on broken input and when the resolver file is missing', () => {
     inRepo('{"overrides":{"tests.guard":"on"}}', (root) => {
       script(root, 'start');
-      const broken = spawnSync('node', ['scripts/test-edit-guard.mjs'], { cwd: root, encoding: 'utf8', input: '{oops' });
+      const broken = spawnSync('node', ['scripts/test-edit-guard.mjs'], { cwd: root, encoding: 'utf8', input: '{oops', env: { ...process.env, NODE_TEST_CONTEXT: '' } });
       assert.equal(broken.status, 0);
       rmSync(join(root, 'scripts', 'workflow-config.mjs'));
       assert.equal(hook(root, 'src/a.test.ts').status, 2, 'no resolver: the marker alone turns the guard on');
@@ -255,10 +255,28 @@ describe('the real hook in a throw-away git repo', () => {
         cwd: root,
         encoding: 'utf8',
         input: JSON.stringify({ tool_name: 'Edit', cwd: '/c/no/such/posix/folder', tool_input: { file_path: join(root, 'src/a.test.ts') } }),
-        env: { ...process.env, ALLOW_TEST_EDITS: '', CLAUDE_PROJECT_DIR: '' },
+        env: { ...process.env, ALLOW_TEST_EDITS: '', CLAUDE_PROJECT_DIR: '', NODE_TEST_CONTEXT: '' },
       });
       assert.equal(result.status, 2);
     });
+  });
+
+  it('does not hang a project whose test script is a bare `node --test`', () => {
+    // `node --test` picks up any file named test-*.mjs, including this guard, and starts it with stdin left open.
+    const root = mkdtempSync(join(tmpdir(), 'guard-bare-'));
+    try {
+      mkdirSync(join(root, 'scripts'));
+      copyFileSync(join(HERE, 'test-edit-guard.mjs'), join(root, 'scripts', 'test-edit-guard.mjs'));
+      copyFileSync(join(HERE, 'workflow-config.mjs'), join(root, 'scripts', 'workflow-config.mjs'));
+      // .mjs: a .js file with `import` only works without a package.json on newer Node versions (not on Node 18).
+      writeFileSync(join(root, 'ok.test.mjs'), "import { test } from 'node:test';\ntest('ok', () => {});\n");
+      const env = { ...process.env };
+      delete env.NODE_TEST_CONTEXT;
+      const result = spawnSync(process.execPath, ['--test'], { cwd: root, encoding: 'utf8', timeout: 60000, env });
+      assert.equal(result.status, 0, `node --test did not finish cleanly: ${result.error ?? result.stdout.slice(-300)}`);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
   });
 
   it('reports status', () => {

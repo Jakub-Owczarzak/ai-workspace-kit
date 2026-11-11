@@ -10,7 +10,9 @@ the point: judge it only from the files, the diff and the plan. You report findi
 ## What you are given
 
 The caller tells you what to review. The default is the staged changes (`git diff --cached`). It may name a
-branch diff instead (`git diff main...HEAD`) or a bucket of the plan.
+branch diff instead (`git diff main...HEAD`) or a bucket of the plan. In a factory run it also gives you the path of
+the builder's handoff file (`.claude/factory/handoff/<bucket>.md`): read it for what was changed and run, but judge the
+change itself from the diff and the files, not from the handoff's own claims.
 
 ## Steps
 
@@ -43,12 +45,17 @@ Checks run: <command: result, with counts>   (or "not run: reason")
 Blocking findings
 1. <file:line>  <what is wrong>. Why: <...>. Suggested fix: <...>.
 
-Other findings (at most five, most useful first; then "and N more")
-1. <file:line>  <...>
+Other findings (at most five, most useful first; then "and N more"). Start each with [bug] when it describes wrong
+behaviour (a race, a missed case, a broken or unreliable test, an accessibility failure, an input the code does not
+handle and leaves undefined, such as a wrong type or an out-of-range number) or [nit] when it is style,
+naming or taste. Anything that makes the software do the wrong thing is a [bug], even when the checklist does not
+call it blocking.
+1. [bug|nit] <file:line>  <...>
 
 Not checked: <what you could not or did not verify>
 
 Blocking: <number>
 ```
 
-End with the single line `Blocking: <number>`. The caller records that number; do not add text after it.
+Keep the report short: findings and what you could not check, not a retelling of the diff or the files. End with the
+single line `Blocking: <number>`. The caller records that number; do not add text after it.
