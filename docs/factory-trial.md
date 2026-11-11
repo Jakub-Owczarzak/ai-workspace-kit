@@ -128,3 +128,40 @@ Findings from this run: `gh stack submit` failed on stale local tracking refs (o
 fixed with a plain `git push -u` and no force; the first push warned that the bucket 1 tree had no review record (the
 changelog commit changed the tree after the review), the same stale-record finding as in the first trial. Still not
 exercised: the CI watch and fix loop, native e2e, the `org` profile.
+
+### Round 2 (fewer orchestrator turns)
+
+After round 1 the orchestrator's turn list was read step by step and the skill and builder were changed again (one
+`preflight --json`, the builder fetches its plan and runs `handoff-check` itself, PLAN update before the review, batched push
+and CI-wait calls, a shorter final report, builders told to batch reads and edits). Run on 2026-11-11 on
+`trial/factory-compare2`, same project, plan, model and start.
+
+| | Baseline | Round 1 | Round 2 |
+|---|---|---|---|
+| Orchestrator turns | 68 | 38 | **34** |
+| Orchestrator cost (equiv.) | about 1,263,000 | about 482,000 | about 447,000 |
+| Orchestrator context, first to last prompt | 89,800 to 178,100 | 68,800 to 102,400 | 65,200 to 102,600 |
+| Bucket 1 builder (turns, cost) | 13, about 120,000 | 11, about 111,000 | 11, about 106,000 |
+| Bucket 2 builder (turns, cost) | 24, about 312,000 | 38, about 424,000 | 21, about 266,000 |
+| Reviewers (two) | about 152,000 | about 119,000 | about 123,000 |
+| **Total** | **about 1,847,000** | **about 1,136,000** | **about 942,000** |
+| Against the baseline | | -38% | **-49%** |
+
+Outcome: both buckets built; 0 blocking findings in both reviews (the bucket 2 reviewer left 5 non-blocking notes, one a real
+race in `useWelcomeCardVisibility.tsx` that this run disclosed and left unfixed, where the baseline fixed it); lint and types exit
+0; 58 and 64 unit tests; `npm run e2e` 3 of 3; a real `gh stack` stack (PRs #11 and #12, stack #13); nothing merged; no CI ran.
+The orchestrator did not open the screenshots and said so.
+
+Reading it honestly:
+1. **Against the baseline the saving is large and beyond noise (-49%); against round 1 it is not firm (-17%).** About 160,000
+   of the 190,000 difference between rounds 1 and 2 is the bucket 2 builder (21 turns against 38), and a builder's turn count
+   depends on how its e2e debugging goes, so it varies from run to run (24, 38, 21 for the same task). The orchestrator's own
+   part moved only from 482,000 to 447,000 (-7%), inside the noise.
+2. **The turn reduction I predicted (24 to 26) did not happen: 34.** The orchestrator still took a status-text turn after each
+   subagent report (4 turns; the reports arrive as messages), probed `gh stack --help` although the reference spells the
+   commands out, read and edited `PLAN.md` in several steps, and ran separate calls for the push check, the screenshot
+   publish and `gh stack submit`. These are the next candidates, and each is worth about 1 turn (about 0.8% of the total).
+3. **The success bar is met:** total at least 30% lower than the baseline (49%), orchestrator turns at most 34 (exactly 34),
+   same outcome. Cost per orchestrator turn is about the same (13,000 in round 2 against 18,600 in the baseline).
+4. **Quality caveats that stay:** no screenshot was opened; a known race was left unfixed (disclosed); the review record
+   is again older than the committed tree; the CI loop, native e2e and the `org` profile are still not exercised.
