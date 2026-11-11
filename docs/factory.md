@@ -48,6 +48,7 @@ stops without changing anything (a dirty tree, a bucket without "Done when", an 
 | `factory.ciFixAttempts` | number, `0` = report only | 3 / 3 / 2 | How many times it may fix a red CI run before it stops |
 | `factory.host` | `auto`, `github`, `gitlab` | auto | `auto` reads the git remote |
 | `factory.pushConfirm` | `auto`, `ask` | auto / auto / ask | Whether it pushes by itself or asks for a yes first |
+| `factory.fastFix` | `off`, `docs` | docs / docs / off | A tiny documentation-only fix (at most 10 lines, Markdown and README files; checked by `factory-guard.mjs fast-check`) may be made by the orchestrator with a self-check and no builder or reviewer. Code always goes to a builder. Not used under `review.mode: required` |
 | `tests.e2e` | `off`, `browser`, `native` | off / off / off | End-to-end tests and screenshots; works with or without the factory |
 
 The full table, with the other controls, is in `docs/workflow-profiles.md`.
@@ -78,6 +79,12 @@ Subagents and hooks are Claude Code features. In Cursor, Codex, OpenCode and Cli
 a labeled self-review (`record --self-review`), which the gate does not count under `review.mode: required`, so the
 push stops and asks you. These tools were **not run** here; the adapters were written from their documentation
 dated 2026-11-11. See `adapters/`.
+
+## Resuming
+
+If every bucket is built and factory pull requests are open (after a CI outage, a closed session or a stop), start
+`/wk-run-factory` again: the preflight reports `resume` instead of "every bucket is done", and the run goes straight to
+watching CI, lowest layer first, with the attempt counts kept in `.claude/factory/state.json`. (GitHub only so far.)
 
 ## Stops and limits
 

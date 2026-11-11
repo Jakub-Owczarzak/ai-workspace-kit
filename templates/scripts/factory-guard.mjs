@@ -5,6 +5,8 @@
 //   node scripts/factory-guard.mjs preflight [--json]     Is a factory run allowed here, and what is left to build?
 //   node scripts/factory-guard.mjs baseline               Run the project's lint, type check, test and build commands once
 //                                                         at the start and record which already fail (.claude/factory/baseline.json)
+//   node scripts/factory-guard.mjs fast-check             May the change in the working tree be made without a builder
+//                                                         (factory.fastFix docs, documentation files only, 10 lines at most)? 0/1
 //   node scripts/factory-guard.mjs plan-excerpt [--bucket <id>]   The Intent Anchor and the pending buckets' plans (or one
 //                                                         bucket's), so a run does not read the whole PLAN.md
 //   node scripts/factory-guard.mjs handoff-check --bucket <id>   Is .claude/factory/handoff/<id>.md complete and done? 0/1
@@ -256,6 +258,57 @@ export function handoffProblems(text) {
   return problems;
 }
 
+// ---- The fast fix ---------------------------------------------------------------------------------------------
+// `factory.fastFix: docs` lets the orchestrator make a tiny documentation-only fix itself. The limit is enforced here, not
+// left to judgment: only documentation files, and at most FAST_FIX_MAX_LINES changed lines in all.
+
+export const FAST_FIX_MAX_LINES = 10;
+const DOC_FILE = /(^|\/)(README|CHANGELOG)[^/]*$|\.(md|markdown)$|^docs\//i;
+
+/**
+ * `{ ok, reason }` for a change given as `[{ path, lines }]` (lines = added plus deleted) and the `factory.fastFix` value.
+ * The reason always says why, so the caller can show it.
+ */
+export function fastFixVerdict(files, fastFix) {
+  if (fastFix !== 'docs') return { ok: false, reason: `factory.fastFix is ${fastFix}: use a builder and an independent re-review` };
+  if (!files.length) return { ok: false, reason: 'there is no change to check' };
+  const other = files.filter((file) => !DOC_FILE.test(file.path.replaceAll('\\', '/')));
+  if (other.length) return { ok: false, reason: `not documentation only (${other.slice(0, 3).map((file) => file.path).join(', ')}): use a builder` };
+  const lines = files.reduce((total, file) => total + file.lines, 0);
+  if (lines > FAST_FIX_MAX_LINES) return { ok: false, reason: `${lines} changed lines is more than ${FAST_FIX_MAX_LINES}: use a builder` };
+  return { ok: true, reason: `${lines} changed lines in ${files.length} documentation file${files.length === 1 ? '' : 's'}` };
+}
+
+/** The files changed against HEAD (staged, unstaged and new files) with their changed-line counts. Never throws. */
+export function changedFiles(root, run = realRunner(root)) {
+  const ask = (command, args) => {
+    try {
+      const result = run(command, args);
+      return { status: result?.status ?? 1, stdout: String(result?.stdout ?? '') };
+    } catch {
+      return { status: 1, stdout: '' };
+    }
+  };
+  const counts = new Map();
+  for (const line of ask('git', ['diff', 'HEAD', '--numstat']).stdout.split(/\r?\n/).filter(Boolean)) {
+    const [added, deleted, ...rest] = line.split('\t');
+    const path = rest.join('\t');
+    counts.set(path, (Number(added) || 0) + (Number(deleted) || 0) || 1);
+  }
+  for (const line of ask('git', ['status', '--porcelain']).stdout.split(/\r?\n/).filter(Boolean)) {
+    const path = line.slice(3).trim();
+    if (counts.has(path) || path.replaceAll('\\', '/').startsWith('.claude/factory/')) continue;
+    let size = 1;
+    try {
+      size = readFileSync(join(root, path), 'utf8').split('\n').length;
+    } catch {
+      // A folder or an unreadable file: count it as one line, the file-type check still applies.
+    }
+    counts.set(path, size);
+  }
+  return [...counts].map(([path, lines]) => ({ path, lines }));
+}
+
 // ---- The host and the branch ----------------------------------------------------------------------------------
 
 /**
@@ -469,6 +522,7 @@ export function preflight(root, { env = process.env, run } = {}) {
     branch: '',
     defaultBranch: 'main',
     buckets: [],
+    resume: null,
   };
   const { problems, notes } = result;
   const finish = () => {
@@ -543,6 +597,23 @@ export function preflight(root, { env = process.env, run } = {}) {
       }
     }
     if (result.pushConfirm === 'ask') notes.push('factory.pushConfirm is ask: the factory stops for your yes before each push.');
+
+    // Every bucket is done but pull requests of an earlier run are open: this is a resume at the CI step, not an error.
+    const allDone = problems.some((problem) => problem.startsWith('Every bucket is done'));
+    if (allDone && result.host === 'github' && problems.length === 1) {
+      const listed = ask('gh', ['pr', 'list', '--state', 'open', '--json', 'number,headRefName,baseRefName', '--limit', '50']);
+      let open = [];
+      try {
+        open = JSON.parse(listed.stdout || '[]').filter((pr) => String(pr.headRefName).startsWith('factory/'));
+      } catch {
+        open = [];
+      }
+      if (open.length) {
+        problems.length = 0;
+        result.resume = { prs: open.map((pr) => ({ number: pr.number, branch: pr.headRefName, base: pr.baseRefName })) };
+        notes.push(`Every bucket is built and ${open.length} factory pull request${open.length === 1 ? ' is' : 's are'} open: resume at the CI step (section 3 of the skill), bottom layer first. Nothing is built again.`);
+      }
+    }
   }
 
   checkE2e(root, result);
@@ -622,6 +693,12 @@ function main(argv) {
       console.log(writeReport(options.root, { reason: options.reason, details }));
       return 0;
     }
+    case 'fast-check': {
+      const fastFix = loadWorkflowConfig(options.root).controls['factory.fastFix'].value;
+      const verdict = fastFixVerdict(changedFiles(options.root), fastFix);
+      console.log(`${verdict.ok ? 'ok' : 'refused'}: ${verdict.reason}`);
+      return verdict.ok ? 0 : 1;
+    }
     case 'baseline': {
       const state = recordBaseline(options.root);
       const names = Object.keys(state.commands);
@@ -680,7 +757,7 @@ function main(argv) {
       return 0;
     }
     default:
-      console.error('usage: factory-guard.mjs preflight | baseline | plan-excerpt [--bucket <id>] | handoff-check --bucket <id> | attempt --key <name> | push-check --branch <name> | report --reason <text> | reset | clean-log [--lines <n>] < log  [--root <dir>]');
+      console.error('usage: factory-guard.mjs preflight | baseline | fast-check | plan-excerpt [--bucket <id>] | handoff-check --bucket <id> | attempt --key <name> | push-check --branch <name> | report --reason <text> | reset | clean-log [--lines <n>] < log  [--root <dir>]');
       return 2;
   }
 }

@@ -187,6 +187,19 @@
       "touches": [".claude/workflow.json"]
     },
     {
+      "id": "control.factory.fastFix",
+      "kind": "control",
+      "control": "factory.fastFix",
+      "title": "Factory: small documentation fixes without a subagent",
+      "what": "Whether the factory may fix a tiny documentation-only problem itself (for example a CI check that wants a README line) instead of starting a builder and a reviewer. Only used when the factory is on.",
+      "impact": "docs: a fix that touches only documentation files (Markdown, README, docs/, CHANGELOG) and at most 10 changed lines is made by the orchestrator, checked by `factory-guard.mjs fast-check`, verified, and labelled in the pull request as a self-checked fast fix; it saves a builder and a reviewer. off: every fix goes to a fresh builder and an independent re-review. Anything that touches code always goes to a builder.",
+      "values": {
+        "off": "Every fix goes to a builder and an independent re-review",
+        "docs": "A tiny documentation-only fix is made and self-checked by the orchestrator"
+      },
+      "touches": [".claude/workflow.json"]
+    },
+    {
       "id": "control.claude.runChecks",
       "kind": "control",
       "control": "claude.runChecks",

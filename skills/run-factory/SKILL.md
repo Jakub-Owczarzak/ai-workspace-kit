@@ -21,6 +21,10 @@ skill on their own from its description, and this one pushes code.
 Run `node scripts/factory-guard.mjs preflight --json` once, in the same turn as `plan-excerpt` and the reads below (do not
 run the plain form as well: the JSON holds the same `problems` and `notes`).
 
+- **Resume.** If the JSON has a `resume` object (every bucket is built and factory pull requests are open, with the
+  list in `resume.prs`), this is a continuation, for example after a CI outage or a closed session: do not build or
+  review anything again. Skip to section 3 and watch those pull requests, lowest layer first (the base of each one
+  tells the order). The attempt counts in `.claude/factory/state.json` carry over.
 - If `ok` is false, show the user every problem and stop. Change nothing. Do not work around a
   problem: not a dirty tree, not a missing "Done when", not a host it does not support.
 - Show the `note:` lines once. They say what will not happen (for example, that e2e will not run).
@@ -43,7 +47,7 @@ run the plain form as well: the JSON holds the same `problems` and `notes`).
   `singleAgent`: when it is true and your tool cannot start a separate agent with a fresh context, read "Without
   subagents (single-agent mode)" below before step 1 and follow it wherever this skill says to start a subagent.
 - Settings come from `node scripts/workflow-config.mjs`: `factory.mode` (`local` or `pr`), `factory.prLayout`,
-  `factory.ciFixAttempts`, `factory.pushConfirm`, `review.mode`, `tests.tdd`. Do not guess them.
+  `factory.ciFixAttempts`, `factory.pushConfirm`, `factory.fastFix`, `review.mode`, `tests.tdd`. Do not guess them.
 
 ## Keep your own context small
 
@@ -155,6 +159,14 @@ for each PR>`); if there are still none, tell the user there is no CI to watch a
      (`factory.ciFixAttempts`) is reached or is 0: stop (section 4).
   2. Read why: **[host: read the failure]**. Pass any log through `node scripts/factory-guard.mjs clean-log`: it
      removes color codes, markers and timestamps and keeps the last lines.
+  2b. **Fast fix (only when `factory.fastFix` is `docs` and `review.mode` is not `required`).** For a tiny
+     documentation-only failure, such as a CI check that wants a README line, you may make the fix yourself instead of
+     starting a builder and a reviewer: switch to the branch (step 3), make the edit, then run
+     `node scripts/factory-guard.mjs fast-check`. Exit 0 means the change is only documentation files and at most 10
+     changed lines; verify once (step 3 of section 1), commit, and say in the pull request body: "fast fix by the
+     orchestrator: documentation only, N lines, self-checked, no independent re-review". Exit 1 means it is not small
+     or not documentation: undo your edit (`git restore` the files you changed) and use a builder as below. Never use
+     the fast path for anything that touches code, tests or configuration.
   3. Check out that branch in one call that also prints `git branch --show-current` (a stack command such as
      `gh stack submit` leaves the top branch checked out, and a fix started on the wrong branch is wasted), tell the
      builder the branch name, give it the failure output and let it fix the cause.

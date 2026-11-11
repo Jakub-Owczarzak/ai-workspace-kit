@@ -104,6 +104,13 @@ export const CONTROL_SPECS = {
     description:
       'whether the factory pushes by itself (auto) or stops for your yes before each push (ask); only used when factory.mode is pr',
   },
+  'factory.fastFix': {
+    type: 'choice',
+    allowed: ['off', 'docs'],
+    env: 'FACTORY_FAST_FIX',
+    description:
+      'whether the factory may fix a tiny documentation-only problem itself with a self-check (docs) or must always use a builder and an independent re-review (off); only used when factory.mode is on',
+  },
   'claude.runChecks': {
     type: 'boolean',
     env: 'CLAUDE_RUN_CHECKS',
@@ -132,6 +139,7 @@ export const PROFILES = {
     'factory.ciFixAttempts': 3,
     'factory.host': 'auto',
     'factory.pushConfirm': 'auto',
+    'factory.fastFix': 'docs',
     'claude.runChecks': false,
     'static.checks': true,
   },
@@ -148,6 +156,7 @@ export const PROFILES = {
     'factory.ciFixAttempts': 3,
     'factory.host': 'auto',
     'factory.pushConfirm': 'auto',
+    'factory.fastFix': 'docs',
     'claude.runChecks': false,
     'static.checks': true,
   },
@@ -164,6 +173,7 @@ export const PROFILES = {
     'factory.ciFixAttempts': 2,
     'factory.host': 'auto',
     'factory.pushConfirm': 'ask',
+    'factory.fastFix': 'off',
     'claude.runChecks': false,
     'static.checks': true,
   },

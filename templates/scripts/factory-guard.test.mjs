@@ -7,13 +7,16 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, it } from 'node:test';
 import {
+  FAST_FIX_MAX_LINES,
   bucketE2e,
   bucketPlanProblems,
   buildReport,
   ciDecision,
   cleanCiLog,
+  changedFiles,
   detectHost,
   e2eCommand,
+  fastFixVerdict,
   handoffPath,
   handoffProblems,
   isProtectedBranch,
@@ -220,6 +223,58 @@ describe('e2eCommand', () => {
 
   it('does not take a command from prose or a line that only mentions e2e in passing', () => {
     assert.equal(e2eCommand('We run e2e tests on CI.\nnpm test   # tests, not e2e-free'), null);
+  });
+});
+
+describe('fastFixVerdict and changedFiles', () => {
+  it('allows a tiny documentation-only change when factory.fastFix is docs', () => {
+    assert.equal(fastFixVerdict([{ path: 'README.md', lines: 2 }], 'docs').ok, true);
+    assert.equal(fastFixVerdict([{ path: 'docs/guide.md', lines: 4 }, { path: 'CHANGELOG.md', lines: 6 }], 'docs').ok, true);
+    assert.equal(fastFixVerdict([{ path: 'packages/app/README.txt', lines: 1 }], 'docs').ok, true, 'a README is a documentation file by name');
+  });
+
+  it('refuses code, a big change, an empty change and the off setting, each with a reason', () => {
+    assert.match(fastFixVerdict([{ path: 'src/a.js', lines: 1 }], 'docs').reason, /not documentation only \(src\/a\.js\)/);
+    assert.match(fastFixVerdict([{ path: 'README.md', lines: 1 }, { path: 'src/a.js', lines: 1 }], 'docs').reason, /src\/a\.js/);
+    assert.match(fastFixVerdict([{ path: 'README.md', lines: FAST_FIX_MAX_LINES + 1 }], 'docs').reason, /more than 10/);
+    assert.equal(fastFixVerdict([], 'docs').ok, false);
+    assert.match(fastFixVerdict([{ path: 'README.md', lines: 1 }], 'off').reason, /factory\.fastFix is off/);
+  });
+
+  it('changedFiles reads the numstat, new files and skips the factory folder', () => {
+    withProject((root) => {
+      const run = fakeRun({
+        'git diff HEAD --numstat': { status: 0, stdout: '1\t1\tREADME.md\n3\t0\tsrc/a.js\n' },
+        'git status --porcelain': { status: 0, stdout: ' M README.md\n M src/a.js\n?? NOTES.md\n?? .claude/factory/state.json\n' },
+      });
+      const files = changedFiles(root, run);
+      assert.deepEqual(files.map((file) => file.path).sort(), ['NOTES.md', 'README.md', 'src/a.js']);
+      assert.equal(files.find((file) => file.path === 'README.md').lines, 2);
+    }, { files: { 'NOTES.md': 'one\ntwo\n' } });
+  });
+
+  it('the fast-check command follows the profile: team may, org may not', () => {
+    const run = (root) => {
+      execFileSync('git', ['init', '-q', '-b', 'main'], { cwd: root });
+      execFileSync('git', ['add', '-A'], { cwd: root });
+      execFileSync('git', ['-c', 'user.email=t@e.c', '-c', 'user.name=t', 'commit', '-q', '--allow-empty', '-m', 'init'], { cwd: root });
+      writeFileSync(join(root, 'README.md'), 'one line\n');
+      try {
+        return { status: 0, stdout: execFileSync(process.execPath, [GUARD, 'fast-check', '--root', root], { encoding: 'utf8', cwd: root }) };
+      } catch (error) {
+        return { status: error.status, stdout: String(error.stdout ?? '') };
+      }
+    };
+    withProject((root) => {
+      const team = run(root);
+      assert.equal(team.status, 0);
+      assert.match(team.stdout, /^ok: /);
+    }, { config: { profile: 'team' } });
+    withProject((root) => {
+      const org = run(root);
+      assert.equal(org.status, 1);
+      assert.match(org.stdout, /factory\.fastFix is off/);
+    }, { config: { profile: 'org' } });
   });
 });
 
@@ -474,6 +529,35 @@ describe('preflight', () => {
       assert.equal(result.defaultBranch, 'main');
       assert.deepEqual(result.buckets.map((bucket) => bucket.id), ['2', '3a', '3b']);
     });
+  });
+
+  const ALL_DONE_PLAN = FILLED_PLAN.replace('| todo |', '| done: x |').replace('| in progress |', '| done: x |').replace('| planned, awaiting approval |', '| done: x |');
+  const OPEN_PRS = 'gh pr list --state open --json number,headRefName,baseRefName --limit 50';
+
+  it('resumes at the CI step when every bucket is done and factory pull requests are open', () => {
+    withProject((root) => {
+      const prs = JSON.stringify([{ number: 5, headRefName: 'factory/1-trim', baseRefName: 'trial/org' }, { number: 9, headRefName: 'feature/other', baseRefName: 'main' }]);
+      const result = preflight(root, { env: pr, run: fakeRun({ ...GOOD_GIT, ...GOOD_GH, [OPEN_PRS]: { status: 0, stdout: prs } }) });
+      assert.deepEqual(result.problems, []);
+      assert.equal(result.ok, true);
+      assert.deepEqual(result.buckets, []);
+      assert.deepEqual(result.resume, { prs: [{ number: 5, branch: 'factory/1-trim', base: 'trial/org' }] });
+      assert.match(result.notes.join('\n'), /resume at the CI step/);
+    }, { plan: ALL_DONE_PLAN });
+  });
+
+  it('still refuses "every bucket is done" when no factory pull request is open or the tree is dirty', () => {
+    withProject((root) => {
+      const none = preflight(root, { env: pr, run: fakeRun({ ...GOOD_GIT, ...GOOD_GH, [OPEN_PRS]: { status: 0, stdout: '[]' } }) });
+      assert.equal(none.ok, false);
+      assert.match(none.problems.join('\n'), /Every bucket is done/);
+      assert.equal(none.resume, null);
+      const dirty = preflight(root, {
+        env: pr,
+        run: fakeRun({ ...GOOD_GIT, ...GOOD_GH, 'git status --porcelain': { status: 0, stdout: ' M src/a.js\n' }, [OPEN_PRS]: { status: 0, stdout: JSON.stringify([{ number: 1, headRefName: 'factory/1-a', baseRefName: 'main' }]) } }),
+      });
+      assert.equal(dirty.ok, false, 'uncommitted changes are never resumed over');
+    }, { plan: ALL_DONE_PLAN });
   });
 
   it('takes its settings from the profile, so org asks before a push', () => {
