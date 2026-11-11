@@ -231,3 +231,19 @@ Found and fixed in the same round: the reviewer's `[bug]` for an unhandled bad i
 "gap" because the plan did not cover it; the rule now says that defining a bad input's behaviour is fixing a bug, not new scope, and
 the local run above followed it. The resume at the CI step was run for real on the finished branch (the preflight said `resume`) and
 then restricted to the pull requests of the current stack.
+
+## The report-only CI limit and the resume (Bucket 9, 2026-11-11)
+
+**Report-only CI** (`factory.ciFixAttempts: 0`, team profile, one bucket `mumble`, CI with a `docs` check the local tests do not run):
+the bucket was built test-first, the reviewer's `[bug]` (a non-string argument) was fixed with an explicit `TypeError` and re-reviewed,
+the branch was pushed and a pull request opened. CI then failed on `docs` (the README did not name `mumble`). The agent ran
+`factory-guard.mjs attempt`, which printed `stop: 0 of 0 attempts used` and exited 1, made no fix, and wrote the stop report (reason,
+the failing check and its log, "attempts used: none"). This is the first time the stop path of the attempt counter ran in a live loop.
+Tokens: orchestrator 30 turns, about 314,000; four subagents, about 132,000; total about 446,000.
+
+**Resume at the CI step**: in a fresh session on the finished branch, `/wk-run-factory` did not say "every bucket is done"; the
+preflight reported `resume`, nothing was built, pushed or merged, the agent only read the CI results of the open factory pull
+requests, asked for an attempt (the counter said stop again) and wrote a new report. In this run the installed guard was the version
+before the stack filter, so it watched all 7 open factory pull requests of the repository, including other scenarios' red ones, and
+named them without reading their logs; the kit now limits resume to the pull requests of the current branch and its ancestors
+(unit-tested; not re-run live).
