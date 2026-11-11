@@ -604,7 +604,11 @@ export function preflight(root, { env = process.env, run } = {}) {
       const listed = ask('gh', ['pr', 'list', '--state', 'open', '--json', 'number,headRefName,baseRefName', '--limit', '50']);
       let open = [];
       try {
-        open = JSON.parse(listed.stdout || '[]').filter((pr) => String(pr.headRefName).startsWith('factory/'));
+        // Only the pull requests of this stack: a factory branch that is the current branch or one of its ancestors.
+        // Another run's open factory pull requests in the same repository are not this run's to watch.
+        open = JSON.parse(listed.stdout || '[]')
+          .filter((pr) => String(pr.headRefName).startsWith('factory/'))
+          .filter((pr) => pr.headRefName === result.branch || ask('git', ['merge-base', '--is-ancestor', `origin/${pr.headRefName}`, 'HEAD']).status === 0);
       } catch {
         open = [];
       }

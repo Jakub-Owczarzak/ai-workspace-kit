@@ -537,12 +537,21 @@ describe('preflight', () => {
   it('resumes at the CI step when every bucket is done and factory pull requests are open', () => {
     withProject((root) => {
       const prs = JSON.stringify([{ number: 5, headRefName: 'factory/1-trim', baseRefName: 'trial/org' }, { number: 9, headRefName: 'feature/other', baseRefName: 'main' }]);
-      const result = preflight(root, { env: pr, run: fakeRun({ ...GOOD_GIT, ...GOOD_GH, [OPEN_PRS]: { status: 0, stdout: prs } }) });
+      const result = preflight(root, { env: pr, run: fakeRun({ ...GOOD_GIT, ...GOOD_GH, [OPEN_PRS]: { status: 0, stdout: prs }, 'git merge-base --is-ancestor origin/factory/1-trim HEAD': { status: 0, stdout: '' } }) });
       assert.deepEqual(result.problems, []);
       assert.equal(result.ok, true);
       assert.deepEqual(result.buckets, []);
       assert.deepEqual(result.resume, { prs: [{ number: 5, branch: 'factory/1-trim', base: 'trial/org' }] });
       assert.match(result.notes.join('\n'), /resume at the CI step/);
+    }, { plan: ALL_DONE_PLAN });
+  });
+
+  it('does not resume over the factory pull requests of another run (not in this branch history)', () => {
+    withProject((root) => {
+      const prs = JSON.stringify([{ number: 2, headRefName: 'factory/2-old', baseRefName: 'main' }]);
+      const result = preflight(root, { env: pr, run: fakeRun({ ...GOOD_GIT, ...GOOD_GH, [OPEN_PRS]: { status: 0, stdout: prs } }) });
+      assert.equal(result.ok, false);
+      assert.equal(result.resume, null);
     }, { plan: ALL_DONE_PLAN });
   });
 

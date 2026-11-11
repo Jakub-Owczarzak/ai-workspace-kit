@@ -82,9 +82,10 @@ dated 2026-11-11. See `adapters/`.
 
 ## Resuming
 
-If every bucket is built and factory pull requests are open (after a CI outage, a closed session or a stop), start
-`/wk-run-factory` again: the preflight reports `resume` instead of "every bucket is done", and the run goes straight to
-watching CI, lowest layer first, with the attempt counts kept in `.claude/factory/state.json`. (GitHub only so far.)
+If every bucket is built and factory pull requests are open (after a CI outage, a closed session or a stop), switch to
+the **top branch of the stack** (the one whose `PLAN.md` shows the buckets done) and start `/wk-run-factory` again: the preflight reports `resume` instead of "every bucket is done", and the run goes straight to
+watching the pull requests of that stack (the current branch and its ancestors, not another run's), lowest layer first,
+with the attempt counts kept in `.claude/factory/state.json`. (GitHub only so far.)
 
 ## Stops and limits
 

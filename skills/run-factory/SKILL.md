@@ -22,7 +22,7 @@ Run `node scripts/factory-guard.mjs preflight --json` once, in the same turn as 
 run the plain form as well: the JSON holds the same `problems` and `notes`).
 
 - **Resume.** If the JSON has a `resume` object (every bucket is built and factory pull requests are open, with the
-  list in `resume.prs`), this is a continuation, for example after a CI outage or a closed session: do not build or
+  list in `resume.prs`, limited to this branch and its ancestors), this is a continuation, for example after a CI outage or a closed session: do not build or
   review anything again. Skip to section 3 and watch those pull requests, lowest layer first (the base of each one
   tells the order). The attempt counts in `.claude/factory/state.json` carry over.
 - If `ok` is false, show the user every problem and stop. Change nothing. Do not work around a
