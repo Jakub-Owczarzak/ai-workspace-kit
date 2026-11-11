@@ -43,7 +43,9 @@ Run the project's commands from the project folder the caller names. A script th
 
 ## Limits you keep
 
-- **No git changes.** You may run `git status`, `git diff`, `git log` and `git show`. You may not run `git add`,
+- **No git changes.** You may run `git status`, `git diff`, `git log`, `git show` and `git branch --show-current`. When the
+  caller names a branch, run `git branch --show-current` before you edit anything and, if it differs, stop and report
+  `blocked: on branch <x>, expected <y>` without changing a file. You may not run `git add`,
   `commit`, `checkout`, `switch`, `reset`, `stash`, `merge`, `rebase` or `push`, or create a branch.
 - **No network, no installs, no secrets.** Do not install packages, call a service, or read or print a token or key,
   unless the bucket's plan names the exact dependency to add.

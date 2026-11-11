@@ -155,7 +155,9 @@ for each PR>`); if there are still none, tell the user there is no CI to watch a
      (`factory.ciFixAttempts`) is reached or is 0: stop (section 4).
   2. Read why: **[host: read the failure]**. Pass any log through `node scripts/factory-guard.mjs clean-log`: it
      removes color codes, markers and timestamps and keeps the last lines.
-  3. Check out that branch, give the failure output to the `factory-builder` subagent and let it fix the cause.
+  3. Check out that branch in one call that also prints `git branch --show-current` (a stack command such as
+     `gh stack submit` leaves the top branch checked out, and a fix started on the wrong branch is wasted), tell the
+     builder the branch name, give it the failure output and let it fix the cause.
      Verify yourself, review as in section 1 (a quick pass for a small fix), and commit.
   4. Push the fix: **[host: push a fix]**. When you changed a lower layer of a stack, the layers above must contain
      it before they are pushed: **[host: restack]**, or, without a stack tool, restack by hand (below).
@@ -171,7 +173,9 @@ of the merge and record it before pushing.
 
 Stop, without asking, when any of these happens: preflight fails, the builder is `blocked`, verification or review
 is still failing after 3 rounds, `push-check` refuses, the user does not say yes to a push, a command that should
-work fails twice in the same way, CI is still red at the cap.
+work fails twice in the same way, CI is still red at the cap, or a failing CI check says in its own log that it needs a
+decision, approval or setting outside the repository (not a change to the code or its docs). In that last case do not
+use up the remaining fix attempts: write the report with the check's name and message and say what clears it.
 
 To stop: write the reason and the last real output with
 `node scripts/factory-guard.mjs report --reason "<one line>" --details-file <file with the output>`, then tell the user

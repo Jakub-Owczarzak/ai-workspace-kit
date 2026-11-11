@@ -140,3 +140,38 @@ What it showed:
 - `apply` rewrites `.claude/workspace-kit/choices.json` and `manifest.json` each time. They are tracked in a project
   that commits the kit folder, so the tree is dirty afterwards and the factory preflight refuses until they are committed.
 - Redirecting stderr of a native command in PowerShell (`2>&1`) turns normal progress lines into an error record.
+
+## The CI fix loop on a repository with CI (Bucket 9, scenario 1, 2026-11-11)
+
+A private scratch GitHub repository with a tiny Node library, the team profile, `factory.mode: pr`, `factory.ciFixAttempts: 2`, a
+two-bucket plan (`farewell`, `shout`) and three CI jobs: `test` (the same as the local `npm test`), `docs` (every exported function
+must be named in `README.md`; the local tests do not run it) and `external` (always red: it stands for an approval decided outside
+the repository). The agent files were the registered `factory-builder` and `reviewer` of the current kit, started by `/wk-run-factory`
+in a fresh Claude Code session on Sonnet 5.5.
+
+| Step | Result |
+|---|---|
+| Build, verify, review, commit | Both buckets built; local tests, lint and type check green; advisory review with 0 blocking findings |
+| Push and open | A stack of two PRs (a stack tool left the top branch checked out) |
+| Red CI, found by the loop | `docs` failed on both PRs (the README did not name the new functions), `external` failed on both |
+| Fix attempts | The failing log was read through `clean-log`; `factory-guard.mjs attempt` counted 1 of 2 on each branch; a fresh builder fixed the README on each; a quick re-review of each fix |
+| Restack | The upper branch got the lower fix by `git merge` and a normal push, no force |
+| After the fixes | `test` and `docs` green on both PRs; `external` still red |
+| Stop | The agent stopped without using the second attempt, because the log of `external` says it needs an approval outside the repository; it wrote `.claude/factory/report.md` with the reason, the attempts used and the log |
+| Merged or deployed | Nothing |
+
+What this proved: a red CI run on a real pipeline is detected, read, fixed by a fresh builder, re-reviewed and pushed; the attempt
+counter is kept per branch; the by-hand restack works without a force push; the stop report is written with the real log.
+
+What it did not prove: **the cap itself.** The agent stopped by judgment after one attempt per branch (the failure looked unfixable
+by code), not because `attempt` returned stop. The skill now says to stop early for a check that needs an outside decision; the cap
+path, with a failure that looks fixable and is not, is still to be run. The `typecheck` of the scratch project is a no-op and proves
+nothing; e2e did not run (no bucket was marked `E2E: yes`).
+
+Found and fixed: the first CI-fix builder was started on the wrong branch (the stack command had left the top branch checked out); it
+stopped without editing. The skill now says to switch to the branch and print `git branch --show-current` in the same call, and the
+builder checks the branch name before it edits.
+
+Tokens (input-token equivalents, assumed price ratios): the orchestrator 50 turns, about 532,000; eight subagents (three builders,
+three quick or full reviews and two CI-fix builders and reviews), about 241,000; total about 773,000 for a very small project. The
+orchestrator is again about 70% of it, and each CI fix cycle costs about ten of its turns.
