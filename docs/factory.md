@@ -21,11 +21,15 @@ stops without changing anything (a dirty tree, a bucket without "Done when", an 
 ## What it does, per bucket
 
 1. A branch `factory/<id>-<name>`.
-2. A fresh `factory-builder` subagent builds the bucket. It edits files and runs commands; it never commits,
-   pushes or switches branches.
-3. The orchestrator verifies by itself (lint, types, tests, the bucket's "Verify by") and does not trust the
-   builder's report. For a bucket marked `E2E: yes` it also runs the end-to-end command.
-4. A fresh `reviewer` subagent reads the staged change; blocking findings go back to a builder (at most 3 rounds).
+2. A fresh `factory-builder` subagent builds the bucket, runs the checks and fixes its own failures (at most 3 rounds
+   inside its run). It edits files and runs commands; it never commits, pushes or switches branches. It writes its
+   full report to a **handoff file** (`.claude/factory/handoff/<bucket>.md`, git-ignored) and replies with a few lines
+   and a status line, so the orchestrator does not carry the report in its own context.
+3. The orchestrator verifies by itself, once per bucket (lint, types, tests, the bucket's "Verify by", in one batched
+   call) and does not trust the builder's report. `factory-guard.mjs handoff-check` confirms the handoff is
+   complete. For a bucket marked `E2E: yes` it also runs the end-to-end command.
+4. A fresh `reviewer` subagent reads the staged change and the handoff; blocking findings go back to a builder (at
+   most 3 rounds).
 5. One commit per bucket, through the normal hooks (never `--no-verify`).
 6. After the last bucket: `local` mode writes the PR text to `.claude/factory/pr-<id>.md` and stops. `pr` mode
    runs `push-check` (feature branches only), pushes, opens the PR or stack, writes the bodies from the real diff,
@@ -89,8 +93,11 @@ above cover the rest.
 
 ## Cost
 
-Each subagent carries a fixed prefix (system prompt and tool list) that is re-read every turn, so a small change
-still costs real tokens. The measured numbers and the tuning plan are in `PLAN.md` (Bucket 9 and 10).
+Every turn re-reads the whole context of the agent that takes it, so a small change still costs real tokens. In a
+real-project trial the orchestrator was about 70% of the cost (`docs/factory-trial.md`). The skill therefore keeps the
+orchestrator's context small (a plan excerpt instead of the whole `PLAN.md`, batched and filtered commands, handoff
+files instead of relayed reports) and lets the builder carry the build-check-fix loop. Whether that helps is being
+measured against the trial's numbers: the plan and the result are in `PLAN.md` (Bucket 10).
 
 ## Permissions
 

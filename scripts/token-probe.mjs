@@ -7,11 +7,19 @@
 // output), the size of the first and last prompt, and a rough cost in "input-token equivalents" using ASSUMED price
 // ratios (cache read 0.1, cache write 1.25, output 5 times a fresh input token): check current pricing before relying
 // on the cost line. The `subagent_tokens` number a subagent reports is about its last prompt plus output, not the sum.
+//
+//   --after "<text>"   count only the model turns after the first transcript line that contains this text (for example
+//                      the user message that started a run), so a planning interview in the same session is left out.
+//                      Use it on the orchestrator transcript (copy it to <folder>/agent-main.jsonl and use the id `main`).
 import { readFileSync } from 'node:fs';
 
-const [folder, ...ids] = process.argv.slice(2);
+const argv = process.argv.slice(2);
+const afterAt = argv.indexOf('--after');
+const afterText = afterAt >= 0 ? argv[afterAt + 1] : null;
+if (afterAt >= 0) argv.splice(afterAt, 2);
+const [folder, ...ids] = argv;
 if (!folder || ids.length === 0) {
-  console.error('usage: node scripts/token-probe.mjs <subagents folder> <agent id> [<agent id> ...]');
+  console.error('usage: node scripts/token-probe.mjs <subagents folder> <agent id> [<agent id> ...] [--after "<text>"]');
   process.exit(2);
 }
 
@@ -27,7 +35,12 @@ for (const id of ids) {
   }
   const turns = [];
   const seen = new Set();
+  let started = afterText === null;
   for (const line of lines) {
+    if (!started) {
+      if (line.includes(afterText)) started = true;
+      continue;
+    }
     let entry;
     try {
       entry = JSON.parse(line);

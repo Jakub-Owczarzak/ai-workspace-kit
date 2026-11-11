@@ -10,7 +10,9 @@ the point: judge it only from the files, the diff and the plan. You report findi
 ## What you are given
 
 The caller tells you what to review. The default is the staged changes (`git diff --cached`). It may name a
-branch diff instead (`git diff main...HEAD`) or a bucket of the plan.
+branch diff instead (`git diff main...HEAD`) or a bucket of the plan. In a factory run it also gives you the path of
+the builder's handoff file (`.claude/factory/handoff/<bucket>.md`): read it for what was changed and run, but judge the
+change itself from the diff and the files, not from the handoff's own claims.
 
 ## Steps
 
@@ -51,4 +53,5 @@ Not checked: <what you could not or did not verify>
 Blocking: <number>
 ```
 
-End with the single line `Blocking: <number>`. The caller records that number; do not add text after it.
+Keep the report short: findings and what you could not check, not a retelling of the diff or the files. End with the
+single line `Blocking: <number>`. The caller records that number; do not add text after it.

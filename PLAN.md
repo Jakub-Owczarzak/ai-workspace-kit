@@ -125,6 +125,32 @@ give the builder the exact files to read instead of letting it explore; reuse on
 keep the skill files short and move rarely used parts into references; cap printed output (`clean-log`, `--jq`, `Select-Object`);
 cache research results in `docs/`. State the trade-off for each in the plan.
 
+**Bucket 10 as approved by the user (2026-11-11).** Approach: keep the orchestrator's context small and its turns few, and let
+subagents carry the loops, handing work over through files. Built so far (458 tests pass): `factory-guard.mjs plan-excerpt` (the
+anchor and the pending buckets' plans, not the whole `PLAN.md`) and `handoff-check`; the `factory-builder` runs build, checks and
+fixes (up to 3 rounds) and writes `.claude/factory/handoff/<bucket>.md`, replying with a few lines; the `reviewer` reads the
+handoff and keeps its report short; the `run-factory` skill got a "Keep your own context small" section (batch commands, filter
+output, no relaying, no PNG reads unless a "Done when" depends on them, short PR bodies, a fresh session for long plans), and the
+orchestrator verifies once per bucket in one batched call. Not built: a verifier subagent, a driver script, `/compact` steps.
+Trade-off kept honest: the builder now checks its own work in its loop; the guarantees stay in the reviewer (independent) and the
+orchestrator's own single verification.
+**The comparison run (same scenario, new session).** Repo clone `<trial clone>`, branch `trial/factory-compare`
+from the baseline's start (`trial/factory-0.2.0`) with the new kit files installed and the same approved plan (the baseline's
+`PLAN.md`, both buckets back to todo, uncommitted as then). Same model (Sonnet 5.5), same start (`/wk-run-factory` in a fresh
+session, no planning in it), the same project commands and profile. Measure the run phase only, with
+`node scripts/token-probe.mjs <folder> main <agent ids> --after "<the first run message>"`.
+Baseline, run phase only: orchestrator 68 turns, about 1,263,000 input-token equivalents, context 89,800 to 178,100; subagents
+(4) about 584,000; **total about 1,847,000**. Caveats: the baseline orchestrator carried the planning (context started at 89,800;
+the new one starts near 63,000 plus the plan excerpt), which is intended (lever 1), so report orchestrator turns and cost per turn
+separately; one run each, so differences within about 15% are noise; the price ratios are assumed.
+**Success (agreed in words by the user: "significantly lower"; thresholds proposed by me, to confirm):** total cost at least 30%
+lower than 1,847,000 (at most about 1,290,000), orchestrator turns at most half of 68, **and** the same outcome: two buckets built,
+reviews with 0 blocking findings, lint, types and unit tests green, e2e 3 of 3 with screenshots, nothing merged, no guarantee skipped.
+If the cost drops but the outcome is worse, it is not a success.
+**Needs the user before the run:** close PRs #6 and #7 on `the Expo starter project` and delete the remote branches
+`factory/1-settings-tab-shell`, `factory/2-welcome-card-switch` and `factory-screenshots` (the new run uses the same names and a push
+would be rejected), and push `trial/factory-compare`.
+
 ## Intent Anchor
 
 **Goal:** Add an opt-in **factory** layer to ai-workspace-kit. After the user approves a plan, agents and
@@ -201,7 +227,7 @@ Every bucket also updates the catalog, the installer, uninstall and tests for wh
 | 7 | Docs and diagrams | README sections, profile tables, the rewritten push principle, new SVGs, playbook mapping | done: 453 tests pass, smoke ok; Quick setup chapter first in the README (prompts, no-pop-up settings, responsibility warning), `docs/factory.md`, `docs/permissions.md`, 4 new generated SVGs (factory solo, team, org, e2e), playbook mapping, version 0.2.0 (not tagged or published) |
 | 8 | Real-project trial | A full run on a real project, with a short report | done with a gap (2026-11-11; report `docs/factory-trial.md`): two PRs opened on the real repo with registered agents, browser e2e, 0 blocking findings; **no CI ran on them** (the project's workflow only runs for PRs into `main`), so the CI watch and fix loop were not exercised; tokens measured. Setup notes: Decisions: copy of `the Expo starter project` as a new private scratch GitHub repo (A), a small feature with one `E2E: yes` bucket, profile `team`. Done so far: copy at `<trial clone>` (tracked files of the project at `feat/update-workspace-kit`, local git, 2 commits), kit 0.2.0 installed from the tarball with the documented upgrade path (`init`, `init --force`, `apply`, `apply --force` for the old docs-fresh script, the pre-push hook chained by hand), preflight runs. **Changed by the user:** run on the real repo instead (a branch from main): fresh clone `<trial clone>`, branch `trial/factory-0.2.0` (pushed, install committed as 11c38ee, tests 58 of 58 with the vitest workaround, preflight on it was run). The first copy `<trial clone>` (no remote) is obsolete and can be deleted (it was locked by a running process and could not be renamed). A stack's base is `main`, so each PR diff will include the install commit; the PRs are never merged and are closed with the branches at the end. Findings so far: (1) the real project's tests fail with the default vitest pool in this environment (all 10 files, "Cannot read properties of undefined (reading 'config')"; same in the original folder; `pool: 'vmThreads'` gives 58 of 58); cause not found; (2) `npx <tarball path> init` exits 0 and prints nothing on Windows, while `npm exec --package=<tarball> -- ai-workspace-kit init` and the registry `npx ai-workspace-kit@0.1.1 init` work: not yet investigated; (3) the project's own `PLAN.md` still lists unplanned buckets, so preflight refuses until a new plan replaces it |
 | 9 | Final test round, with token measurement | Everything re-tested from a clean tarball install, plus the paths no run has covered yet (matrix below), run on a real-sized project; a token report by role, bucket and step | todo |
-| 10 | Token tuning | From the Bucket 9 report: change the process to spend fewer tokens, re-run the same scenario, compare before and after, and keep only changes that do not weaken a guarantee | todo |
+| 10 | Token tuning | From the Bucket 9 report: change the process to spend fewer tokens, re-run the same scenario, compare before and after, and keep only changes that do not weaken a guarantee | in progress: changes built (458 tests), comparison repo ready (`<trial clone>`, preflight ok), waiting for the user's yes to clean the old remote branches and PRs, then the run in a fresh session (see "Bucket 10 as approved") |
 
 ## Current bucket
 

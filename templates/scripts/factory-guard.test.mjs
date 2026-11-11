@@ -14,8 +14,11 @@ import {
   cleanCiLog,
   detectHost,
   e2eCommand,
+  handoffPath,
+  handoffProblems,
   isProtectedBranch,
   parseBucketMap,
+  planExcerpt,
   planProblems,
   preflight,
   readState,
@@ -215,6 +218,25 @@ describe('e2eCommand', () => {
 
   it('does not take a command from prose or a line that only mentions e2e in passing', () => {
     assert.equal(e2eCommand('We run e2e tests on CI.\nnpm test   # tests, not e2e-free'), null);
+  });
+});
+
+describe('planExcerpt, handoffPath and handoffProblems', () => {
+  it('planExcerpt names a pending bucket that has no written plan', () => {
+    const plan = FILLED_PLAN.replace('**Bucket 3b: Skill**\n- Done when: the skill runs once for real.\n', '');
+    assert.match(planExcerpt(plan), /no written plan for bucket 3b/);
+  });
+
+  it('handoffPath keeps the id to safe characters inside the factory folder', () => {
+    const path = handoffPath('/p', '../x y').replaceAll('\\', '/');
+    assert.match(path, /\/\.claude\/factory\/handoff\/[^/]+\.md$/);
+    assert.ok(!path.includes('/../'));
+  });
+
+  it('handoffProblems lists each missing part', () => {
+    assert.deepEqual(handoffProblems('Changed: a\nRan: b\nDone when:\n- c: done\nStatus: done\n'), []);
+    assert.equal(handoffProblems('').length, 4);
+    assert.match(handoffProblems('Changed: a\nRan: b\nDone when:\n').join(' '), /no "Status:" line/);
   });
 });
 
@@ -673,6 +695,33 @@ describe('command line', () => {
       encoding: 'utf8',
     });
     assert.equal(output.trim(), 'second');
+  });
+
+  it('plan-excerpt prints the anchor and the pending buckets only, or one bucket', () => {
+    withProject((root) => {
+      const all = run(['plan-excerpt'], root).stdout;
+      assert.match(all, /Ship the thing/);
+      assert.match(all, /Bucket 2: Controls/);
+      assert.match(all, /Bucket 3b: Skill/);
+      assert.doesNotMatch(all, /\| Bucket \| Output \|/, 'the bucket map table is not repeated');
+      const one = run(['plan-excerpt', '--bucket', '3a'], root).stdout;
+      assert.match(one, /guard passes its tests/);
+      assert.doesNotMatch(one, /Ship the thing/);
+      assert.doesNotMatch(one, /Bucket 2: Controls/);
+    });
+  });
+
+  it('handoff-check passes only for a complete handoff that says Status: done', () => {
+    withProject((root) => {
+      assert.equal(run(['handoff-check', '--bucket', '2'], root).status, 1, 'no file yet');
+      assert.equal(run(['handoff-check'], root).status, 2, 'needs --bucket');
+      const dir = join(root, '.claude', 'factory', 'handoff');
+      mkdirSync(dir, { recursive: true });
+      writeFileSync(join(dir, '2.md'), 'Changed: a.js\nRan: npm test: 3 of 3\nDone when:\n- x: done\n\nStatus: blocked: which database?\n');
+      assert.match(run(['handoff-check', '--bucket', '2'], root).stdout, /not done/);
+      writeFileSync(join(dir, '2.md'), 'Changed: a.js\nRan: npm test: 3 of 3\nDone when:\n- x: done\n\nStatus: done\n');
+      assert.equal(run(['handoff-check', '--bucket', '2'], root).status, 0);
+    });
   });
 
   it('prints an error and exits 2 for an unknown command', () => {

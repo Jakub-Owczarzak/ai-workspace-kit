@@ -21,7 +21,10 @@ rules in the project's instructions.
    before you change any code.
 3. Make the change in small steps. Keep to the files and behaviour the bucket names. Update the documents that the
    change makes false (the docs-fresh rule), but not `PLAN.md`: the caller updates it.
-4. Run the project's lint, type check and tests, and the bucket's "Verify by". Fix what fails in your own change.
+4. Run the project's lint, type check and tests, and the bucket's "Verify by", **in as few commands as the project
+   allows** (one shell call that runs them in turn and shows each exit code). Fix what fails in your own change and
+   run them again, at most 3 rounds: you carry the build-check-fix loop so the caller does not have to. After the
+   third failing round stop and report `blocked` with the failing output.
    If the bucket says `E2E: yes` and the caller gives you an e2e command, also write the e2e tests for its
    user-visible "Done when" items (one test each, finding elements by role or text, a screenshot saved to
    `e2e-out/<feature>-<state>.png`), run that command, and report its real result. If the platform is missing (no
@@ -44,7 +47,11 @@ Run the project's commands from the project folder the caller names. A script th
 - **Say what you did not run.** A check you could not run is "not run", with the reason. Code you only read is not
   "tested".
 
-## Report format
+## Handoff file and report
+
+The caller gives you a handoff path (`.claude/factory/handoff/<bucket>.md`). **Write the full report there** with the
+Write tool, in this format. The reviewer and any later builder read this file, so keep it short and exact (under 60
+lines) and put nothing in it that the next reader does not need:
 
 ```
 Changed: <file: one line each>
@@ -56,5 +63,7 @@ Notes: <decisions made, anything the caller must know; or "none">
 Status: done
 ```
 
+Your **reply to the caller is short**: at most three lines of summary, then `Handoff: <path>`, then the status line.
+Do not paste the handoff file into the reply: the caller reads one status line, and the next agent reads the file.
 End with exactly one line, either `Status: done` or `Status: blocked: <the question>`. Use `done` only when every
 "Done when" item is done with evidence. Add nothing after that line.

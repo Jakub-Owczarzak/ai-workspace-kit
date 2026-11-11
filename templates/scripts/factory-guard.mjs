@@ -3,6 +3,9 @@
 // in every session and can be tested without an assistant.
 //
 //   node scripts/factory-guard.mjs preflight [--json]     Is a factory run allowed here, and what is left to build?
+//   node scripts/factory-guard.mjs plan-excerpt [--bucket <id>]   The Intent Anchor and the pending buckets' plans (or one
+//                                                         bucket's), so a run does not read the whole PLAN.md
+//   node scripts/factory-guard.mjs handoff-check --bucket <id>   Is .claude/factory/handoff/<id>.md complete and done? 0/1
 //   node scripts/factory-guard.mjs attempt --key <layer>  Count one CI fix attempt; exit 0 = fix it, 1 = stop
 //   node scripts/factory-guard.mjs push-check --branch <b> [--default-branch <d>]   Exit 1 for a protected branch
 //   node scripts/factory-guard.mjs report --reason <text> [--details-file <file>]   Write .claude/factory/report.md
@@ -130,6 +133,58 @@ export function e2eCommand(agentsText) {
     if (match && !match[1].startsWith('<')) return match[1];
   }
   return null;
+}
+
+/**
+ * The part of PLAN.md a factory run needs, so the orchestrator does not read the whole file: the Intent Anchor
+ * section, then the written plan of each wanted bucket (`only` = one bucket id; otherwise every pending bucket).
+ * A bucket with no plan block is named at the end, not skipped silently.
+ */
+export function planExcerpt(planText, only = null) {
+  const lines = String(planText ?? '').split(/\r?\n/);
+  const parts = [];
+  const anchor = lines.findIndex((line) => /^##\s+Intent Anchor\s*$/i.test(line.trim()));
+  if (anchor !== -1 && only === null) {
+    let end = lines.length;
+    for (let index = anchor + 1; index < lines.length; index += 1) {
+      if (/^##\s/.test(lines[index].trim())) {
+        end = index;
+        break;
+      }
+    }
+    parts.push(lines.slice(anchor, end).join('\n').trimEnd());
+  }
+  const wanted = only === null ? parseBucketMap(planText).filter((bucket) => bucket.pending) : [{ id: only }];
+  const missing = [];
+  for (const bucket of wanted) {
+    const block = findBucketBlock(lines, bucket.id);
+    if (block) parts.push(lines.slice(block.start, block.end).join('\n').trimEnd());
+    else missing.push(bucket.id);
+  }
+  if (missing.length) parts.push(`(no written plan for bucket ${missing.join(', ')})`);
+  return parts.join('\n\n');
+}
+
+// ---- The handoff file -----------------------------------------------------------------------------------------
+// A builder writes `.claude/factory/handoff/<bucket>.md` when it finishes. The orchestrator reads one status line and
+// the path; the reviewer and any later builder read the file. It is state for a fresh session too.
+
+/** Where the handoff file of a bucket lives (the id is reduced to safe characters). */
+export function handoffPath(root, id) {
+  return join(root, FACTORY_DIR, 'handoff', `${String(id).replace(/[^\w.-]+/g, '-')}.md`);
+}
+
+/** What is wrong with a handoff text, as sentences; an empty list means it is complete and says `Status: done`. */
+export function handoffProblems(text) {
+  const body = String(text ?? '');
+  const problems = [];
+  for (const label of ['Changed', 'Ran', 'Done when']) {
+    if (!new RegExp(`^${label}:`, 'm').test(body)) problems.push(`The handoff has no "${label}:" section.`);
+  }
+  const status = body.match(/^Status:\s*(.*)$/m);
+  if (!status) problems.push('The handoff has no "Status:" line.');
+  else if (!/^done\b/i.test(status[1].trim())) problems.push(`The handoff says "Status: ${status[1].trim()}", not done.`);
+  return problems;
 }
 
 // ---- The host and the branch ----------------------------------------------------------------------------------
@@ -440,6 +495,7 @@ function parseArguments(argv) {
     else if (argv[index] === '--branch' && next) options.branch = argv[(index += 1)];
     else if (argv[index] === '--default-branch' && next) options.defaultBranch = argv[(index += 1)];
     else if (argv[index] === '--lines' && next) options.lines = Number(argv[(index += 1)]);
+    else if (argv[index] === '--bucket' && next) options.bucket = argv[(index += 1)];
   }
   return options;
 }
@@ -497,6 +553,38 @@ function main(argv) {
       console.log(writeReport(options.root, { reason: options.reason, details }));
       return 0;
     }
+    case 'plan-excerpt': {
+      let plan = '';
+      try {
+        plan = readFileSync(join(options.root, 'PLAN.md'), 'utf8');
+      } catch {
+        console.error('cannot read PLAN.md');
+        return 1;
+      }
+      console.log(planExcerpt(plan, options.bucket ?? null));
+      return 0;
+    }
+    case 'handoff-check': {
+      if (!options.bucket) {
+        console.error('handoff-check needs --bucket <id>');
+        return 2;
+      }
+      const path = handoffPath(options.root, options.bucket);
+      let text;
+      try {
+        text = readFileSync(path, 'utf8');
+      } catch {
+        console.log(`missing: no handoff file for bucket ${options.bucket} (expected ${path})`);
+        return 1;
+      }
+      const problems = handoffProblems(text);
+      if (problems.length) {
+        for (const problem of problems) console.log(`problem: ${problem}`);
+        return 1;
+      }
+      console.log(`ok: handoff for bucket ${options.bucket} is complete (${path})`);
+      return 0;
+    }
     case 'reset':
       resetState(options.root);
       console.log('attempt counts cleared');
@@ -513,7 +601,7 @@ function main(argv) {
       return 0;
     }
     default:
-      console.error('usage: factory-guard.mjs preflight | attempt --key <name> | push-check --branch <name> | report --reason <text> | reset | clean-log [--lines <n>] < log  [--root <dir>]');
+      console.error('usage: factory-guard.mjs preflight | plan-excerpt [--bucket <id>] | handoff-check --bucket <id> | attempt --key <name> | push-check --branch <name> | report --reason <text> | reset | clean-log [--lines <n>] < log  [--root <dir>]');
       return 2;
   }
 }

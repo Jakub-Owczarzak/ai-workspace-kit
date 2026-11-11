@@ -23,8 +23,10 @@ Run `node scripts/factory-guard.mjs preflight`.
 - If it says `not ready`, show the user every `problem:` line and stop. Change nothing. Do not work around a
   problem: not a dirty tree, not a missing "Done when", not a host it does not support.
 - Show the `note:` lines once. They say what will not happen (for example, that e2e will not run).
-- Read the whole of `PLAN.md`, the Intent Anchor and the plan of every pending bucket. Read `AGENTS.md` for the
-  project's lint, type check and test commands. Read the `pr-description` skill: its rules write the PR bodies.
+- Get the plan with `node scripts/factory-guard.mjs plan-excerpt`: it prints the Intent Anchor and the plan of every
+  pending bucket, and nothing else. Do not read the whole `PLAN.md` (old buckets, the decision log and notes only cost
+  tokens on every later turn). Read `AGENTS.md`'s Commands block for the project's lint, type check and test commands.
+  Read the `pr-description` skill: its rules write the PR bodies.
   When `tests.e2e` is not `off` and a bucket is marked `E2E: yes`, read the `e2e-tests` skill too. The preflight
   JSON (`preflight --json`) gives each bucket an `e2e` flag and the project's `e2eCommand`.
 - **The host.** The preflight JSON says which host this is: `host` is `github` or `gitlab`. Read
@@ -36,6 +38,24 @@ Run `node scripts/factory-guard.mjs preflight`.
 - Settings come from `node scripts/workflow-config.mjs`: `factory.mode` (`local` or `pr`), `factory.prLayout`,
   `factory.ciFixAttempts`, `factory.pushConfirm`, `review.mode`, `tests.tdd`. Do not guess them.
 
+## Keep your own context small
+
+Every turn you take re-reads everything in this conversation, so its size and your number of turns are the cost of a
+run. Within this skill's other rules:
+
+- **Batch.** Run independent commands in one shell call, and the lint, type check and tests of a check round in one
+  call that prints each exit code. Make independent tool calls in the same turn.
+- **Filter output.** Show the tail or the failing lines (`| tail -n 25`, `clean-log`, `--jq`), never a whole log or list.
+- **Read only what you need.** The plan excerpt, not `PLAN.md`; the lines of a file, not the file. Do not open a
+  screenshot unless a "Done when" item depends on how it looks, and then at most two.
+- **Do not relay.** A subagent's report is in its handoff file: read the status line, not the file, unless you must act on
+  what it says. Do not paste reports, diffs or plan text back into the conversation or into a prompt.
+- **Write short.** PR bodies and your own summaries say what changed, the real verification and the gaps, in as
+  few lines as that takes.
+- **A long plan.** After a bucket or two, or when this conversation holds the planning as well, say once that a fresh
+  session continues for fewer tokens (`PLAN.md`, the handoff files and `.claude/factory/` hold the state and the
+  preflight lists what is left), then carry on if the user says go.
+
 ## 1. Build each pending bucket, in order
 
 The preflight lists the buckets still to build. For each one:
@@ -44,14 +64,19 @@ The preflight lists the buckets still to build. For each one:
    - `prLayout` `single`: one branch for the whole plan, `factory/<plan-name>`, made once.
    - `prLayout` `stack`: **[host: branches]**. Without a stack tool, `git switch -c <branch>` from the previous
      bucket's branch (the first one from the start branch); each PR will target the branch below it.
-2. **Build.** Start the `factory-builder` subagent with the bucket's plan from `PLAN.md` (goal, steps, "Done when",
-   "Verify by", TDD, E2E), the project commands (and the e2e command for an `E2E: yes` bucket), and the rules in force. Give it nothing else from this conversation:
-   a fresh context is the point. It edits files and runs commands; it does not commit, push or switch branches.
-   - It ends with `Status: done` or `Status: blocked: <question>`. On `blocked`, stop the run (section 4) with
-     that question. Never answer it yourself and carry on.
-3. **Verify yourself.** Run the project's lint, type check and tests, and the bucket's "Verify by". Do not trust
-   the builder's report. If something fails, give the real output to a new builder run and verify again, at most
-   3 times per bucket, then stop (section 4).
+2. **Build.** Start the `factory-builder` subagent with the bucket's plan (`plan-excerpt --bucket <id>`: goal, steps,
+   "Done when", "Verify by", TDD, E2E), the project commands (and the e2e command for an `E2E: yes` bucket), the rules in
+   force, and the handoff path `.claude/factory/handoff/<id>.md`. Give it nothing else from this conversation:
+   a fresh context is the point. It edits files, runs the checks and fixes its own failures (up to 3 rounds inside
+   its own run, so you do not start a new builder for each one); it does not commit, push or switch branches.
+   - It writes its full report to the handoff file and replies with a few lines, the path and one line,
+     `Status: done` or `Status: blocked: <question>`. On `blocked`, stop the run (section 4) with that question.
+     Never answer it yourself and carry on. On `done`, run `node scripts/factory-guard.mjs handoff-check --bucket <id>`:
+     exit 1 means the handoff is missing or incomplete, so ask the builder to complete it.
+3. **Verify yourself, once.** Run the project's lint, type check and tests, and the bucket's "Verify by", in one
+   batched call with each exit code shown (output filtered). Do not trust the builder's report. If something fails,
+   give the real failing output to a new builder run (same handoff path) and verify again, at most 3 times per
+   bucket, then stop (section 4).
    - **E2E, only for a bucket whose `e2e` flag is true** (marked `E2E: yes`) **and `tests.e2e` is not `off`.** The
      builder was given the e2e command and wrote the e2e tests with the bucket. After the unit tests pass, delete
      the old PNGs in `e2e-out/`, run the `e2eCommand` yourself from the project root, and judge it by the real output
@@ -65,7 +90,7 @@ The preflight lists the buckets still to build. For each one:
    as `e2e-out/`, `node_modules/` or build output must not go in, and a leftover from another branch's run shows up as
    untracked after a switch), run
    `node scripts/check-review-gate.mjs --staged`, and if there is no clean record start the `reviewer` subagent
-   and have the builder fix every blocking finding. At most 3 review rounds, then stop (section 4). Record the
+   (give it the handoff path with the bucket) and have the builder fix every blocking finding. At most 3 review rounds, then stop (section 4). Record the
    final result as the commit gate describes.
 5. **Update `PLAN.md`:** set the bucket's status to `done: <one line>` and add any decision made. The plan goes in
    the same commit as the work.
