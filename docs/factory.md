@@ -96,7 +96,7 @@ everything as it is.
 
 ## What has not been run
 
-`prLayout: single`; `factory.mode: local`; a builder returning `blocked`; a review with blocking findings across the 3-round limit; the
+a `single` layout in `pr` mode; a builder returning `blocked`; a review with blocking findings across the 3-round limit; the
 CI cap reached by the attempt counter in a live loop (both live stops were the agent's judgment about a check that needs
 an outside approval); the `--self-review` block in a real push; a separate yes for each fix push under `pushConfirm: ask` (the skill
 asks now; not run); native e2e; any non-Claude tool (see `docs/other-tools-checklist.md`). The unit tests cover

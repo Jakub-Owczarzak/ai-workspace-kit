@@ -206,3 +206,28 @@ in the same session through the outage. Not proven: the cap reached by the count
 Tokens (input-token equivalents, assumed ratios): orchestrator 64 turns, about 718,000; ten subagents, about 309,000 (builders
 about 179,000, reviewers about 130,000); total about 1,027,000. The subagents' first prompt was about 12,000 to 13,000 here
 against 19,000 to 20,000 in the Expo project, which is the size of the project's own instructions (`AGENTS.md` and the rules).
+
+## Local mode with one branch for the whole plan, and the fast fix (Bucket 9, 2026-11-11)
+
+**`factory.mode: local` with `factory.prLayout: single`** (team profile, a two-bucket plan `padLeft`, `wordCount`, a scratch
+repository with a remote that the run never used). Registered agents, started by `/wk-run-factory`.
+
+| Step | Result |
+|---|---|
+| Branch | One branch for the whole plan, `factory/add-pad-and-count`, two commits (one per bucket) |
+| Build, verify, review | 8 of 8 tests, lint ok; advisory review, 0 blocking findings; the reviewer's `[bug]` (`wordCount(undefined)` threw a raw `TypeError`) was fixed by a builder with a deliberate error and a test seen failing first, then re-read by the reviewer |
+| Push | Nothing was pushed: the remote has no such branch; the run stopped with the PR text written to `.claude/factory/pr-add-pad-and-count.md` and the work tree clean |
+
+Tokens: orchestrator 33 turns, about 385,000; six subagents, about 187,000; total about 572,000. One gap: a documentation line was
+edited after the first review, so the reviewer never read it.
+
+**The fast fix** (`factory.fastFix: docs`, team profile, `ciFixAttempts: 1`, one bucket `yell`, CI with a changelog check that
+the local tests do not run): the changelog check failed once; the orchestrator added one line to `CHANGELOG.md`, `factory-guard.mjs
+fast-check` approved it (documentation only, 1 line), it was verified and committed without a builder or a reviewer, and the pull
+request body said "fast fix, self-checked". CI went green on the one allowed attempt. Tokens: orchestrator 27 turns, about
+293,000; builder and reviewer about 77,000; total about 370,000. Not shown: the cap, because the one failure was fixed.
+
+Found and fixed in the same round: the reviewer's `[bug]` for an unhandled bad input (`yell` with a non-string) was first left as a
+"gap" because the plan did not cover it; the rule now says that defining a bad input's behaviour is fixing a bug, not new scope, and
+the local run above followed it. The resume at the CI step was run for real on the finished branch (the preflight said `resume`) and
+then restricted to the pull requests of the current stack.
