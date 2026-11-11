@@ -1,6 +1,6 @@
 # Factory rehearsal: what ran and what did not
 
-Bucket 3b of `PLAN.md`. The `run-factory` skill was followed step by step, on 2026-11-11, on a scratch GitHub
+Part of the factory work (Bucket 3b of its plan). The `run-factory` skill was followed step by step, on 2026-11-11, on a scratch GitHub
 repository with a tiny Node project, a two-bucket plan, `factory.mode: pr`, the solo profile and `gh stack` v0.3.0.
 The project had a CI-only check (every exported function must be named in `README.md`) that its local `npm test`
 does not run, so the build was green locally and red in CI.

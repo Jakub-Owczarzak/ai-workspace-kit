@@ -109,7 +109,7 @@ Every turn re-reads the whole context of the agent that takes it, so a small cha
 real-project trial the orchestrator was about 70% of the cost (`docs/factory-trial.md`). The skill therefore keeps the
 orchestrator's context small (a plan excerpt instead of the whole `PLAN.md`, batched and filtered commands, handoff
 files instead of relayed reports) and lets the builder carry the build-check-fix loop. Whether that helps is being
-measured against the trial's numbers: the plan and the result are in `PLAN.md` (Bucket 10).
+measured against the trial's numbers, which are in `docs/factory-trial.md`.
 
 ## Permissions
 

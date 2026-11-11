@@ -1,6 +1,6 @@
 # Factory spike: what was run and what it showed
 
-Bucket 1 of `PLAN.md`. A throwaway private GitHub repository was used to test the assumptions the factory
+The first step of the factory work (a risk spike). A throwaway private GitHub repository was used to test the assumptions the factory
 variant depends on. Run on 2026-11-11, Windows 11, `gh` 2.103.3, `gh stack` v0.3.0, Git 2.54, Node 22.19.
 No production code was written.
 
@@ -31,7 +31,7 @@ No production code was written.
   to the history; a decision for Bucket 4 is whether to use a separate `factory-screenshots` branch instead.
   Check how the image shows in a logged-in browser before relying on it.
 - **Native e2e.** Not tested here. It becomes an optional UI-test choice that the kit prepares and the user
-  connects to their own platform (see `PLAN.md`, Bucket 4).
+  connects to their own platform (see `docs/factory-rehearsal.md`).
 - **Bucket 5 (GitLab).** Chained MRs work and CI can be watched, so the stack fallback is feasible. Run `glab`
   from inside the project clone: `glab mr create` reads the git remotes
   of the **current folder**, and `-R <project>` did not override that (it failed with "none of the git remotes ...

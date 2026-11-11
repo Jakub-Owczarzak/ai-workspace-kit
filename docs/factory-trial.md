@@ -21,7 +21,7 @@ separate Claude Code session started after the agents were installed, so `factor
 Not seen: the builder's test-first failing run (reported by the builder, not observed), the screenshots rendered on
 GitHub, anything on a phone (every check was web only).
 
-## Tokens (measured with `scripts/token-probe.mjs` from the session transcripts)
+## Tokens (measured with `scripts/token-report.mjs` from the session transcripts)
 
 Cost is in input-token equivalents with **assumed** price ratios (cache read 0.1, cache write 1.25, output 5); check
 current pricing before relying on it.
@@ -41,7 +41,7 @@ processed.
 What this shows:
 
 1. **The registered agents start at about 19,000 to 22,000 tokens, not 41,000.** That is about half of the
-   `general-purpose` agent's prefix, not the 70% to 80% cut estimated in `PLAN.md` before the measurement. The
+   `general-purpose` agent's prefix, not the 70% to 80% cut estimated before the measurement. The
    prefix is not only the tool list: the builder (6 tools) and the reviewer (4 tools) differ by only about 2,000.
 2. **The orchestrator is the largest cost: about 70% of the total in this run.** It made 76 turns, 98% of what it
    processed was cache reads of a context that grew from 63,000 to 178,000 tokens. This session also contains the
@@ -110,7 +110,7 @@ Outcome: both buckets built; 0 blocking review findings in both; lint and types 
 a different count of new tests, not a failure); `npm run e2e` 3 of 3 with screenshots published and put in PR #9; a real
 `gh stack` stack of two PRs (#8, #9), nothing merged. No CI ran (the project's workflow only runs for PRs into `main`).
 
-Against the success bar set in `PLAN.md`: the cost target (at least 30% lower) is **met**; the turns target (at most 34)
+Against the success bar set before the comparison: the cost target (at least 30% lower) is **met**; the turns target (at most 34)
 is **missed** (38). The outcome was equal or better, so the change counts as a success on cost.
 
 What the numbers say:

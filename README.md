@@ -820,8 +820,8 @@ What changes per profile:
 Outside Claude Code the factory runs as a **single agent**: the same steps as separate passes, with no fresh context
 and no independent reader. Its review is a labeled self-review, which the gate does not count under
 `review.mode: required`, so the push stops and asks you. Each subagent also carries a fixed prompt prefix that is
-re-read every turn, so even a small change costs real tokens; measuring and reducing that is planned work
-([`PLAN.md`](PLAN.md)).
+re-read every turn, so even a small change costs real tokens; the measurements and what was done about them are in
+[`docs/factory-trial.md`](docs/factory-trial.md).
 
 #### End-to-end tests and screenshots
 
@@ -1102,8 +1102,8 @@ all or nothing. To get a newer kit, use `init --force` as above. The skill has n
 Numbers are from 2026-11-10 unless a line says otherwise; they change as the kit does.
 
 - **Tests:** `npm test` runs every `*.test.mjs` file in its own process, with a time limit and closed stdin:
-  451 tests, all pass on Node 22 (Windows, 2026-11-11; the 318 reported earlier also passed on Node 18, which was not
-  re-run for the factory work). None calls Claude. They include real runs in
+  473 tests, all pass (2026-11-11), in CI on Ubuntu, macOS and Windows with Node 18 and Node 22, and locally on Windows.
+  None calls Claude. They include real runs in
   throw-away git repositories, a hook run through a symlink, and the installer's collision cases: a skill with
   the same name, a hand-written `CLAUDE.md`, a `settings.json` with comments, a `git-lfs` pre-push hook, and an
   older copy of the kit.
@@ -1185,12 +1185,11 @@ package ([section 9](#9-keeping-the-kit-up-to-date)).
      scripts/                the checks, the profile resolver and their tests
    docs/                     workflow-profiles, config-checks, test-discipline, project-overview,
                              review-gate, playbook-mapping, setup-prompt, factory, permissions,
-                             factory-host-interface, factory-spike, factory-rehearsal, diagrams/ (generated SVGs)
+                             factory-host-interface, factory-spike, factory-rehearsal, factory-trial, other-tools-checklist, diagrams/ (generated SVGs)
    adapters/                 where each piece goes: Claude Code, Codex and AGENTS.md readers, Cursor, OpenCode, Cline
    stacks/expo-react-native/ routing rows and an always-on rule for one framework (optional)
-   scripts/                  kit development only, not shipped: run-tests.mjs, ci-smoke.mjs, make-flow-diagrams.mjs,
-                             token-probe.mjs
-   PLAN.md                   the plan for the factory work, with the decision log and the token findings
+   scripts/                  kit development only, not shipped: run-tests.mjs, ci-smoke.mjs, matrix-install.mjs,
+                             make-flow-diagrams.mjs, token-report.mjs (each with its test where it has one)
    .github/workflows/ci.yml  tests and the install smoke test on 3 operating systems and 2 Node versions
    .github/workflows/publish.yml   publishes to npm when a version tag is pushed (guards: the tag matches
                              package.json, the commit is on main, the tests pass)
