@@ -87,3 +87,44 @@ Proven here: install and upgrade from the tarball on a real project; the registe
 two-bucket stack with browser e2e and screenshots; the orchestrator re-verifying instead of trusting reports; real
 token numbers. **Not proven:** the CI watch and fix loop on this project (no CI ran), native e2e, the `org` profile,
 a `required` review gate, any tool other than Claude Code.
+
+## Comparison run after the token changes (Bucket 10)
+
+Same project, profile, model (Sonnet 5.5), plan and start (`/wk-run-factory`), run on 2026-11-11 in a fresh session on
+`trial/factory-compare` with the changed kit (plan excerpt, handoff files, a builder that owns the build-check-fix
+loop, one batched orchestrator verification, a "keep your context small" section). The baseline numbers are the run
+phase only (planning left out). One run each, assumed price ratios: a difference under about 15% is noise.
+
+| | Baseline | After the changes | Change |
+|---|---|---|---|
+| Orchestrator turns | 68 | 38 | -44% |
+| Orchestrator context, first to last prompt | 89,800 to 178,100 | 68,800 to 102,400 | |
+| Orchestrator cost (input-token equiv.) | about 1,263,000 | about 482,000 | **-62%** |
+| Bucket 1 builder (turns, cost) | 13, about 120,000 | 11, about 111,000 | |
+| Bucket 2 builder (turns, cost) | 24, about 312,000 | 38, about 424,000 | +36% |
+| Reviewers (two) | about 152,000 | about 119,000 | |
+| Subagents together | about 584,000 | about 654,000 | +12% |
+| **Total** | **about 1,847,000** | **about 1,136,000** | **-38%** |
+
+Outcome: both buckets built; 0 blocking review findings in both; lint and types exit 0; unit tests 58 then 64 (65 before:
+a different count of new tests, not a failure); `npm run e2e` 3 of 3 with screenshots published and put in PR #9; a real
+`gh stack` stack of two PRs (#8, #9), nothing merged. No CI ran (the project's workflow only runs for PRs into `main`).
+
+Against the success bar set in `PLAN.md`: the cost target (at least 30% lower) is **met**; the turns target (at most 34)
+is **missed** (38). The outcome was equal or better, so the change counts as a success on cost.
+
+What the numbers say:
+1. **The saving is almost all the orchestrator.** Fewer turns (the builder owns the fix loop; one batched check), a
+   smaller context (it read the plan excerpt and 3 files instead of 36, and no screenshots) and a start without the
+   planning history. The new skill steps were used: `plan-excerpt`, `handoff-check`, handoff files of 24 and 35 lines.
+2. **Moving the loop into the builder shifts cost, it does not remove it.** The bucket 2 builder took 38 turns instead
+   of 24 (it now fixes its own failures and wrote the e2e tests), so subagents cost 12% more. The net is still a large
+   saving because a builder turn re-reads about 20,000 to 80,000 tokens and an orchestrator turn 70,000 to 180,000.
+3. **Weaker than before in one place:** the orchestrator did not open the screenshots (the baseline opened two and checked
+   that they showed what the tests claimed). That is the intended "no screenshot reads" rule, and it is a real loss of
+   a check; the PR says so.
+
+Findings from this run: `gh stack submit` failed on stale local tracking refs (old branches deleted on the remote) and was
+fixed with a plain `git push -u` and no force; the first push warned that the bucket 1 tree had no review record (the
+changelog commit changed the tree after the review), the same stale-record finding as in the first trial. Still not
+exercised: the CI watch and fix loop, native e2e, the `org` profile.
