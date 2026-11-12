@@ -49,8 +49,9 @@ test('profiles match the resolver', () => {
 });
 
 test('every rule file has an option, and every rule option has a file', () => {
+  // A `<name>-details.md` file is read on demand by the rule it belongs to; it is not a rule of its own.
   const ruleFiles = [
-    ...listFiles(join(root, 'rules')),
+    ...listFiles(join(root, 'rules')).filter((file) => !file.endsWith('-details.md')),
     ...listFiles(join(root, 'stacks')).filter((file) => posix(file).includes('/rules/')),
   ].map(kitRelative);
   const optionSources = options.filter((option) => option.kind === 'rule').map((option) => option.source);

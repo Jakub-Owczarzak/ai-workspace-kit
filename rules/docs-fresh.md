@@ -8,7 +8,9 @@ same turn. Do not wait to be asked.
 - **Router skill and rules**: when a convention or a workflow rule changes.
 - **Plan and backlog files**: mark finished items, add new open items, record decisions. The plan moves with
   the code: when the work departs from `PLAN.md`, update it in the same commit, not later.
+<!-- wk:if skill.changelog-bump -->
 - **Changelog**: never edited by hand; the commit step adds entries.
+<!-- wk:endif -->
 - **Copies for other tools** (for example a second copy of the rules for another assistant): write both
   from the same text and run `diff` to confirm they are identical.
 
@@ -20,9 +22,10 @@ update that system in the same session.
 Do this for navigation, state, data, theme, error handling, file layout, build, release and repository
 setup. If a change makes a statement in a document false, fixing the document is part of the change.
 
-A commit hook can back this up: `templates/scripts/check-docs-fresh.mjs` warns when source changed but the
-overview is not part of the commit (`DOCS_CHECK=strict` blocks). It cannot tell whether the overview
-needed a change, so a warning is a prompt to check, not proof of a stale document.
+<!-- wk:if hook.pre-commit -->
+The commit hook warns when source changed but the overview is not part of the commit; a warning is a prompt to check,
+not proof of a stale document.
 
+<!-- wk:endif -->
 Write the docs for the next person to read cold: what is true now, where it lives, what is not done. Mark
 anything unverified as unverified.

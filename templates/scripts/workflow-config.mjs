@@ -62,7 +62,7 @@ export const CONTROL_SPECS = {
     allowed: ['off', 'browser', 'native'],
     env: 'TEST_E2E',
     description:
-      'end-to-end UI tests and screenshots (off = none, browser = Playwright in a headless browser, native = Maestro against a platform the user supplies and runs: Expo, Android Studio, Xcode or a device)',
+      'end-to-end UI tests and screenshots (off = none, browser = Playwright in a headless browser, native = experimental, Maestro against a platform the user supplies and runs: Expo, Android Studio, Xcode or a device)',
   },
   'review.mode': {
     type: 'choice',

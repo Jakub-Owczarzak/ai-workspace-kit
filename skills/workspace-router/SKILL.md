@@ -53,7 +53,6 @@ what order things are true. Fill the tables in section 2 for this project (the s
 | `figma-sync` | UI changes are pending in the design-sync file, or the user asks to align the design with the app |
 | `e2e-tests` | Adding, running or fixing end-to-end UI tests, or a pull request needs screenshots (only when `tests.e2e` is not `off`) |
 | `run-factory` | Only when the user starts it by hand: carry an approved plan through build, review, commit and (when `factory.mode` is `pr`) pull requests and CI |
-| `update-workspace-kit` | A change added or improved something reusable (skill, rule, hook script, template), or the user asks to update the kit, pull the latest kit, or check drift |
 
 ### 2.2 Project skills (add rows for this project)
 

@@ -99,8 +99,7 @@ A row's status is the weakest honest word for it: if one step of a practice diff
 
 ## Kit additions beyond the playbook
 
-The workflow profile (`.claude/workflow.json`, `docs/workflow-profiles.md`), `update-workspace-kit` (push and
-pull between a project and the kit), `write-project-overview` with `overview-check.mjs`, the stack pack for
+The workflow profile (`.claude/workflow.json`, `docs/workflow-profiles.md`), `write-project-overview` with `overview-check.mjs`, the stack pack for
 Expo, `figma-sync`, `changelog-bump`, `pr-description`, `readable-fix-plan`, and the harsh
 `ultra-code-quality-review`. Added in the factory work: the `run-factory` skill with `factory-guard.mjs` and the
 `factory-builder` agent (build to pull requests or stacks, GitHub and GitLab, CI watching with a fix cap),

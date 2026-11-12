@@ -3,7 +3,8 @@
 The factory is an **opt-in layer** on top of the solo, team and org profiles. After you approve a plan, agents
 carry it through build, verify, review and commit, and (in `pr` mode) push, open the pull request or a stack of
 them, and watch CI. **It never merges and never deploys.** A person merges. It is off in every profile until you
-turn it on.
+turn it on. The setup asks about it right after the profile and, on a yes, installs the whole layer; to add it to a
+project later, run the setup again and answer yes.
 
 Everything here is marked **proven** (it ran for real, and `docs/factory-rehearsal.md` or `docs/factory-spike.md`
 has the output) or **not proven** (written from documentation, or never run).
@@ -11,7 +12,8 @@ has the output) or **not proven** (written from documentation, or never run).
 ## Starting it
 
 1. Plan with the `goal-first-planner` skill and approve the plan. Each bucket needs a "Done when".
-2. Set the controls in `.claude/workflow.json` (`factory.mode` is `off` until you change it).
+2. Check the controls in `.claude/workflow.json`. The setup sets `factory.mode` to the answer you gave (`local` or `pr`);
+   it is `off` when you said no.
 3. Start it by hand: `/wk-run-factory` (in Codex: `$wk-run-factory`). The skill refuses to run if you did not ask
    for it in the conversation, because it pushes code.
 
@@ -67,7 +69,7 @@ bottom to top, with a normal push. The factory never force-pushes.
 
 - `browser`: Playwright in a headless browser. **Proven** (Playwright 1.65), including a live factory run with an
   `E2E: yes` bucket and screenshots in the PR body.
-- `native`: Maestro against a platform you supply and run (Expo, Android Studio, Xcode or a device). The recipe is
+- `native` (experimental): Maestro against a platform you supply and run (Expo, Android Studio, Xcode or a device). The recipe is
   written from the tool's documentation. **Not proven** on a device, and the factory never calls it verified.
 - Screenshots go to a separate `factory-screenshots` branch, linked by commit SHA in the PR body. The PR says the
   images were published, not seen in a browser.

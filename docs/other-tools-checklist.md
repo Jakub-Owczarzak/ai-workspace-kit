@@ -11,7 +11,7 @@ you do not mind (or none: use `factory.mode: local`, which never pushes).
 
 1. `npx ai-workspace-kit init` in the scratch project.
 2. In your tool, say: "Read `.claude/workspace-kit/skills/setup-workspace/SKILL.md` and follow it." Choose your tool, a
-   profile (`team` is a good test), and the factory pieces.
+   profile (`team` is a good test), and answer **yes, `local`** to the factory question that follows the profile.
 3. Check, and write down yes or no for each:
    - the questionnaire was asked and the dry run was shown before anything was installed;
    - the skills appear where the tool looks for them (`.agents/skills/wk-*` for Cursor, Codex and OpenCode,
@@ -19,7 +19,26 @@ you do not mind (or none: use `factory.mode: local`, which never pushes).
    - `AGENTS.md` has the kit's marked block, and your own `CLAUDE.md` or `AGENTS.md` text is untouched;
    - `node scripts/workflow-config.mjs` prints the profile you chose.
 
-## 2. Start the factory in `local` mode
+## 2. Check the translation rule
+
+The skills were written for Claude Code. Setup adds [tool-translation.md](../adapters/tool-translation.md) to your
+`AGENTS.md` so your tool knows what to do instead. A test proves the rule mentions every Claude Code feature the skills
+name; only you can show your tool follows it. Start `wk-goal-first-planner` the way your tool does (see the table in step
+3), and give it this task:
+
+> Plan a small feature for this project: a `--version` flag for a script. Follow the skill, and do not write code yet.
+
+Check, and write down yes or no for each:
+- the interview questions came through the tool's own question tool or plain numbered text (3–5 at a time), and the tool **waited** for your answer
+  instead of guessing one;
+- the tool said **once** that it was using a stand-in, and did not go looking for a question tool or a plan mode;
+- **no file was edited** before you approved the plan (check with `git status`);
+- it kept `.claude/workflow.json` and `.claude/factory/` where they are, and did not make a `CLAUDE.md`;
+- the skill started the way the table in step 3 says.
+
+Then say "proceed", and check that `PLAN.md` holds an Intent Anchor and a bucket map.
+
+## 3. Start the factory in `local` mode
 
 Set `factory.mode` to `local` in `.claude/workflow.json`, write a two-line plan with `wk-goal-first-planner` (or copy the
 plan format from `templates/PLAN.md`: an Intent Anchor, a bucket map, and a bucket block with a "Done when" line), commit
@@ -41,11 +60,25 @@ Check, and write down:
 - it built the bucket, ran your tests, committed, and wrote `.claude/factory/pr-<id>.md`;
 - it pushed nothing.
 
-## 3. What to send back
+## 4. What to send back
 
-Open an issue with the *Feedback or a problem* form (it asks for your tool and operating system) and paste:
+Open an issue with the *Feedback or a problem* form (it asks for your tool and operating system) and paste the table
+below, filled in, plus:
 - your tool and its version, and the answers to the yes/no lines above;
 - the output of `node scripts/workflow-config.mjs` and `node scripts/factory-guard.mjs preflight`;
 - anything the tool did that the adapter note for your tool says it would not.
 
 Do not paste tokens, keys or private code.
+
+| Check | Cursor | Codex | OpenCode | Cline |
+|---|---|---|---|---|
+| Version of the tool | | | | |
+| Setup: questionnaire, dry run, skills in the right folder, `AGENTS.md` block | | | | |
+| Translation: questions asked (own question tool or plain text), waited for the answer | | | | |
+| Translation: said once it uses a stand-in | | | | |
+| Translation: no file edited before the plan was approved | | | | |
+| Translation: no `CLAUDE.md` created, `.claude/` paths kept | | | | |
+| Skill started by hand the documented way | | | | |
+| Factory ran as a single agent, review labelled SELF-REVIEW, nothing pushed | | | | |
+
+Write yes, no or not tried in each cell, and add a line for every no.
