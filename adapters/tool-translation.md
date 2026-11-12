@@ -13,6 +13,8 @@ stand-in below, and say once when you do.
   `@wk-<name>` in OpenCode, `/` then the skill in Cline), or read `<skills folder>/wk-<name>/SKILL.md` and follow it.
 - **Tool names in a skill (`Read`, `Edit`, `Bash`, `Grep`).** Use your tool's equivalent for reading, editing, running a
   command and searching.
+- **`CLAUDE.md`** is Claude Code's instruction file. Where a skill says `CLAUDE.md`, use your tool's own instruction
+  file (`AGENTS.md` for most tools); do not create a `CLAUDE.md` for it.
 - **Paths starting with `.claude/`** (`.claude/workflow.json`, `.claude/factory/`) are the kit's own data. Keep using
   those paths; do not move them to a folder of your tool.
 
