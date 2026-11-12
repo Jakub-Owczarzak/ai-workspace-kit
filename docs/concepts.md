@@ -80,7 +80,7 @@ folder; the setup prompt and the `apply` program then put each piece you chose w
                                                           v
  rules/        8 short rules          --apply-->    a marked block in CLAUDE.md (Claude Code alone)
                                                     or in AGENTS.md (any other tool)
- skills/       12 skills              --apply-->    .claude/skills/wk-<name>/   (or .agents/skills/, .cline/skills/)
+ skills/       11 skills              --apply-->    .claude/skills/wk-<name>/   (or .agents/skills/, .cline/skills/)
  templates/    AGENTS.md, PLAN.md,    --apply-->    AGENTS.md, PLAN.md, REVIEW.md, CHANGELOG.md (only if missing),
                REVIEW.md, agents/,                  .claude/agents/reviewer.md, .claude/workflow.json,
                workflow.json, hooks/                a marked block in your git hooks (pre-commit, pre-push)

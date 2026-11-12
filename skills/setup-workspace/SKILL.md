@@ -62,8 +62,7 @@ for the chosen profile.
    - push hook or release workflow: the protected branch (`project.protectedBranch`; leave it out if the push
      hook should only run the review gate);
    - release workflow and changelog: the files that hold the version as `file:key`, for example
-     `package.json:version` (`project.versionFiles`);
-   - `wk-update-workspace-kit`: the kit repository address.
+     `package.json:version` (`project.versionFiles`).
    Without these answers the program writes nothing for that piece and reports exactly what it needs.
 
 If the user says "you decide", use the defaults and list them as assumptions in the summary.

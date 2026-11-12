@@ -37,7 +37,7 @@ Numbers are from 2026-11-10 unless a line says otherwise; they change as the kit
   (`6481ca0`, `2c5369d`, `e4a94f2`). The repository is private, where macOS minutes are billed at a higher rate;
   the cause is not confirmed. A cancelled macOS job says nothing about the code, so check that all six jobs ran
   before reading a CI result as proof of portability.
-- **Skill lint:** 12 skills, 0 errors, 0 warnings. This checks structure only; it does not prove a skill triggers.
+- **Skill lint:** 11 skills, 0 errors, 0 warnings. This checks structure only; it does not prove a skill triggers.
 - **A real project, on a copy:** `the Expo starter project`, which already had an older kit copy, plain-named
   skills, husky hooks, imported rules and a wired guard hook. `init` refused until `--force`. `apply` replaced
   nothing the project owned, did not add what its hook already ran, and a second run changed nothing. With
@@ -63,8 +63,7 @@ The status of every playbook practice, and how it was checked, is in
 [`docs/playbook-mapping.md`](playbook-mapping.md). Known limits: a review record is an attestation (the
 assistant that wrote the change can write it); the reviewer has Bash and is told not to change anything, which is
 instructions, not a sandbox; the review gate is per machine; the VS Code extension does not read a project's
-default plan mode, per the Claude Code docs; and the `update-workspace-kit` pull mode does not work with the
-package ([section 9](install-and-update.md#9-keeping-the-kit-up-to-date)).
+default plan mode, per the Claude Code docs.
 
 ## 12. What is not in the kit
 

@@ -186,13 +186,12 @@ An older install copied `rules/`, `skills/` and friends by hand and named the sk
 This was tried on a copy of a real project that had exactly that history
 ([section 11](design-and-evidence.md#11-how-it-was-checked-and-what-is-not-proven)).
 
-### Sharing an improvement back: `update-workspace-kit`
+### Contributing an improvement
 
-This kit is also a git repository (`https://github.com/Jakub-Owczarzak/ai-workspace-kit`). The
-`update-workspace-kit` skill's **push** mode (project to kit: check a piece is reusable, remove project facts,
-write it to a branch of the kit, ask before pushing) is described in the skill and was not re-tested after the
-npm package was introduced.
+The kit has no skill that pushes to its repository or opens pull requests for you, on purpose. To get a newer kit, use
+`init --force` as above. To suggest a change, open an issue first
+(<https://github.com/Jakub-Owczarzak/ai-workspace-kit/issues/new/choose>); a pull request from a fork is welcome after
+that. See [CONTRIBUTING.md](../CONTRIBUTING.md).
 
-**Its pull mode predates the package and should not be used with it.** It treats `.kit-version` as a git commit
-and copies a working copy over the kit folder, while the package writes its version number there and `init` is
-all or nothing. To get a newer kit, use `init --force` as above. The skill has not been reworked yet.
+A project that installed an earlier kit may still have a `wk-update-workspace-kit` skill folder. The kit no longer
+ships it and `apply` does not remove it: delete that folder if you do not use it.

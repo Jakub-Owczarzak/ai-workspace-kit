@@ -98,6 +98,8 @@ To remove everything the kit installed, see [Uninstall](docs/install-and-update.
 [`RELEASING.md`](RELEASING.md). What is proven and what is not:
 [how it was checked](docs/design-and-evidence.md#11-how-it-was-checked-and-what-is-not-proven).
 
+**Want to contribute?** Open an issue first, then a pull request from a fork: see [CONTRIBUTING.md](CONTRIBUTING.md).
+
 **Trying it and want to tell us how it went?** Open an issue with the *Feedback or a problem* form
 ([new issue](https://github.com/Jakub-Owczarzak/ai-workspace-kit/issues/new/choose)). It asks which AI tool and
 operating system you used and what the installer printed; those details make a report easy to act on.

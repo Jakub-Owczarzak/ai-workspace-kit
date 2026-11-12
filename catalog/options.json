@@ -404,17 +404,6 @@
       "installs": ["templates/FIGMA-SYNC.md"]
     },
     {
-      "id": "skill.update-workspace-kit",
-      "kind": "skill",
-      "source": "skills/update-workspace-kit",
-      "installAs": "wk-update-workspace-kit",
-      "title": "Kit updater",
-      "what": "Pulls newer kit versions into this project, and can port a reusable piece of this project back into the kit.",
-      "impact": "Needs the kit repository address. Never changes files without showing the change first.",
-      "default": true,
-      "touches": [".claude/skills/wk-update-workspace-kit/", ".claude/workspace-kit/.kit-version"]
-    },
-    {
       "id": "skill.setup-workspace",
       "kind": "skill",
       "source": "skills/setup-workspace",

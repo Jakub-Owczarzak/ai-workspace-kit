@@ -33,7 +33,7 @@ control that tunes it, and what can stop you. Step 0 happens once per project.
    7 PULL REQUEST . pr-description writes the text; CI runs; merge; the release workflow bumps the version
       |
       v
-   8 KEEP IT TRUE . write-project-overview (refresh), check-config, update-workspace-kit
+   8 KEEP IT TRUE . write-project-overview (refresh), check-config
 ```
 
 ### Step 0: install (once per project)
@@ -268,16 +268,15 @@ Skills involved: `pr-description`, `changelog-bump`. Template: `templates/workfl
       v
    node scripts/check-config.mjs  --> skill lint, @ imports, doc size  (no Claude needed)
 
-   the kit has improvements, or the project made one?
+   a newer kit version?
       |
       v
-   a newer kit version:  npx ...@latest init --force, review the diff, apply again (section 9)
-   a project improvement for the kit:  update-workspace-kit, PUSH mode (project -> kit), always asks first
+   npx ...@latest init --force, review the diff, apply again (section 9)
 ```
 
 ## 6. The skills and how they connect
 
-Twelve skills (`run-factory` and `e2e-tests` are the newest). In a project they are installed as `wk-<name>` (so `/wk-pr-description`); this page uses the plain
+Eleven skills (`run-factory` and `e2e-tests` are the newest). In a project they are installed as `wk-<name>` (so `/wk-pr-description`); this page uses the plain
 names. **Started by hand** means only you can start it (`/name`); otherwise Claude may pick it from its
 description. The profile does not install or remove skills; you choose the skills at setup, and the profile
 changes how strictly the workflow uses them.
@@ -293,7 +292,6 @@ changes how strictly the workflow uses them.
 | `readable-fix-plan` | by Claude | Turning review findings or a bug list into one plan | none | a verified, clickable fix plan | takes findings from the reviewer or a harsh review |
 | `figma-sync` | by Claude | UI changes are pending, or you ask to align the design | none | frames in Figma, `FIGMA-SYNC.md` | fed by the `ui-change-flagging` rule; runs before the commit |
 | `ultra-code-quality-review` | by hand | You want a deliberately harsh maintainability review | none | a structural review | separate from the review gate; it does not leave a review record |
-| `update-workspace-kit` | by Claude | A change you made in the project is reusable and should go back into the kit (push mode; its pull mode predates the npm package, see [section 9](install-and-update.md#9-keeping-the-kit-up-to-date)) | none | kit changes on a branch | talks to the kit repository |
 
 The `reviewer` is a **subagent**, not a skill: a file in `.claude/agents/` that the assistant starts as a fresh
 reader at step 4. It is tuned by `review.mode`.
@@ -301,7 +299,7 @@ reader at step 4. It is tuned by `review.mode`.
 How they connect:
 
 ```text
-   setup-workspace --installs--> everything        update-workspace-kit --push--> KIT REPOSITORY
+   setup-workspace --installs--> everything
 
    workspace-router
       |--routes--> goal-first-planner --writes--> PLAN.md --read by--> reviewer --writes--> review record

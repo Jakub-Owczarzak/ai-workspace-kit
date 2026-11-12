@@ -16,7 +16,7 @@ Sections 13 and 14 of the former README: where each file lives in the kit, and t
    catalog/options.json      every switchable option, explained in plain words (read by the questionnaire)
    rules/                    8 always-on rules: readable-code, repo-tidiness, docs-fresh, commit-gate,
                              verification, test-discipline, skill-routing, ui-change-flagging
-   skills/                   12 skills, each with SKILL.md (and triggers.json for the model-invocable ones);
+   skills/                   11 skills, each with SKILL.md (and triggers.json for the model-invocable ones);
                              run-factory has references/ for GitHub and GitLab, e2e-tests for Playwright and Maestro
    templates/
      AGENTS.md CLAUDE.md PLAN.md REVIEW.md BACKLOG.md FIGMA-SYNC.md CHANGELOG.md workflow.json
