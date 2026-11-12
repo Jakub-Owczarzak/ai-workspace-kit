@@ -98,11 +98,11 @@
       "control": "tests.e2e",
       "title": "End-to-end UI tests and screenshots",
       "what": "Lets the assistant test the interface the way a user would, and take screenshots of UI changes for the pull request.",
-      "impact": "off: no end-to-end tests. browser: Playwright drives a headless browser; Playwright is installed in your project when you choose this. native: Maestro runs against a platform you supply and run yourself (Expo, Android Studio, Xcode or a device); the kit only prepares the way to connect it, and this path is not verified on a device. Works with or without the factory.",
+      "impact": "off: no end-to-end tests. browser: Playwright drives a headless browser; Playwright is installed in your project when you choose this. native (experimental): Maestro runs against a platform you supply and run yourself (Expo, Android Studio, Xcode or a device); the kit only prepares the way to connect it, and this path is not verified on a device. Works with or without the factory.",
       "values": {
         "off": "No end-to-end tests",
         "browser": "Playwright in a headless browser",
-        "native": "Maestro against your own native platform (you supply and run it)"
+        "native": "Experimental: Maestro against your own native platform (you supply and run it)"
       },
       "touches": [".claude/workflow.json"],
       "requires": ["skill.e2e-tests"]
@@ -487,7 +487,7 @@
       "source": "skills/e2e-tests",
       "installAs": "wk-e2e-tests",
       "title": "End-to-end tests and screenshots",
-      "what": "Sets up and runs end-to-end UI tests the way a user would, and takes screenshots for pull requests. Browser: Playwright in a headless browser (proven). Native: Maestro against a platform you supply and run yourself (Expo, Android Studio, Xcode or a device); written from the documentation and not verified on a device.",
+      "what": "Sets up and runs end-to-end UI tests the way a user would, and takes screenshots for pull requests. Browser: Playwright in a headless browser (proven). Native (experimental): Maestro against a platform you supply and run yourself (Expo, Android Studio, Xcode or a device); written from the documentation and not verified on a device.",
       "impact": "Nothing runs until you set tests.e2e to browser or native. It asks before installing Playwright (about 40 seconds the first time). Works with or without the factory.",
       "default": false,
       "requires": ["check.e2e-shots"],

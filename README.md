@@ -11,6 +11,19 @@ It grew out of day-to-day work with an AI assistant, was made independent of any
 was then aligned with Anthropic's
 [AI-native SDLC playbook](https://claude.com/resources/articles/the-ai-native-sdlc-playbook).
 
+## What you get in each tool
+
+- **Claude Code: the full kit.** Skills, rules, hooks, and the optional factory, which uses separate subagents: a fresh
+  builder for each bucket and an independent reviewer who has not seen the conversation.
+- **Cursor, Codex, OpenCode, Cline: a reduced version.** The same rules and skills, run by one agent. The setup adds a
+  rule that translates the Claude Code features (question tool, subagents, slash commands) into plain steps. The review
+  is then the agent checking its own work, labelled `SELF-REVIEW`, and the review gate does not count it as independent.
+  A single agent also re-reads the same context every turn, so a factory run costs more tokens than the subagent layout
+  (see [Cost](docs/factory.md#cost)).
+- **Proven and not proven.** Claude Code and browser e2e were run. The four other tools were written from their
+  documentation and have not been run; native e2e (Maestro) is experimental. The
+  [checklist](docs/other-tools-checklist.md) is the short path to find out whether it works for you.
+
 ## Quick setup
 
 Needs Node 18 or newer and git. Five minutes, in this order. Commands go in a terminal in your project folder;
@@ -826,7 +839,7 @@ re-read every turn, so even a small change costs real tokens; the measurements a
 #### End-to-end tests and screenshots
 
 `tests.e2e` is an option for **every profile, with the factory on or off**: `browser` (Playwright in a headless
-browser) or `native` (Maestro against a simulator or device you supply). It is `off` by default because it needs a
+browser) or `native` (**experimental**: Maestro against a simulator or device you supply). It is `off` by default because it needs a
 tool installed in your project; the kit never turns it on. Only buckets the plan marks `E2E: yes` run it. In the
 factory, the screenshots go to a separate `factory-screenshots` branch and appear in the PR body under Verification,
 with a plain statement that the images were published, not seen in a browser. Browser e2e is proven; native is

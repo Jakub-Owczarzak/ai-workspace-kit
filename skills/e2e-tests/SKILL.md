@@ -16,7 +16,7 @@ means `off`).
 - `off`: do not set anything up and do not run e2e tests. If the user asks for them, say the control is off and
   that they choose `browser` or `native` in `.claude/workflow.json` (the profile never turns it on by itself).
 - `browser`: follow `references/browser-playwright.md`. This is proven: it was run on Windows with Playwright 1.65.
-- `native`: follow `references/native-maestro.md`. The user supplies the platform (Expo, Android Studio, Xcode or a
+- `native` (**experimental**): follow `references/native-maestro.md`. The user supplies the platform (Expo, Android Studio, Xcode or a
   device) and starts it. This path is **written from Maestro's documentation and is not verified on a device**;
   say so in anything you report.
 

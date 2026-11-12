@@ -67,7 +67,7 @@ bottom to top, with a normal push. The factory never force-pushes.
 
 - `browser`: Playwright in a headless browser. **Proven** (Playwright 1.65), including a live factory run with an
   `E2E: yes` bucket and screenshots in the PR body.
-- `native`: Maestro against a platform you supply and run (Expo, Android Studio, Xcode or a device). The recipe is
+- `native` (experimental): Maestro against a platform you supply and run (Expo, Android Studio, Xcode or a device). The recipe is
   written from the tool's documentation. **Not proven** on a device, and the factory never calls it verified.
 - Screenshots go to a separate `factory-screenshots` branch, linked by commit SHA in the PR body. The PR says the
   images were published, not seen in a browser.
