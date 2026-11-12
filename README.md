@@ -75,6 +75,23 @@ watches CI. It never merges. Details and what is proven: [`docs/factory.md`](doc
 commands. You can pre-approve the ones you trust, but that lets an agent run them unasked, so read the warning first:
 [`docs/permissions.md`](docs/permissions.md). The kit never writes these settings for you.
 
+## Uninstall
+
+One command takes out everything the setup installed, and nothing else. From the project folder:
+
+```text
+node .claude/workspace-kit/bin/cli.mjs uninstall          # a preview: shows what would go, changes nothing
+node .claude/workspace-kit/bin/cli.mjs uninstall --yes    # removes it
+```
+
+The kit keeps a record of what it installed, so it removes only that: its skills, scripts and rules block, the hook and
+`.gitignore` lines it added, and `.claude/workspace-kit/` itself. Your own skills, scripts and hooks are never touched.
+
+Files you changed since the install (a `PLAN.md` you filled in, a `workflow.json` you edited) are kept, and the command
+ends with a **prompt** to paste into your AI tool, which goes through them one by one and asks you about each. To remove
+those too in one step, run `uninstall --purge --yes`; the preview first says which files git cannot bring back. Details:
+[Uninstall](docs/install-and-update.md#uninstall).
+
 ## Where to go next
 
 | You want | Read |
@@ -93,7 +110,7 @@ commands. You can pre-approve the ones you trust, but that lets an agent run the
 ## Status and feedback
 
 `ai-workspace-kit` is on npm. It is an early version (0.x), so expect rough edges (the version is in `package.json`).
-To remove everything the kit installed, see [Uninstall](docs/install-and-update.md#uninstall). How releases are made:
+To remove everything the kit installed, see [Uninstall](#uninstall). How releases are made:
 [`RELEASING.md`](RELEASING.md). What is proven and what is not:
 [how it was checked](docs/design-and-evidence.md#11-how-it-was-checked-and-what-is-not-proven).
 
