@@ -9,6 +9,8 @@ import { DIAGRAMS, layoutFor, renderAll, wrap } from './make-flow-diagrams.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const readme = readFileSync(join(ROOT, 'README.md'), 'utf8');
+// The diagrams live in the profile-flows guide; the README links to it.
+const flows = readFileSync(join(ROOT, 'docs', 'profile-flows.md'), 'utf8');
 const PROFILES = ['solo', 'team', 'org'];
 
 describe('workflow diagrams', () => {
@@ -29,11 +31,11 @@ describe('workflow diagrams', () => {
     }
   });
 
-  it('the README embeds each diagram, with alt text, and links to the section', () => {
+  it('docs/profile-flows.md embeds each diagram, with alt text, and the README links to that section', () => {
     for (const name of Object.keys(DIAGRAMS)) {
-      assert.match(readme, new RegExp(`!\\[[^\\]]{20,}\\]\\(docs/diagrams/flow-${name}\\.svg\\)`), `README does not embed flow-${name}.svg`);
+      assert.match(flows, new RegExp(`!\\[[^\\]]{20,}\\]\\(diagrams/flow-${name}\\.svg\\)`), `docs/profile-flows.md does not embed flow-${name}.svg`);
     }
-    assert.match(readme, /\(#the-flow-in-each-profile-what-is-automated-what-needs-you\)/);
+    assert.match(readme, /\(docs\/profile-flows\.md#the-flow-in-each-profile-what-is-automated-what-needs-you\)/);
   });
 
   it('the three profile diagrams have the same eight stages in the same order, and the test comes before the build', () => {
