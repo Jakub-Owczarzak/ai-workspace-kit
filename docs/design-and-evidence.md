@@ -5,14 +5,18 @@ Sections 10 to 12 of the former README: the principles, what was proven and what
 ## 10. Design principles
 
 - **Rules are always on, skills are on demand.** Rules are short and apply to every change; a skill is a
-  longer procedure used for one kind of task.
+  longer procedure used for one kind of task. The always-on block is read in every session and by every fresh
+  subagent, so it is kept small on purpose: a rule keeps its safety lines and points to a `<name>-details.md` file read
+  on demand, passages about options that are not installed are not written (`<!-- wk:if option-id -->` in the rule
+  file), and a test holds a size budget (about 2,000 tokens for a default install, down from about 3,000).
 - **Procedure and data are separate.** A skill holds the method and no project facts; the project keeps its
   own data in a file the skill reads (`figma-sync` and `FIGMA-SYNC.md`, `changelog-bump` and `CHANGELOG.md`).
 - **Plain markdown first.** Nothing depends on one tool. The adapters only say where files go.
 - **Ask before changing, never overwrite.** Installing is additive and shows what it will change.
 - **Report honestly.** Verification statements say what was run and what was not.
 - **Strictness is a setting.** The profile turns controls on or off per project; the default is light.
-- **Measure, do not trim.** The size report shows the cost of the always-loaded files and never cuts them.
+- **Measure, do not trim.** The size report shows the cost of the always-loaded files and never cuts your files; the
+  kit's own rules are the part it keeps small.
 - **Fail open.** A check that cannot run allows the action and says so; a guard that can wedge a session costs
   more than it protects.
 - **Local only.** No CI calls to Claude, no API key, no GitHub calls from the kit's scripts.

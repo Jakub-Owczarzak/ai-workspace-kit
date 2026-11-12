@@ -64,8 +64,3 @@ list in the same change.
 
 **Release** (optional: only when the project ships builds)
 - <How a release is made, which files carry the version, where it is published.>
-
-**Changelog (every commit)**
-Every commit that changes behaviour or UI needs a changelog entry (see `changelog-bump`). In a terminal the
-hook asks for the bump type and a one-line description. For a non-terminal commit set
-`CHANGELOG_BUMP=patch|minor|major` and `CHANGELOG_ENTRY="Add ..."`. Do not edit the version by hand.

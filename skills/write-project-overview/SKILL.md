@@ -20,7 +20,12 @@ A script does the checkable part and the model does the rest, so the result does
 
 - **Shape:** the sections of `templates/AGENTS.md` in the kit (`.claude/workspace-kit/templates/AGENTS.md`):
   What it is, Stack, Implemented, Commands, Architecture, Where a new file goes, Root config, Conventions,
-  Known quirks, Repo/git/CI, Release, Changelog. Drop an optional section that has nothing to say.
+  Known quirks, Repo/git/CI, Release. Drop an optional section that has nothing to say.
+- **The project, not the kit.** Describe the project only. Do not list the kit's own files or folders
+  (`.claude/workspace-kit/`, the `wk-*` skills, the check scripts in `scripts/`, the marked rules block): the kit
+  describes itself, and this file is read at the start of every session. One line is enough: "The workspace kit is
+  installed; its rules are in the marked block."
+- **The changelog rule is not repeated here:** the commit-gate rule and `changelog-bump` carry it.
 - **Short and dated:** one fact per bullet. `Last updated` carries today's date and what changed.
 - **Verified or marked:** check a name, path, number or command against the code before writing it. What you
   could not check gets `(unverified)`. Never write "works" or "tested" for something you only read.
