@@ -49,9 +49,23 @@ for the chosen profile.
    OpenCode, Cline)? Which profile (`solo`, `team`, `org`)? Quote each profile's `forWho` and `summary`.
    Default `solo`. If a stack pack matches, ask whether to add it. Tell the user where each tool will read
    the kit from (`<KIT>/adapters/<tool>.md`): with several tools the rules are written once, in `AGENTS.md`.
-2. **Round 2: strictness.** List the 8 controls with the profile's defaults (see the catalog `values`, and
-   `docs/workflow-profiles.md`). Ask: keep the defaults, or change some? Only ask about the controls the user
-   wants to change; record changes as `overrides`.
+   **Round 1b: the factory layer** (one question, asked right after tools and profile are answered, because the
+   answer depends on the tools). The factory is the optional layer where agents carry an approved plan through
+   build, tests, review and commit without asking for each step (read the `what` and `impact` of
+   `control.factory.mode`). Ask: "Add the factory layer?" with three answers: **No** (recommended; every profile
+   defaults to off), **Yes, `local`** (builds, tests, reviews and commits, and stops before any push), **Yes, `pr`**
+   (also pushes branches, opens the pull requests and watches CI; it never merges). Say what the chosen tools get:
+   with Claude Code the builder and the reviewer are separate subagents; with any other tool one agent does all the
+   work in separate passes, and its review is a SELF-REVIEW that a `required` review gate does not count
+   (`wk-run-factory`, "Without subagents"), and it costs more tokens. On a yes: add `skill.run-factory` to `enabled`
+   (the catalog's `requires` add `factory-core`, `review-gate`, `skill.pr-description` and `check.static`; say so)
+   and put `factory.mode` in `overrides`. After `pr`, also ask `factory.host` (auto reads the git remote) and
+   `factory.pushConfirm` (ask before every push, or auto); leave the other factory controls at their defaults and
+   say they can be changed in Round 2. On a no, install no factory piece; running this setup again adds it later.
+2. **Round 2: strictness.** List the controls (the catalog entries of kind `control`) with the profile's defaults
+   (see the catalog `values`, and `docs/workflow-profiles.md`). Leave out the `factory.*` controls unless the answer to
+   Round 1b was yes. Ask: keep the defaults, or change some? Only ask about the controls the user wants to change;
+   record changes as `overrides`.
 3. **Round 3: what to install.** One group per message, as a short list, then ask "accept the preselection or
    change it?": rules; skills; hooks and CI; review gate and checks; templates and settings. If the user
    wants changes, ask which ids. Options marked `appliesWhen` are off unless that condition is true for this
@@ -117,7 +131,9 @@ Typical ones, with the same rules (new files only, marked blocks in existing fil
 
 Report briefly: what was installed and where, what was skipped and why, the assumptions made, the files the
 user still has to edit, and how to undo: `node <KIT>/bin/cli.mjs uninstall` shows a preview of everything the
-setup added and `--yes` removes it (files the user edited since are kept). Suggest one first step. Do not commit.
+setup added and `--yes` removes it (files the user edited since are kept, and a prompt lists them; `--purge` removes
+those too). Suggest one first step; if the factory was added, say it is started by hand with the tool's own way of
+starting `wk-run-factory`. Do not commit.
 
 ## Limits
 

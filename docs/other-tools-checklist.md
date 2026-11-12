@@ -11,7 +11,7 @@ you do not mind (or none: use `factory.mode: local`, which never pushes).
 
 1. `npx ai-workspace-kit init` in the scratch project.
 2. In your tool, say: "Read `.claude/workspace-kit/skills/setup-workspace/SKILL.md` and follow it." Choose your tool, a
-   profile (`team` is a good test), and the factory pieces.
+   profile (`team` is a good test), and answer **yes, `local`** to the factory question that follows the profile.
 3. Check, and write down yes or no for each:
    - the questionnaire was asked and the dry run was shown before anything was installed;
    - the skills appear where the tool looks for them (`.agents/skills/wk-*` for Cursor, Codex and OpenCode,

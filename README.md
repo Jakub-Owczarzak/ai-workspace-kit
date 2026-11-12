@@ -58,10 +58,9 @@ overwrites a file of yours. More in [Install and use](docs/install-and-update.md
 > Use the goal-first-planner skill. I want to <describe the goal>. Interview me, then plan it in small buckets.
 
 **5. Optional: let agents carry an approved plan to pull requests** (the [factory](docs/factory.md)).
-It is off until you turn it on. Paste:
-
-> In `.claude/workflow.json` set `factory.mode` to `local`, show me the result with `node scripts/workflow-config.mjs`,
-> and explain what `local` and `pr` do. Do not start the factory yet.
+The setup in step 2 asks about it right after the profile: answer **local** to try it (it builds, tests, reviews and
+commits, then stops before any push), or **pr** to let it also push and open the pull requests. The default is no. To
+add it later, run step 2 again and answer yes.
 
 Then, with an approved `PLAN.md`, start it by hand with `/wk-run-factory` (Codex: `$wk-run-factory`). It builds,
 verifies, reviews and commits each bucket; in `pr` mode it also pushes feature branches, opens the pull requests and
