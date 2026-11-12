@@ -3,8 +3,9 @@
 The kit's skills name some Claude Code features. If you are **not** Claude Code, do not look for those features; use the
 stand-in below, and say once when you do.
 
-- **`AskUserQuestion` (multiple-choice question tool).** Ask the same questions as plain text: numbered options, one
-  round at a time (3–5 questions), then wait for the answer. Never guess an answer to keep going.
+- **`AskUserQuestion` (multiple-choice question tool).** If your tool has its own question tool (OpenCode does), use it
+  with the same questions and options. If it has none, ask as plain text: numbered options, one round at a time (3–5
+  questions). Either way, wait for the answer. Never guess an answer to keep going.
 - **Plan mode / `ExitPlanMode`.** Write the plan in the chat (or in `PLAN.md` when the skill says so) and stop until the
   user approves it. Do not edit code before approval.
 - **Subagents (`factory-builder`, `reviewer`, `.claude/agents/`).** Do the same work yourself as separate passes, as the

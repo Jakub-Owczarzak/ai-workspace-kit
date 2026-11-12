@@ -29,7 +29,7 @@ name; only you can show your tool follows it. Start `wk-goal-first-planner` the 
 > Plan a small feature for this project: a `--version` flag for a script. Follow the skill, and do not write code yet.
 
 Check, and write down yes or no for each:
-- the interview questions came as **plain numbered text** (3–5 at a time), and the tool **waited** for your answer
+- the interview questions came through the tool's own question tool or plain numbered text (3–5 at a time), and the tool **waited** for your answer
   instead of guessing one;
 - the tool said **once** that it was using a stand-in, and did not go looking for a question tool or a plan mode;
 - **no file was edited** before you approved the plan (check with `git status`);
@@ -74,7 +74,7 @@ Do not paste tokens, keys or private code.
 |---|---|---|---|---|
 | Version of the tool | | | | |
 | Setup: questionnaire, dry run, skills in the right folder, `AGENTS.md` block | | | | |
-| Translation: questions as plain text, waited for the answer | | | | |
+| Translation: questions asked (own question tool or plain text), waited for the answer | | | | |
 | Translation: said once it uses a stand-in | | | | |
 | Translation: no file edited before the plan was approved | | | | |
 | Translation: no `CLAUDE.md` created, `.claude/` paths kept | | | | |
