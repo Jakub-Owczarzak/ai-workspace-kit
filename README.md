@@ -1,5 +1,9 @@
 # Workspace kit
 
+[![CI](https://github.com/Jakub-Owczarzak/ai-workspace-kit/actions/workflows/ci.yml/badge.svg)](https://github.com/Jakub-Owczarzak/ai-workspace-kit/actions/workflows/ci.yml)
+[![npm version](https://img.shields.io/npm/v/ai-workspace-kit)](https://www.npmjs.com/package/ai-workspace-kit)
+[![License: MIT](https://img.shields.io/npm/l/ai-workspace-kit)](LICENSE)
+
 A portable set of working rules, skills, templates and checks that make an AI coding assistant (Claude Code
 first, other tools through adapters) work the way a careful engineer works: plan before building, keep the
 code and the docs true, prove what was done, get a second reader on the change, and ship with a clean history.
