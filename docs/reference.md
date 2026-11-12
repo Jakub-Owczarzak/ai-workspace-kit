@@ -28,7 +28,7 @@ Sections 13 and 14 of the former README: where each file lives in the kit, and t
    docs/                     workflow-profiles, config-checks, test-discipline, project-overview,
                              review-gate, playbook-mapping, setup-prompt, factory, permissions,
                              factory-host-interface, factory-spike, factory-rehearsal, factory-trial, other-tools-checklist,
-                             concepts, workflow-steps, profile-flows, install-and-update, design-and-evidence, reference
+                             uninstall-prompt, concepts, workflow-steps, profile-flows, install-and-update, design-and-evidence, reference
                              (the guide that used to be the README), diagrams/ (generated SVGs)
    adapters/                 where each piece goes: Claude Code, Codex and AGENTS.md readers, Cursor, OpenCode, Cline
    stacks/expo-react-native/ routing rows and an always-on rule for one framework (optional)

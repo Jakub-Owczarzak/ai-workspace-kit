@@ -112,7 +112,8 @@ One command removes everything the installer added, and nothing else:
 
 ```text
 node .claude/workspace-kit/bin/cli.mjs uninstall           # a preview: shows exactly what would go, changes nothing
-node .claude/workspace-kit/bin/cli.mjs uninstall --yes     # does it
+node .claude/workspace-kit/bin/cli.mjs uninstall --yes     # does it, and keeps what you changed
+node .claude/workspace-kit/bin/cli.mjs uninstall --purge --yes   # also removes what you changed (see below)
 ```
 
 (`npx ai-workspace-kit uninstall` also works once the package is on npm.) It can do this safely because `apply`
@@ -121,7 +122,8 @@ what that record lists:
 
 | What | What the uninstaller does |
 |---|---|
-| Files the kit created (skills, scripts, templates such as `PLAN.md`, the reviewer agent, the release workflow) | Deleted **only while they are still exactly what the kit wrote**. A file you edited since is kept and listed as `KEPT` (a Windows line-ending change is not an edit). |
+| Files the kit created (scripts, templates such as `PLAN.md`, the reviewer agent, the release workflow) | Deleted **only while they are still exactly what the kit wrote**. A file you edited since is kept and listed as `KEPT` (a Windows line-ending change is not an edit). |
+| Files in a `wk-*` skill folder | Always removed, even if the setup filled project facts into them (the router skill) or you edited them: the `wk-` prefix marks a skill as the kit's own. Listed as `EDITED`. A skill without the prefix is yours and is never touched. |
 | Marked blocks in your own files (rules in `CLAUDE.md` or `AGENTS.md`, hooks, `.gitignore`) | The block is cut out; your text stays. If the kit created the file and nothing else is in it, the file goes too. |
 | Keys the kit added to `.claude/settings.json` | Only those keys. A value you changed since (for example `defaultMode`) is kept. |
 | The `check:config` script in `package.json` | Removed only while it is still the kit's command. |
@@ -129,8 +131,21 @@ what that record lists:
 | `.claude/workspace-kit/` itself | Removed last. `--keep-kit` keeps it, with a fresh record, so you can run the setup again. |
 
 What it does **not** touch: your own skills (even one with the same plain name), your own scripts and hooks, review
-records and fix-mode state in `.claude/reviews/` and `.claude/state/` (it tells you they exist), and anything the
-kit never recorded. It also tells you if `CLAUDE.md` or `AGENTS.md` still imports files from the kit folder.
+records, fix-mode state and factory data in `.claude/reviews/`, `.claude/state/` and `.claude/factory/` (it tells you
+they exist), and anything the kit never recorded. It also tells you if `CLAUDE.md` or `AGENTS.md` still imports files
+from the kit folder.
+
+**What is kept, and how to clean it.** Working with the kit changes the files it created: the planner fills
+`PLAN.md`, you switch the factory on in `.claude/workflow.json`, the overview skill writes into `AGENTS.md`. Those
+files are yours now, so a normal uninstall keeps them. It then prints a **cleanup prompt** with the exact list, because
+the kit folder and its record are gone once it finishes; paste it into your AI tool and it goes through the items one
+at a time, asking you for each. The wording is in [uninstall-prompt.md](uninstall-prompt.md).
+
+To remove everything in one step instead, use `uninstall --purge --yes`. It also removes the kit-created files you
+changed, an instruction file the kit created (even with text you added), a `check:config` script you changed, and the
+three data folders above. The preview (`uninstall --purge` without `--yes`) lists each such file and says whether git
+has its content (`git restore` brings it back) or **NOT RECOVERABLE**. It never touches anything the kit did not
+create, and a file you already had before the kit only loses the kit's block.
 After it runs, look at `git status` and `git diff`. One limit: a JSON file the uninstaller rewrites
 (`settings.json`, `package.json`) is written back with its own indentation, so a hand-formatted one may change in
 layout, and a file with comments is never rewritten, only reported for you to edit. A project installed by a version

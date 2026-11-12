@@ -17,5 +17,6 @@ switchable rule, skill, hook and check in a line or two, installs only what you 
 skipped. Run it again at any time to change your choices; it is safe to repeat.
 
 To undo everything the setup installed, run `node .claude/workspace-kit/bin/cli.mjs uninstall` (a preview; add
-`--yes` to remove). It removes only what the setup recorded, keeps any file you edited since, and never touches
-your own skills, scripts or hooks.
+`--yes` to remove). It removes only what the setup recorded, keeps any file you edited since (and prints a prompt to
+clean those up with your AI tool, or use `--purge` to remove them too), and never touches your own skills, scripts or
+hooks.

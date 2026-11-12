@@ -10,7 +10,7 @@ const HELP = `workspace-kit: install the workspace kit into a project
 Usage:
   npx ai-workspace-kit init  [--dir <path>] [--dry-run] [--force]
   node .claude/workspace-kit/bin/cli.mjs apply --choices <file> [--dir <path>] [--dry-run] [--force]
-  node .claude/workspace-kit/bin/cli.mjs uninstall [--dir <path>] [--yes] [--keep-kit]
+  node .claude/workspace-kit/bin/cli.mjs uninstall [--dir <path>] [--yes] [--keep-kit] [--purge]
 
 Commands:
   init       copy the kit into <project>/.claude/workspace-kit/ (nothing else is touched)
@@ -24,6 +24,9 @@ Options:
   --force           init: replace kit files that differ (older copy). apply: replace files that exist and differ
   --yes             uninstall: actually remove (without it, uninstall only previews)
   --keep-kit        uninstall: keep .claude/workspace-kit/ so you can run the setup again
+  --purge           uninstall: also remove the kit-created files you changed (PLAN.md, REVIEW.md, ...), an instruction
+                    file the kit created, and .claude/reviews, .claude/state, .claude/factory. Without it, what is
+                    kept is listed in a prompt you can paste into your AI tool
   -h, --help        show this help`;
 
 const args = process.argv.slice(2);
@@ -75,7 +78,7 @@ if (command === 'init') {
 } else if (command === 'uninstall') {
   try {
     const yes = flag('--yes');
-    const report = uninstall({ dir, yes, keepKit: flag('--keep-kit') });
+    const report = uninstall({ dir, yes, keepKit: flag('--keep-kit'), purge: flag('--purge') });
     if (report.nothingToDo) {
       console.log(`Nothing to uninstall: ${TARGET.split('\\').join('/')} was not found in ${dir}.`);
       process.exit(0);
@@ -89,12 +92,26 @@ if (command === 'init') {
     if (report.settings) console.log(`  keys    ${report.settings.file}: ${report.settings.removed.join(', ')}${report.settings.fileDeleted ? '  (file removed)' : ''}`);
     if (report.packageScript) console.log(`  script  package.json: ${report.packageScript.name}`);
     for (const path of report.removedDirs) console.log(`  folder  ${path}  (empty)`);
+    for (const path of report.purgedDirs) console.log(`  folder  ${path}/  (the kit's data, --purge)`);
     console.log(`  kit     ${TARGET.split('\\').join('/')}: ${report.kitFolder}`);
+    for (const item of report.removedEdited) console.log(`EDITED  ${item.path}: removed anyway (${item.reason})`);
+    for (const item of report.purged) {
+      console.log(`PURGED  ${item.path}: you changed it, removed because of --purge${item.recoverable ? ' (git has this content: git restore brings it back)' : ' (NOT RECOVERABLE: git does not have this content)'}`);
+    }
     for (const item of report.keptFiles) console.log(`KEPT    ${item.path}: ${item.reason}`);
     for (const item of report.manual) console.log(`MANUAL  ${item.path}: ${item.reason}`);
     for (const note of report.notices) console.log(`NOTE    ${note}`);
     if (!yes) console.log('\nNothing was changed. Run again with --yes to remove the above. Review the result with "git status" and "git diff".');
     else console.log('\nDone. Review the result with "git status" and "git diff".');
+    if (report.cleanupPrompt) {
+      console.log(
+        `\nSome things were kept (listed above). To clean them with your AI tool, ${yes ? 'paste' : 'after the uninstall paste'} this into a new session in the project folder:\n` +
+          report.cleanupPrompt.split('\n').map((line) => `  | ${line}`).join('\n') +
+          (yes
+            ? '\n\nThe kit folder and its record are gone, so this list exists only in this output: copy the prompt now.'
+            : '\n\nOr remove them all without asking about each one: run it again with --purge --yes instead of --yes.')
+      );
+    }
   } catch (error) {
     console.error(`uninstall failed: ${error.message}`);
     process.exit(1);
