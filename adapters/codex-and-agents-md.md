@@ -10,6 +10,14 @@ all read it. Codex documentation (skills and customization pages) checked 2026-1
 | Skills (`skills/<name>/`) | `.agents/skills/wk-<name>/SKILL.md`. Codex reads repository skills from `.agents/skills` (and personal ones from `$HOME/.agents/skills`). `.codex/skills` is the older location. |
 | Commit and push hooks | The project's git hooks. |
 
+## Translating Claude Code features (automatic)
+
+The skills name some Claude Code features (`AskUserQuestion`, plan mode, subagents, slash commands). When any tool other
+than Claude Code is chosen, setup adds [tool-translation.md](tool-translation.md) to the same marked rules block, with no
+question asked. It tells the assistant what to do instead: ask the questions as plain text, plan in the chat, do the
+subagent work as separate passes, start skills the tool's own way. Claude Code alone does not get it. It is plain text
+that costs a few lines of `AGENTS.md`; edit the file in the kit folder to adjust it for your tool.
+
 ## A tool that reads none of these
 
 Paste the content of the rules into whatever custom-instructions field the tool has. When you want a
