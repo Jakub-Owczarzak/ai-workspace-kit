@@ -1,6 +1,6 @@
 {
   "name": "ai-workspace-kit",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Portable rules, skills, templates and checks that make an AI coding assistant (Claude Code, Cursor, Codex, OpenCode, Cline) work like a careful engineer. Install with npx, then run the setup prompt.",
   "type": "module",
   "license": "MIT",
