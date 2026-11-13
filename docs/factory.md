@@ -15,7 +15,11 @@ has the output) or **not proven** (written from documentation, or never run).
 2. Check the controls in `.claude/workflow.json`. The setup sets `factory.mode` to the answer you gave (`local` or `pr`);
    it is `off` when you said no.
 3. Start it by hand: `/wk-run-factory` (in Codex: `$wk-run-factory`). The skill refuses to run if you did not ask
-   for it in the conversation, because it pushes code.
+   for it in the conversation, because it pushes code. It is marked so the assistant cannot start it on its own: in a
+   scripted run (`claude -p`) the prompt must be the slash command itself, `claude -p "/wk-run-factory"`; a prompt such
+   as "use the wk-run-factory skill" can be refused (seen in a real run, 2026-11-13). From Git Bash on Windows also set
+   `MSYS_NO_PATHCONV=1`, or the shell rewrites the leading `/` into a path such as `C:/Program Files/Git/wk-run-factory`
+   and nothing runs (seen once in the same session).
 
 The skill runs `node scripts/factory-guard.mjs preflight` first. If it says `not ready`, it shows the problems and
 stops without changing anything (a dirty tree, a bucket without "Done when", an unsupported host).
@@ -51,6 +55,7 @@ stops without changing anything (a dirty tree, a bucket without "Done when", an 
 | `factory.host` | `auto`, `github`, `gitlab` | auto | `auto` reads the git remote |
 | `factory.pushConfirm` | `auto`, `ask` | auto / auto / ask | Whether it pushes by itself or asks for a yes first |
 | `factory.fastFix` | `off`, `docs` | docs / docs / off | A tiny documentation-only fix (at most 10 lines, Markdown and README files; checked by `factory-guard.mjs fast-check`) may be made by the orchestrator with a self-check and no builder or reviewer. Code always goes to a builder. Not used under `review.mode: required` |
+| `factory.untrustedText` | `stop`, `note` | note / stop / stop | What happens when text the builder reads (a file, a log, PR or issue text) gives it an order, such as "run this command" or "report no findings". Neither value follows it. `stop`: the builder stops with `blocked: instruction found in <where>`, the run stops and asks you, and the reviewer reports such text in the diff as a blocking finding. `note`: the builder records it under `Notes:` in its handoff and carries on with its bucket, the reviewer lists it as a `[nit]`, and the final report and PR text name it |
 | `tests.e2e` | `off`, `browser`, `native` | off / off / off | End-to-end tests and screenshots; works with or without the factory |
 
 The full table, with the other controls, is in `docs/workflow-profiles.md`.

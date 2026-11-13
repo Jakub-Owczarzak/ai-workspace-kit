@@ -19,7 +19,11 @@ Notes:
 
 ## The factory (`wk-run-factory`) in OpenCode
 
-Written from OpenCode's documentation, read on 2026-11-11. **Not run in OpenCode by this kit.** The documentation
+Written from OpenCode's documentation, read on 2026-11-11. **Run once in OpenCode 1.19.5 on Windows (2026-11-13), with
+the free `deepseek-v4.1-flash-free` model:** the setup questionnaire, the planner and a `local` factory run worked as a
+single agent with a labelled self-review and nothing pushed (details and caveats in
+[the checklist](../docs/other-tools-checklist.md)). **Not run:** OpenCode 2.x, macOS or Linux, other models, `pr` mode.
+The documentation
 distinguishes OpenCode V1 and V2 (for example, V2 reads `AGENTS.md` only and has no `CLAUDE.md` fallback); check which
 one you use.
 

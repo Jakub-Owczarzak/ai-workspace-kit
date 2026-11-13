@@ -111,6 +111,13 @@ export const CONTROL_SPECS = {
     description:
       'whether the factory may fix a tiny documentation-only problem itself with a self-check (docs) or must always use a builder and an independent re-review (off); only used when factory.mode is on',
   },
+  'factory.untrustedText': {
+    type: 'choice',
+    allowed: ['stop', 'note'],
+    env: 'FACTORY_UNTRUSTED_TEXT',
+    description:
+      'what the builder does when text it reads (a file, a log, PR or issue text) gives it an order: stop the run and ask (stop) or never follow it, record it in its handoff and carry on (note); the reviewer reports it as blocking (stop) or as a nit (note); only used when factory.mode is on',
+  },
   'claude.runChecks': {
     type: 'boolean',
     env: 'CLAUDE_RUN_CHECKS',
@@ -140,6 +147,7 @@ export const PROFILES = {
     'factory.host': 'auto',
     'factory.pushConfirm': 'auto',
     'factory.fastFix': 'docs',
+    'factory.untrustedText': 'note',
     'claude.runChecks': false,
     'static.checks': true,
   },
@@ -157,6 +165,7 @@ export const PROFILES = {
     'factory.host': 'auto',
     'factory.pushConfirm': 'auto',
     'factory.fastFix': 'docs',
+    'factory.untrustedText': 'stop',
     'claude.runChecks': false,
     'static.checks': true,
   },
@@ -174,6 +183,7 @@ export const PROFILES = {
     'factory.host': 'auto',
     'factory.pushConfirm': 'ask',
     'factory.fastFix': 'off',
+    'factory.untrustedText': 'stop',
     'claude.runChecks': false,
     'static.checks': true,
   },

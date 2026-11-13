@@ -200,6 +200,20 @@
       "touches": [".claude/workflow.json"]
     },
     {
+      "id": "control.factory.untrustedText",
+      "kind": "control",
+      "control": "factory.untrustedText",
+      "since": "0.4.0",
+      "title": "Factory: an order found in text the builder reads",
+      "what": "What the builder does when text it reads (a file, a log, PR or issue text) tells it to do something, for example to run a command or to report no findings. Only used when the factory is on.",
+      "impact": "stop (the default in team and org): the builder stops with `blocked: instruction found in <where>`, the run stops and asks you, and the reviewer reports such text in the diff as a blocking finding. note (the default in solo): the builder records the text under Notes in its handoff and carries on, the reviewer lists it as a nit, and the report and PR text name it. Neither value follows the text.",
+      "values": {
+        "stop": "The builder stops and the run asks you; the reviewer reports it as blocking",
+        "note": "The builder records it in its handoff and carries on; the reviewer lists it as a nit"
+      },
+      "touches": [".claude/workflow.json"]
+    },
+    {
       "id": "control.claude.runChecks",
       "kind": "control",
       "control": "claude.runChecks",
@@ -458,6 +472,18 @@
       "default": true,
       "installs": ["templates/agents/reviewer.md", "templates/REVIEW.md", "templates/scripts/check-review-gate.mjs"],
       "touches": [".claude/agents/reviewer.md", "REVIEW.md", "scripts/check-review-gate.mjs", ".claude/reviews/ (git-ignored)"]
+    },
+    {
+      "id": "check.reviewer-guard",
+      "kind": "check",
+      "since": "0.4.0",
+      "title": "Reviewer guard: keep the reviewer read-only",
+      "what": "A script and a Claude Code hook that stop the reviewer subagent from running anything except read-only git commands (status, diff, log, show, ls-files, rev-parse, merge-base, branch --show-current), the factory script's plan-excerpt and handoff-check, and the project's lint, type check, test and build commands, one command per call. Without it the reviewer is only told not to change anything.",
+      "impact": "Adds one PreToolUse hook on Bash to .claude/settings.json (your own hooks and keys are kept; setup tells you if the file has to be edited by hand). The hook acts only on the reviewer and lets every other call through. It is not a sandbox: a project's own test or build command can still write files. It fails open if it cannot read a call. Claude Code only; other tools keep the instruction-only limit.",
+      "default": true,
+      "requires": ["review-gate"],
+      "installs": ["templates/scripts/reviewer-bash-guard.mjs"],
+      "touches": ["scripts/reviewer-bash-guard.mjs", ".claude/settings.json (a marked entry)"]
     },
     {
       "id": "factory-core",

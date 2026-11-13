@@ -57,16 +57,18 @@ Numbers are from 2026-11-10 unless a line says otherwise; they change as the kit
 - **Reviews:** five reviews by fresh subagents given the `reviewer` instructions (2026-11-09): the review gate
   (twice), the planner changes, the mapping page and the earlier README. The installer, the catalog and the
   setup questionnaire have **not** been reviewed by a fresh reader.
-- **Not yet run:** the setup questionnaire in a real AI session (the installer behind it is tested; the asking
-  and the wording of the explanations are not); plan mode; a real `git push` through the pre-push hook; the
+- **Not yet run:** the setup questionnaire in Claude Code (it was run once in OpenCode 1.19.5 on 2026-11-13: it asked
+  in rounds, waited, and showed a dry run before writing anything; the installer behind it is tested); plan mode; a real `git push` through the pre-push hook; the
   installer against a real project on macOS or Linux (CI covers it on throw-away projects only); a release made
   *through* the publish workflow with trusted publishing (as of 2026-11-10 the workflow had only run on the
   v0.1.0 tag, where it correctly skipped publishing because that version, published by hand, was already on npm).
 
 The status of every playbook practice, and how it was checked, is in
 [`docs/playbook-mapping.md`](playbook-mapping.md). Known limits: a review record is an attestation (the
-assistant that wrote the change can write it); the reviewer has Bash and is told not to change anything, which is
-instructions, not a sandbox; the review gate is per machine; the VS Code extension does not read a project's
+assistant that wrote the change can write it); the reviewer has Bash, and only in Claude Code a hook
+(`check.reviewer-guard`) limits it to git reads and the project's own check commands; that is a filter, not a
+sandbox, and elsewhere it is instructions only; text under review that is aimed at the assistant is handled by
+a prompt rule, not a barrier; the review gate is per machine; the VS Code extension does not read a project's
 default plan mode, per the Claude Code docs.
 
 ## 12. What is not in the kit

@@ -82,3 +82,30 @@ Do not paste tokens, keys or private code.
 | Factory ran as a single agent, review labelled SELF-REVIEW, nothing pushed | | | | |
 
 Write yes, no or not tried in each cell, and add a line for every no.
+
+## 5. Results so far
+
+**OpenCode 1.19.5, Windows 11, 2026-11-13, free `deepseek-v4.1-flash-free` model, a throw-away project, `team` profile,
+`factory.mode: local`.** One run, by the kit's author, using `opencode run` turn by turn.
+
+| Check | Result |
+|---|---|
+| Setup: questionnaire asked in rounds and waited for, dry run shown before anything was written, 8 skills in `.agents/skills/`, `AGENTS.md` block and translation rule, no `CLAUDE.md`, no `.claude/settings.json` | yes |
+| Translation: numbered options instead of a question tool, said once, waited for the answer | yes |
+| Translation: no file edited before the plan was approved; `PLAN.md` ends with an Intent Anchor and a bucket map | yes |
+| Skill not started by itself when only the plan was described | yes, but the model then delivered the plan itself under the rules in `AGENTS.md` (tests first, a self-review, a commit, nothing pushed) without the factory skill |
+| Skill started by hand with `@wk-run-factory` | yes: it ran `preflight`, `baseline`, `plan-excerpt` and `handoff-check` |
+| Factory ran as a single agent, review labelled SELF-REVIEW (`Self-review: yes` in the record), nothing pushed | yes: one commit on `factory/1-version-flag`, `npm test` 5 of 5, PR text in `.claude/factory/pr-1.md`, no remote, no push attempt |
+
+Caveats: the review record named the tree before the commit, and the changelog hook then changed it, so
+`check-review-gate` said "no review record for this content" for the committed tree (the known "a hook that rewrites
+files changes the tree" limit in [review-gate.md](review-gate.md); advisory here). The run used a small free model, one
+session, and OpenCode 1.x, not 2.x. Not run: Cursor, Codex, Cline, OpenCode 2.x, `pr` mode, macOS and Linux.
+
+Two things that look like kit failures and are not:
+- **Git Bash on Windows:** OpenCode read the working directory from Git Bash's `PWD` (`/tmp/claude/...`) as `C:\tmp\claude\...`
+  and failed with `Unexpected server error` as soon as the prompt held an `@` mention. Start OpenCode from PowerShell.
+- **`Database is not empty and has no session table`:** the OpenCode Desktop app (2.x) and the npm `opencode-ai` CLI
+  (1.x) share `~/.local/share/opencode/opencode.db`. After the desktop app migrates it to the 2.x schema the 1.x CLI
+  refuses to open it. Use the CLI bundled with the desktop app (`resources/opencode-cli.exe`) or the app itself; do not
+  delete the database.
