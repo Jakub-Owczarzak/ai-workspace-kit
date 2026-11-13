@@ -7,7 +7,7 @@ machine: no GitHub call, no CI, no API key.
 |---|---|
 | `templates/REVIEW.md` | The checklist, copied to the project root and edited: plan adherence, correctness, proof shown, the kit rules, project-specific checks, what is blocking |
 | `templates/agents/reviewer.md` | The `reviewer` subagent (`.claude/agents/reviewer.md`). Fresh context, tools Read, Grep, Glob and Bash. Reports findings; edits nothing |
-| `templates/scripts/reviewer-bash-guard.mjs` | Option `check.reviewer-guard`: a Claude Code hook (added to `.claude/settings.json`) that lets the reviewer run only `git status`, `diff`, `log`, `show` and the project's lint, type check, test and build commands, one per call |
+| `templates/scripts/reviewer-bash-guard.mjs` | Option `check.reviewer-guard`: a Claude Code hook (added to `.claude/settings.json`) that lets the reviewer run only `git status`, `diff`, `log`, `show`, the factory script's two read-only subcommands (`plan-excerpt`, `handoff-check`) and the project's lint, type check, test and build commands, one per call |
 | `templates/scripts/check-review-gate.mjs` | Records a finished review and checks that the content being pushed has a clean record |
 | `templates/hooks/pre-push` | Runs the check after the protected-branch block |
 | `rules/commit-gate.md`, step 2 | Tells the assistant when to run the reviewer |

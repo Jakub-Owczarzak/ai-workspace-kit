@@ -54,6 +54,9 @@ export function projectCommands(agentsText) {
 const GIT_READ = /^git (?:status|diff|log|show)(?: |$)/;
 // A read-only git command can still write or run a program through a flag.
 const GIT_WRITING_FLAG = /(?:^|\s)--(?:output|ext-diff|textconv)(?:[=\s]|$)/;
+// The two factory-guard.mjs subcommands that only read (the plan's text and a handoff file's check), with no other argument.
+// The factory's own delegation prompt hands the reviewer `plan-excerpt`, so refusing it left the reviewer at a dead end.
+const FACTORY_READ = /^node (?:\.\/)?scripts\/factory-guard\.mjs (?:plan-excerpt(?: --bucket [\w.-]+)?|handoff-check --bucket [\w.-]+)$/;
 // Anything that chains, redirects, pipes or substitutes: one command per call, nothing hidden inside it.
 const SHELL_CONTROL = /[;&|<>`\r\n]|\$[({]/;
 
@@ -70,7 +73,7 @@ export function decideCommand(rawCommand, commands = {}) {
     allow: false,
     reason:
       `Blocked for the reviewer (${why}): ${command.length > 80 ? `${command.slice(0, 77)}...` : command}\n` +
-      'The reviewer is read-only and runs one command per call: git status, git diff, git log, git show, ' +
+      'The reviewer is read-only and runs one command per call: git status, git diff, git log, git show, node scripts/factory-guard.mjs plan-excerpt, ' +
       `${projectList.length ? `or a project command (${projectList.join(', ')})` : 'or a project command from the Commands block of AGENTS.md (none found)'}. ` +
       'Run each check as its own call, with no chaining, pipes, redirects or substitution. If a check needs more, say so in the report under "Not checked".',
   });
@@ -79,6 +82,7 @@ export function decideCommand(rawCommand, commands = {}) {
   if (GIT_READ.test(command)) {
     return GIT_WRITING_FLAG.test(command) ? refuse('a git flag that writes or runs a program') : { allow: true, reason: '' };
   }
+  if (FACTORY_READ.test(command)) return { allow: true, reason: '' };
   if (projectList.some((known) => command === known || command.startsWith(`${known} `))) return { allow: true, reason: '' };
   return refuse('not a git read command or a project command');
 }

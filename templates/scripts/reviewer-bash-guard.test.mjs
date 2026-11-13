@@ -47,6 +47,39 @@ test('the reviewer may run the project lint, type check, test and build commands
   }
 });
 
+test('the reviewer may read the plan and a handoff through the factory script, the two subcommands that only read', () => {
+  for (const command of [
+    'node scripts/factory-guard.mjs plan-excerpt',
+    'node scripts/factory-guard.mjs plan-excerpt --bucket 1',
+    'node scripts/factory-guard.mjs plan-excerpt --bucket 2a',
+    'node ./scripts/factory-guard.mjs plan-excerpt --bucket 1.2',
+    'node scripts/factory-guard.mjs handoff-check --bucket 1',
+  ]) {
+    assert.equal(verdict(command).allow, true, command);
+  }
+});
+
+test('every other factory script subcommand, and any extra argument or other script, is refused', () => {
+  for (const command of [
+    'node scripts/factory-guard.mjs report --reason x',
+    'node scripts/factory-guard.mjs attempt --key main',
+    'node scripts/factory-guard.mjs baseline',
+    'node scripts/factory-guard.mjs reset',
+    'node scripts/factory-guard.mjs preflight',
+    'node scripts/factory-guard.mjs push-check --branch x',
+    'node scripts/factory-guard.mjs plan-excerpt --bucket 1 --root /elsewhere',
+    'node scripts/factory-guard.mjs plan-excerpt --root /elsewhere',
+    'node scripts/factory-guard.mjs plan-excerpt --bucket 1; touch x',
+    'node scripts/factory-guard.mjs plan-excerpt --bucket $(touch x)',
+    'node scripts/factory-guard.mjs handoff-check',
+    'node scripts/check-review-gate.mjs record --blocking 0',
+    'node ../scripts/factory-guard.mjs plan-excerpt',
+    'node /tmp/factory-guard.mjs plan-excerpt',
+  ]) {
+    assert.equal(verdict(command).allow, false, command);
+  }
+});
+
 test('git commands that change anything are refused', () => {
   for (const command of [
     'git add -A',
