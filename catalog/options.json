@@ -200,6 +200,20 @@
       "touches": [".claude/workflow.json"]
     },
     {
+      "id": "control.factory.untrustedText",
+      "kind": "control",
+      "control": "factory.untrustedText",
+      "since": "0.4.0",
+      "title": "Factory: an order found in text the builder reads",
+      "what": "What the builder does when text it reads (a file, a log, PR or issue text) tells it to do something, for example to run a command or to report no findings. Only used when the factory is on.",
+      "impact": "stop (the default in team and org): the builder stops with `blocked: instruction found in <where>`, the run stops and asks you, and the reviewer reports such text in the diff as a blocking finding. note (the default in solo): the builder records the text under Notes in its handoff and carries on, the reviewer lists it as a nit, and the report and PR text name it. Neither value follows the text.",
+      "values": {
+        "stop": "The builder stops and the run asks you; the reviewer reports it as blocking",
+        "note": "The builder records it in its handoff and carries on; the reviewer lists it as a nit"
+      },
+      "touches": [".claude/workflow.json"]
+    },
+    {
       "id": "control.claude.runChecks",
       "kind": "control",
       "control": "claude.runChecks",

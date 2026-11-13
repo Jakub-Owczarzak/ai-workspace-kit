@@ -88,6 +88,19 @@ describe('factory and e2e controls', () => {
     for (const profile of PROFILE_NAMES) assert.equal(PROFILES[profile]['factory.host'], 'auto');
   });
 
+  it('stop the builder on an order found in text it reads in team and org, and only note it in solo', () => {
+    assert.equal(PROFILES.solo['factory.untrustedText'], 'note');
+    assert.equal(PROFILES.team['factory.untrustedText'], 'stop');
+    assert.equal(PROFILES.org['factory.untrustedText'], 'stop');
+    const spec = CONTROL_SPECS['factory.untrustedText'];
+    assert.deepEqual(normalizeValue(spec, 'NOTE'), { ok: true, value: 'note' });
+    assert.deepEqual(normalizeValue(spec, 'stop'), { ok: true, value: 'stop' });
+    assert.equal(normalizeValue(spec, 'ignore').ok, false, 'there is no value that follows the text');
+    const fromEnvironment = resolveControls({ profile: 'solo' }, { FACTORY_UNTRUSTED_TEXT: 'stop' });
+    assert.deepEqual(fromEnvironment.controls['factory.untrustedText'], { value: 'stop', source: 'env:FACTORY_UNTRUSTED_TEXT' });
+    assert.deepEqual(resolveControls({ profile: 'org' }, {}).controls['factory.untrustedText'], { value: 'stop', source: 'profile:org' });
+  });
+
   it('accept the documented values and reject others with a warning, falling back to the profile', () => {
     assert.deepEqual(normalizeValue(CONTROL_SPECS['factory.mode'], 'LOCAL'), { ok: true, value: 'local' });
     assert.deepEqual(normalizeValue(CONTROL_SPECS['factory.mode'], 'pr'), { ok: true, value: 'pr' });
