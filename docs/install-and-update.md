@@ -188,6 +188,10 @@ are updated. Compare, then run `apply` again with `--force`. That replaces files
 edit you made to an installed `wk-` skill or script. It never replaces `PLAN.md`, `CHANGELOG.md`, `REVIEW.md`,
 `workflow.json` or the release workflow.
 
+**A new option is not turned on by an upgrade.** `apply` installs exactly what `choices.json` lists, so an option
+added in a newer kit (for example `check.reviewer-guard`, added in 0.4.0) stays off until you add its id to the
+`enabled` list in `.claude/workspace-kit/choices.json` and run `apply` again.
+
 ### Moving from the old copy-the-folder install
 
 An older install copied `rules/`, `skills/` and friends by hand and named the skills without a prefix. Running

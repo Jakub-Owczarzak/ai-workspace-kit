@@ -65,8 +65,10 @@ Numbers are from 2026-11-10 unless a line says otherwise; they change as the kit
 
 The status of every playbook practice, and how it was checked, is in
 [`docs/playbook-mapping.md`](playbook-mapping.md). Known limits: a review record is an attestation (the
-assistant that wrote the change can write it); the reviewer has Bash and is told not to change anything, which is
-instructions, not a sandbox; the review gate is per machine; the VS Code extension does not read a project's
+assistant that wrote the change can write it); the reviewer has Bash, and only in Claude Code a hook
+(`check.reviewer-guard`) limits it to git reads and the project's own check commands; that is a filter, not a
+sandbox, and elsewhere it is instructions only; text under review that is aimed at the assistant is handled by
+a prompt rule, not a barrier; the review gate is per machine; the VS Code extension does not read a project's
 default plan mode, per the Claude Code docs.
 
 ## 12. What is not in the kit

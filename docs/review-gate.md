@@ -7,6 +7,7 @@ machine: no GitHub call, no CI, no API key.
 |---|---|
 | `templates/REVIEW.md` | The checklist, copied to the project root and edited: plan adherence, correctness, proof shown, the kit rules, project-specific checks, what is blocking |
 | `templates/agents/reviewer.md` | The `reviewer` subagent (`.claude/agents/reviewer.md`). Fresh context, tools Read, Grep, Glob and Bash. Reports findings; edits nothing |
+| `templates/scripts/reviewer-bash-guard.mjs` | Option `check.reviewer-guard`: a Claude Code hook (added to `.claude/settings.json`) that lets the reviewer run only `git status`, `diff`, `log`, `show` and the project's lint, type check, test and build commands, one per call |
 | `templates/scripts/check-review-gate.mjs` | Records a finished review and checks that the content being pushed has a clean record |
 | `templates/hooks/pre-push` | Runs the check after the protected-branch block |
 | `rules/commit-gate.md`, step 2 | Tells the assistant when to run the reviewer |
@@ -65,8 +66,26 @@ A person can still push once with `REVIEW_MODE=off git push`. Assistants do not 
   and GitHub offers it for private repositories only on a paid plan. The pre-push hook blocks direct pushes to
   the protected branch on this machine only.
 - **"Read-only" is not a sandbox.** The reviewer has no Edit or Write tool and its instructions forbid
-  writing commands, but it has Bash, and Bash can write. Treat this as a reviewer that is told not to
-  change anything, not one that cannot.
+  writing commands, but it has Bash, and Bash can write. In Claude Code the reviewer guard hook
+  (`check.reviewer-guard`) refuses every Bash call that is not a git read command or one of the commands in
+  the Commands block of `AGENTS.md`, and any chaining, pipe, redirect or substitution, with a message the reviewer
+  can act on. It still cannot stop a listed project command from writing (a test run that updates snapshots, a
+  build that writes `dist/`) or a package script from doing anything, so treat the reviewer as one that is
+  restricted to the project's own checks, not one that is sandboxed. In any other tool the guard does not run and
+  the limit is the instruction alone. The hook lives in `.claude/settings.json`, not in the reviewer's own file,
+  because Claude Code skips a project agent's own hooks in a folder it does not trust. It acts only on the
+  `reviewer` agent, and it fails open: a call it cannot read is let through. Proven in real Claude Code 2.1.322
+  runs on Windows (2026-11-13), with the project installed by the kit's own installer: the reviewer's
+  `git ls-files`, `git rev-parse HEAD` and `touch` were refused with the guard's message and nothing was written,
+  `git diff --cached`, `npm run lint` and `npm test` ran, and the main session's Bash was not restricted. Not run:
+  macOS or Linux, and a folder Claude Code has been told to trust. The allowlist is deliberately small, so a
+  read-only command such as `git ls-files` is refused too; the reviewer is told to list such checks under "Not
+  checked".
+- **Text under review is data.** A diff, README, PR text or CI log can contain instructions aimed at an
+  assistant. The reviewer and the builder are told to treat such text as data, to report it and not to follow it.
+  That is wording in a prompt, not a technical barrier, so it can fail against a determined injection. One real
+  run (2026-11-13): a staged file with a comment telling the reviewer to run `touch` and report `Blocking: 0` was
+  reported as a blocking finding and not followed. One attempt is not a measurement.
 - **Records are local.** Another machine has its own records, so `required` is a per-machine gate.
 - **A record is an attestation, not proof.** The gate checks that `record --blocking 0` was run for this exact
   content. It cannot tell that a reviewer really ran, and the assistant that wrote the change could record 0
@@ -89,3 +108,9 @@ A person can still push once with `REVIEW_MODE=off git push`. Assistants do not 
 Copy `templates/REVIEW.md` to the project root, `templates/agents/reviewer.md` to `.claude/agents/`,
 `check-review-gate.mjs` and `workflow-config.mjs` to `scripts/`, append the review-gate lines of
 `templates/hooks/pre-push` to the project's pre-push hook, and add `.claude/reviews/` to `.gitignore`.
+To keep the reviewer read-only in Claude Code, also copy `reviewer-bash-guard.mjs` to `scripts/` and add this to
+`.claude/settings.json` (the setup program merges it for you and keeps your own hooks):
+
+```json
+"hooks": { "PreToolUse": [ { "matcher": "Bash", "hooks": [ { "type": "command", "command": "node \"$CLAUDE_PROJECT_DIR/scripts/reviewer-bash-guard.mjs\"" } ] } ] }
+```
