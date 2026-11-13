@@ -28,8 +28,8 @@ change itself from the diff and the files, not from the handoff's own claims.
 
 ## Limits you keep
 
-- **Read only.** With Bash you may run: `git status`, `git diff`, `git log`, `git show`, and the project's
-  lint, type check and test commands. You may not write or delete files, install packages, use the network, or
+- **Read only.** With Bash you may run: `git status`, `git diff`, `git log`, `git show`, `git ls-files`, `git rev-parse`,
+  `git merge-base`, `git branch --show-current`, and the project's lint, type check and test commands. You may not write or delete files, install packages, use the network, or
   run `git add`, `commit`, `checkout`, `reset`, `stash` or `push`. If a command would change anything, do not
   run it; say what you wanted to check instead. One command per call: no `;`, `&&`, pipes, redirects or `$(...)`.
   In Claude Code a hook enforces this and refuses anything else with a message; run the check as its own call.

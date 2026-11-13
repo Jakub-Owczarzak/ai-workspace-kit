@@ -51,7 +51,10 @@ export function projectCommands(agentsText) {
   return found;
 }
 
-const GIT_READ = /^git (?:status|diff|log|show)(?: |$)/;
+// Git commands that only read. `git branch` is not here: it lists, creates, renames and deletes, so only the exact
+// `git branch --show-current` (the branch name, which the builder's own limits also allow) passes, below.
+const GIT_READ = /^git (?:status|diff|log|show|ls-files|rev-parse|merge-base)(?: |$)/;
+const GIT_BRANCH_NAME = /^git branch --show-current$/;
 // A read-only git command can still write or run a program through a flag.
 const GIT_WRITING_FLAG = /(?:^|\s)--(?:output|ext-diff|textconv)(?:[=\s]|$)/;
 // The two factory-guard.mjs subcommands that only read (the plan's text and a handoff file's check), with no other argument.
@@ -73,7 +76,7 @@ export function decideCommand(rawCommand, commands = {}) {
     allow: false,
     reason:
       `Blocked for the reviewer (${why}): ${command.length > 80 ? `${command.slice(0, 77)}...` : command}\n` +
-      'The reviewer is read-only and runs one command per call: git status, git diff, git log, git show, node scripts/factory-guard.mjs plan-excerpt, ' +
+      'The reviewer is read-only and runs one command per call: git status, git diff, git log, git show, git ls-files, git rev-parse, git merge-base, git branch --show-current, node scripts/factory-guard.mjs plan-excerpt, ' +
       `${projectList.length ? `or a project command (${projectList.join(', ')})` : 'or a project command from the Commands block of AGENTS.md (none found)'}. ` +
       'Run each check as its own call, with no chaining, pipes, redirects or substitution. If a check needs more, say so in the report under "Not checked".',
   });
@@ -82,7 +85,7 @@ export function decideCommand(rawCommand, commands = {}) {
   if (GIT_READ.test(command)) {
     return GIT_WRITING_FLAG.test(command) ? refuse('a git flag that writes or runs a program') : { allow: true, reason: '' };
   }
-  if (FACTORY_READ.test(command)) return { allow: true, reason: '' };
+  if (GIT_BRANCH_NAME.test(command) || FACTORY_READ.test(command)) return { allow: true, reason: '' };
   if (projectList.some((known) => command === known || command.startsWith(`${known} `))) return { allow: true, reason: '' };
   return refuse('not a git read command or a project command');
 }

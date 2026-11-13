@@ -462,8 +462,9 @@
     {
       "id": "check.reviewer-guard",
       "kind": "check",
+      "since": "0.4.0",
       "title": "Reviewer guard: keep the reviewer read-only",
-      "what": "A script and a Claude Code hook that stop the reviewer subagent from running anything except git status, diff, log and show and the project's lint, type check, test and build commands, one command per call. Without it the reviewer is only told not to change anything.",
+      "what": "A script and a Claude Code hook that stop the reviewer subagent from running anything except read-only git commands (status, diff, log, show, ls-files, rev-parse, merge-base, branch --show-current), the factory script's plan-excerpt and handoff-check, and the project's lint, type check, test and build commands, one command per call. Without it the reviewer is only told not to change anything.",
       "impact": "Adds one PreToolUse hook on Bash to .claude/settings.json (your own hooks and keys are kept; setup tells you if the file has to be edited by hand). The hook acts only on the reviewer and lets every other call through. It is not a sandbox: a project's own test or build command can still write files. It fails open if it cannot read a call. Claude Code only; other tools keep the instruction-only limit.",
       "default": true,
       "requires": ["review-gate"],

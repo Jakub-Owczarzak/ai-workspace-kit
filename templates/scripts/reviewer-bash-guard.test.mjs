@@ -47,6 +47,38 @@ test('the reviewer may run the project lint, type check, test and build commands
   }
 });
 
+test('the reviewer may also list files, resolve a revision, find a merge base and read the branch name', () => {
+  for (const command of [
+    'git ls-files',
+    'git ls-files src',
+    'git ls-files --others --exclude-standard',
+    'git rev-parse HEAD',
+    'git rev-parse --abbrev-ref HEAD',
+    'git rev-parse --show-toplevel',
+    'git merge-base main HEAD',
+    'git branch --show-current',
+  ]) {
+    assert.equal(verdict(command).allow, true, command);
+  }
+});
+
+test('the branch command is allowed only to read the current name: listing, creating, renaming and deleting stay refused', () => {
+  for (const command of [
+    'git branch',
+    'git branch newbranch',
+    'git branch -D old',
+    'git branch -m old new',
+    'git branch --show-current extra',
+    'git branch --show-current --delete',
+    'git ls-files --output=out.txt',
+    'git rev-parse HEAD > out.txt',
+    'git merge-base main HEAD; touch x',
+    'git ls-files $(touch x)',
+  ]) {
+    assert.equal(verdict(command).allow, false, command);
+  }
+});
+
 test('the reviewer may read the plan and a handoff through the factory script, the two subcommands that only read', () => {
   for (const command of [
     'node scripts/factory-guard.mjs plan-excerpt',

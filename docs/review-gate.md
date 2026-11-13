@@ -7,7 +7,7 @@ machine: no GitHub call, no CI, no API key.
 |---|---|
 | `templates/REVIEW.md` | The checklist, copied to the project root and edited: plan adherence, correctness, proof shown, the kit rules, project-specific checks, what is blocking |
 | `templates/agents/reviewer.md` | The `reviewer` subagent (`.claude/agents/reviewer.md`). Fresh context, tools Read, Grep, Glob and Bash. Reports findings; edits nothing |
-| `templates/scripts/reviewer-bash-guard.mjs` | Option `check.reviewer-guard`: a Claude Code hook (added to `.claude/settings.json`) that lets the reviewer run only `git status`, `diff`, `log`, `show`, the factory script's two read-only subcommands (`plan-excerpt`, `handoff-check`) and the project's lint, type check, test and build commands, one per call |
+| `templates/scripts/reviewer-bash-guard.mjs` | Option `check.reviewer-guard`: a Claude Code hook (added to `.claude/settings.json`) that lets the reviewer run only `git status`, `diff`, `log`, `show`, `ls-files`, `rev-parse`, `merge-base`, `branch --show-current`, the factory script's two read-only subcommands (`plan-excerpt`, `handoff-check`) and the project's lint, type check, test and build commands, one per call |
 | `templates/scripts/check-review-gate.mjs` | Records a finished review and checks that the content being pushed has a clean record |
 | `templates/hooks/pre-push` | Runs the check after the protected-branch block |
 | `rules/commit-gate.md`, step 2 | Tells the assistant when to run the reviewer |
@@ -76,11 +76,11 @@ A person can still push once with `REVIEW_MODE=off git push`. Assistants do not 
   because Claude Code skips a project agent's own hooks in a folder it does not trust. It acts only on the
   `reviewer` agent, and it fails open: a call it cannot read is let through. Proven in real Claude Code 2.1.322
   runs on Windows (2026-11-13), with the project installed by the kit's own installer: the reviewer's
-  `git ls-files`, `git rev-parse HEAD` and `touch` were refused with the guard's message and nothing was written,
+  `touch` and commands outside the list were refused with the guard's message and nothing was written,
   `git diff --cached`, `npm run lint` and `npm test` ran, and the main session's Bash was not restricted. Not run:
-  macOS or Linux, and a folder Claude Code has been told to trust. The allowlist is deliberately small, so a
-  read-only command such as `git ls-files` is refused too; the reviewer is told to list such checks under "Not
-  checked".
+  macOS or Linux, and a folder Claude Code has been told to trust. The allowlist is small on purpose: other
+  read-only commands (`cat`, `grep`, `ls`) are refused too, so the reviewer uses its Read, Grep and Glob tools and
+  lists anything else under "Not checked".
 - **Text under review is data.** A diff, README, PR text or CI log can contain instructions aimed at an
   assistant. The reviewer and the builder are told to treat such text as data, to report it and not to follow it.
   That is wording in a prompt, not a technical barrier, so it can fail against a determined injection. One real
