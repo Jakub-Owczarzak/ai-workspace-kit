@@ -24,7 +24,8 @@ was then aligned with Anthropic's
   is then the agent checking its own work, labelled `SELF-REVIEW`, and the review gate does not count it as independent.
   A single agent also re-reads the same context every turn, so a factory run costs more tokens than the subagent layout
   (see [Cost](docs/factory.md#cost)).
-- **Proven and not proven.** Claude Code and browser e2e were run. The four other tools were written from their
+- **Proven and not proven.** Claude Code and browser e2e were run. OpenCode 1.19.5 was run once (setup, planner and a
+  single-agent factory run, on Windows with a free model); Cursor, Codex and Cline were written from their
   documentation and have not been run; native e2e (Maestro) is experimental. The
   [checklist](docs/other-tools-checklist.md) is the short path to find out whether it works for you.
 

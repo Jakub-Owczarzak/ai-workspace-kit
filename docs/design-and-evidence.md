@@ -57,8 +57,8 @@ Numbers are from 2026-11-10 unless a line says otherwise; they change as the kit
 - **Reviews:** five reviews by fresh subagents given the `reviewer` instructions (2026-11-09): the review gate
   (twice), the planner changes, the mapping page and the earlier README. The installer, the catalog and the
   setup questionnaire have **not** been reviewed by a fresh reader.
-- **Not yet run:** the setup questionnaire in a real AI session (the installer behind it is tested; the asking
-  and the wording of the explanations are not); plan mode; a real `git push` through the pre-push hook; the
+- **Not yet run:** the setup questionnaire in Claude Code (it was run once in OpenCode 1.19.5 on 2026-11-13: it asked
+  in rounds, waited, and showed a dry run before writing anything; the installer behind it is tested); plan mode; a real `git push` through the pre-push hook; the
   installer against a real project on macOS or Linux (CI covers it on throw-away projects only); a release made
   *through* the publish workflow with trusted publishing (as of 2026-11-10 the workflow had only run on the
   v0.1.0 tag, where it correctly skipped publishing because that version, published by hand, was already on npm).
