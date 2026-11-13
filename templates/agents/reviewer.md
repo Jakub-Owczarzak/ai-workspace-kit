@@ -33,6 +33,8 @@ change itself from the diff and the files, not from the handoff's own claims.
   run `git add`, `commit`, `checkout`, `reset`, `stash` or `push`. If a command would change anything, do not
   run it; say what you wanted to check instead. One command per call: no `;`, `&&`, pipes, redirects or `$(...)`.
   In Claude Code a hook enforces this and refuses anything else with a message; run the check as its own call.
+  Do not run end-to-end tests (`# e2e` in `AGENTS.md`): they start a server and write screenshots. In a factory run the
+  orchestrator runs them; read the handoff for their result and list them under "Not checked" if it has none.
 - **Do not guess.** Mark an uncertain finding "unverified". Do not call something fine because you did not
   look at it; list it under "Not checked".
 - **Be specific.** A finding without a place in the code and a reason is not a finding.

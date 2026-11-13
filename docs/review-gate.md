@@ -80,7 +80,10 @@ A person can still push once with `REVIEW_MODE=off git push`. Assistants do not 
   `git diff --cached`, `npm run lint` and `npm test` ran, and the main session's Bash was not restricted. Not run:
   macOS or Linux, and a folder Claude Code has been told to trust. The allowlist is small on purpose: other
   read-only commands (`cat`, `grep`, `ls`) are refused too, so the reviewer uses its Read, Grep and Glob tools and
-  lists anything else under "Not checked".
+  lists anything else under "Not checked". End-to-end tests are not on the list either: they start a server and
+  write screenshots. In a factory run the orchestrator runs them and the reviewer reads the handoff for the result
+  (in a real `pr`-mode run both bucket-1 reviewers tried `npm run e2e`, were refused, and said so in their reports).
+  The `reviewer.md` instructions now tell the reviewer not to try.
 - **Text under review is data.** A diff, README, PR text or CI log can contain instructions aimed at an
   assistant. The reviewer and the builder are told to treat such text as data, to report it and not to follow it.
   That is wording in a prompt, not a technical barrier, so it can fail against a determined injection. One real

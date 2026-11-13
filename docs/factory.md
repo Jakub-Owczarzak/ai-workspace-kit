@@ -17,7 +17,9 @@ has the output) or **not proven** (written from documentation, or never run).
 3. Start it by hand: `/wk-run-factory` (in Codex: `$wk-run-factory`). The skill refuses to run if you did not ask
    for it in the conversation, because it pushes code. It is marked so the assistant cannot start it on its own: in a
    scripted run (`claude -p`) the prompt must be the slash command itself, `claude -p "/wk-run-factory"`; a prompt such
-   as "use the wk-run-factory skill" can be refused (seen in a real run, 2026-11-13).
+   as "use the wk-run-factory skill" can be refused (seen in a real run, 2026-11-13). From Git Bash on Windows also set
+   `MSYS_NO_PATHCONV=1`, or the shell rewrites the leading `/` into a path such as `C:/Program Files/Git/wk-run-factory`
+   and nothing runs (seen once in the same session).
 
 The skill runs `node scripts/factory-guard.mjs preflight` first. If it says `not ready`, it shows the problems and
 stops without changing anything (a dirty tree, a bucket without "Done when", an unsupported host).
