@@ -26,6 +26,8 @@ try {
   assert.match(first, /copied: [1-9]\d*,/, 'first run copies files');
   const kit = join(project, '.claude', 'workspace-kit');
   assert.ok(existsSync(join(kit, 'skills', 'setup-workspace', 'SKILL.md')), 'setup skill installed');
+  assert.ok(existsSync(join(kit, 'skills', 'manage-workspace', 'SKILL.md')), 'manager skill installed');
+  assert.ok(existsSync(join(kit, 'catalog', 'features.json')), 'features catalog installed');
   assert.ok(existsSync(join(kit, '.kit-version')), 'version file written');
 
   const second = run('npm', initCmd, project);

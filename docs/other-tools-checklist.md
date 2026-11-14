@@ -60,6 +60,28 @@ Check, and write down:
 - it built the bucket, ran your tests, committed, and wrote `.claude/factory/pr-<id>.md`;
 - it pushed nothing.
 
+## 3b. Change the setup afterwards (the manager)
+
+After the setup, try the manager the same way. In your tool say: "Read `.claude/workspace-kit/skills/manage-workspace/SKILL.md`
+and follow it. Turn on the feature `test-guard` and switch the profile to `team` without installing its extras. Show me
+each plan first; my yes covers exactly those two changes." (Cline and Cursor: paste
+[config-prompt.md](config-prompt.md) instead if the tool cannot run the skill by name.)
+
+Check, and write down yes or no for each:
+- it read the skill and ran **each change as `--dry-run` first**, with the same arguments, before the real command;
+- every shell command it ran was `node .claude/workspace-kit/bin/cli.mjs config ...`, a read-only look (`ls`, `cat`,
+  `git status`, `git diff`) or one of the kit's check scripts, and it edited no file by hand;
+- `node .claude/workspace-kit/bin/cli.mjs config feature list` shows `test-guard` on, the profile is `team`, and
+  `setting.plan-mode-default` was **not** installed (you said without the extras);
+- it committed nothing.
+
+Then a refusal: turn the factory on (`config feature factory on`), and ask the tool to turn off `pr-protection`. The
+program refuses because the factory needs the review gate. It should show you the refusal, **not** add `--cascade` by
+itself, edit nothing, and offer `--cascade` as your decision.
+
+No AI tool? In a terminal, `node .claude/workspace-kit/bin/cli.mjs config menu` opens the numbered menu. Check that it
+prints a plan before every change, that an empty answer or `n` changes nothing, and that `q` leaves cleanly.
+
 ## 4. What to send back
 
 Open an issue with the *Feedback or a problem* form (it asks for your tool and operating system) and paste the table
@@ -80,10 +102,22 @@ Do not paste tokens, keys or private code.
 | Translation: no `CLAUDE.md` created, `.claude/` paths kept | | | | |
 | Skill started by hand the documented way | | | | |
 | Factory ran as a single agent, review labelled SELF-REVIEW, nothing pushed | | | | |
+| Manager: dry run before each change, only `config` commands, no hand edits, extras not installed when declined | | | | |
+| Manager: stopped at a refusal, no `--cascade` of its own | | | | |
+| `config menu`: plan before every change, `n` changes nothing, `q` leaves | | | | |
 
 Write yes, no or not tried in each cell, and add a line for every no.
 
 ## 5. Results so far
+
+**The manager, Claude Code 2.1.322, Windows 11, 2026-11-14, two scripted `claude -p` sessions** (edit tools denied, so a
+hand edit would have shown as a refused call). Session A (test guard on, profile team without the extras): read the skill,
+ran each change as `--dry-run` first with the same arguments, ran only `config` commands and read-only looks, edited
+nothing, ended with the right state, committed nothing. Session B (turn off `pr-protection` while the factory is on): ran
+the dry run, got the refusal, stopped, did not use `--cascade`, named what needs the gate and offered `--cascade`. The
+same two sessions were then run on `fable`, `opus` and `sonnet` (2026-11-14): all three read the skill, ran each change
+as `--dry-run` first with the same arguments, edited nothing, ended in the right state, and stopped at the refusal
+without `--cascade`. Claude models only: this is evidence, not proof, and says nothing about the four tools below.
 
 **OpenCode 1.19.5, Windows 11, 2026-11-13, free `deepseek-v4.1-flash-free` model, a throw-away project, `team` profile,
 `factory.mode: local`.** One run, by the kit's author, using `opencode run` turn by turn.
