@@ -14,7 +14,11 @@ Do not commit.
 
 What happens next: the assistant asks which tools and which profile (solo, team, org) you use, explains each
 switchable rule, skill, hook and check in a line or two, installs only what you choose, and reports what it
-skipped. Run it again at any time to change your choices; it is safe to repeat.
+skipped. Run it again at any time to add pieces or change tools and stack packs; it is safe to repeat. A re-run starts
+from your recorded choices (`.claude/workspace-kit/choices.json`), not from the defaults, so it keeps what you turned off.
+It never turns anything off itself, and it turns on again whatever the answers include, saying so in a NOTE. To switch
+features on or off later, change the profile or a control, use the manager prompt in [config-prompt.md](config-prompt.md)
+(skill `manage-workspace`) or `config menu` in a terminal.
 
 To undo everything the setup installed, run `node .claude/workspace-kit/bin/cli.mjs uninstall` (a preview; add
 `--yes` to remove). It removes only what the setup recorded, keeps any file you edited since (and prints a prompt to

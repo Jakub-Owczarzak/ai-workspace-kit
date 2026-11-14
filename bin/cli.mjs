@@ -4,6 +4,11 @@ import { resolve } from 'node:path';
 import { init, TARGET } from '../lib/init.mjs';
 import { apply } from '../lib/apply.mjs';
 import { uninstall } from '../lib/uninstall.mjs';
+import { formatGet, formatList, getOption, readSetup } from '../lib/config.mjs';
+import { formatPlan, setOptions } from '../lib/reconcile.mjs';
+import { formatControlPlan, formatProfilePlan, setControl, setProfile } from '../lib/controls.mjs';
+import { formatFeature, formatFeatureList, formatFeaturePlan, getFeature, readFeatures, setFeature } from '../lib/features.mjs';
+import { runMenu } from '../lib/menu.mjs';
 
 const HELP = `workspace-kit: install the workspace kit into a project
 
@@ -11,11 +16,20 @@ Usage:
   npx ai-workspace-kit init  [--dir <path>] [--dry-run] [--force]
   node .claude/workspace-kit/bin/cli.mjs apply --choices <file> [--dir <path>] [--dry-run] [--force]
   node .claude/workspace-kit/bin/cli.mjs uninstall [--dir <path>] [--yes] [--keep-kit] [--purge]
+  node .claude/workspace-kit/bin/cli.mjs config menu [--dir <path>]
+  node .claude/workspace-kit/bin/cli.mjs config list [--group <name>] [--json] [--dir <path>]
+  node .claude/workspace-kit/bin/cli.mjs config get <id> [--json] [--dir <path>]
+  node .claude/workspace-kit/bin/cli.mjs config on|off <id>... [--cascade] [--prune] [--dry-run] [--dir <path>]
+  node .claude/workspace-kit/bin/cli.mjs config set <control> <value> | unset <control> [--dry-run] [--dir <path>]
+  node .claude/workspace-kit/bin/cli.mjs config profile solo|team|org [--install-defaults] [--dry-run] [--dir <path>]
+  node .claude/workspace-kit/bin/cli.mjs config feature [list | <name> | <name> on [level] | <name> off] [--cascade] [--prune] [--dry-run] [--json]
 
 Commands:
   init       copy the kit into <project>/.claude/workspace-kit/ (nothing else is touched)
   apply      install the pieces named in a choices file (written by the setup prompt)
   uninstall  remove everything apply installed, using the record it kept. Shows a preview; --yes does it
+  config     show the installed setup (list, get <id>), turn pieces on and off (on, off), change a control (set, unset),
+             the workflow profile (profile), or turn a whole capability on or off by name (feature)
 
 Options:
   --dir <path>      project folder (default: current folder)
@@ -24,6 +38,11 @@ Options:
   --force           init: replace kit files that differ (older copy). apply: replace files that exist and differ
   --yes             uninstall: actually remove (without it, uninstall only previews)
   --keep-kit        uninstall: keep .claude/workspace-kit/ so you can run the setup again
+  --group <name>    config list: only one group (factory, planning, tests, review, commits, docs, checks, ...)
+  --json            config list/get/on/off: machine-readable output
+  --cascade         config off: also turn off the options that need the ones you name
+  --prune           config off / config feature off: also turn off the options nothing that stays on needs any more
+  --install-defaults  config profile: also turn on the options the new profile enables by default (never turns any off)
   --purge           uninstall: also remove the kit-created files you changed (PLAN.md, REVIEW.md, ...), an instruction
                     file the kit created, and .claude/reviews, .claude/state, .claude/factory. Without it, what is
                     kept is listed in a prompt you can paste into your AI tool
@@ -35,7 +54,7 @@ if (!command || command === '-h' || command === '--help') {
   console.log(HELP);
   process.exit(0);
 }
-if (command !== 'init' && command !== 'apply' && command !== 'uninstall') {
+if (command !== 'init' && command !== 'apply' && command !== 'uninstall' && command !== 'config') {
   console.error(`Unknown command: ${command}\n\n${HELP}`);
   process.exit(1);
 }
@@ -73,8 +92,90 @@ if (command === 'init') {
   console.log(
     `\nNext: open your AI tool in this project and run the setup prompt:\n` +
       `  "Run the setup-workspace skill from ${kitPath}/skills/setup-workspace/SKILL.md"\n` +
-      `No skill support in your tool? Paste the text in ${kitPath}/docs/setup-prompt.md instead.`
+      `No skill support in your tool? Paste the text in ${kitPath}/docs/setup-prompt.md instead.\n` +
+      `\nLater, to switch features on or off or change the profile: run the manage-workspace skill from\n` +
+      `${kitPath}/skills/manage-workspace/SKILL.md (or paste ${kitPath}/docs/config-prompt.md), or in a terminal:\n` +
+      `  node ${kitPath}/bin/cli.mjs config menu`
   );
+} else if (command === 'config') {
+  const sub = args[1] && !args[1].startsWith('--') ? args[1] : undefined;
+  // The option ids after the subcommand: everything that is not a flag or a flag's value.
+  const ids = [];
+  for (let index = 2; index < args.length; index += 1) {
+    if (['--dir', '--group', '--choices'].includes(args[index])) index += 1;
+    else if (!args[index].startsWith('--')) ids.push(args[index]);
+  }
+  const id = ids[0];
+  try {
+    if (!sub) {
+      console.log(
+        'config: change the installed setup.\n' +
+          '  config menu                    a numbered menu for everything below (asks before it changes anything)\n' +
+          '  config feature list            the named capabilities and their state (then: config feature <name> on|off)\n' +
+          '  config list                    every option and control, grouped\n' +
+          '  config profile solo|team|org   change the profile\n' +
+          '  config set|unset <control> ... change one control; config on|off <id>... one piece\n' +
+          'Add --dry-run to any change to see it first. Full usage: --help'
+      );
+      process.exit(0);
+    }
+    if (sub === 'menu') {
+      await runMenu({ dir, input: process.stdin, output: process.stdout });
+      process.exit(0);
+    }
+    if (!['list', 'get', 'on', 'off', 'set', 'unset', 'profile', 'feature'].includes(sub)) {
+      throw new Error('config needs "menu", "list", "get <id>", "on <id>...", "off <id>...", "set <control> <value>", "unset <control>", "profile <name>" or "feature ..."');
+    }
+    // A change prints its plan, then a reminder that these commands edit tracked files. The big nested reports are left out of --json.
+    const finish = (plan, text) => {
+      console.log(flag('--json') ? JSON.stringify(plan, (key, value) => (key === 'apply' || key === 'requirements' ? undefined : value), 2) : text);
+      if (plan.changed && !plan.dryRun && !flag('--json')) console.log('\nReview the changes with "git status" and "git diff".');
+      process.exit(0);
+    };
+    if (sub === 'get' && !id) throw new Error('config get needs an option id');
+    if ((sub === 'on' || sub === 'off') && !ids.length) throw new Error(`config ${sub} needs at least one option id`);
+    if (sub === 'set' || sub === 'unset') {
+      if (!id || (sub === 'set' && ids[1] === undefined)) throw new Error(sub === 'set' ? 'config set needs a control and a value: config set docs.check strict' : 'config unset needs a control');
+      const plan = setControl({ dir, name: id, value: sub === 'set' ? ids[1] : 'default', dryRun });
+      finish(plan, formatControlPlan(plan));
+    }
+    if (sub === 'profile') {
+      if (!id) throw new Error('config profile needs a name: solo, team or org');
+      const plan = setProfile({ dir, profile: id, installDefaults: flag('--install-defaults'), dryRun });
+      finish(plan, formatProfilePlan(plan));
+    }
+    if (sub === 'on' || sub === 'off') {
+      const plan = setOptions({ dir, [sub]: ids, cascade: flag('--cascade'), prune: flag('--prune'), dryRun });
+      finish(plan, formatPlan(plan));
+    }
+    if (sub === 'feature') {
+      const data = readFeatures(dir);
+      if (!id || id === 'list') {
+        console.log(flag('--json') ? JSON.stringify(data, null, 2) : formatFeatureList(data));
+        process.exit(0);
+      }
+      const item = getFeature(data, id);
+      if (!ids[1]) {
+        console.log(flag('--json') ? JSON.stringify(item, null, 2) : formatFeature(item));
+        process.exit(0);
+      }
+      if (ids[1] !== 'on' && ids[1] !== 'off') throw new Error(`config feature ${id} needs "on" or "off"`);
+      const plan = setFeature({ dir, name: id, state: ids[1], level: ids[2], cascade: flag('--cascade'), prune: flag('--prune'), dryRun });
+      finish(plan, formatFeaturePlan(plan));
+    }
+    const setup = readSetup(dir);
+    if (sub === 'list') {
+      const group = valueOf('--group');
+      const text = formatList(setup, { group });
+      console.log(flag('--json') ? JSON.stringify({ ...setup, options: group ? setup.options.filter((o) => o.group === group) : setup.options }, null, 2) : text);
+    } else {
+      const option = getOption(setup, id);
+      console.log(flag('--json') ? JSON.stringify(option, null, 2) : formatGet(option));
+    }
+  } catch (error) {
+    console.error(`config failed: ${error.message}`);
+    process.exit(1);
+  }
 } else if (command === 'uninstall') {
   try {
     const yes = flag('--yes');
