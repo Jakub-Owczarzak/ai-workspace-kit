@@ -151,10 +151,37 @@ After it runs, look at `git status` and `git diff`. One limit: a JSON file the u
 layout, and a file with comments is never rewritten, only reported for you to edit. A project installed by a version
 without a manifest cannot be uninstalled this way; the command says so and changes nothing.
 
+### Change the setup later (the manager)
+
+After the setup has run, you change it with `config`, not by running the setup again. Three ways to the same engine:
+
+- **Ask your AI tool:** paste `Read .claude/workspace-kit/skills/manage-workspace/SKILL.md and follow it.` (for a tool
+  without skills, the text in [config-prompt.md](config-prompt.md)). It shows the features with their state, asks what to
+  change, shows each change as a dry run and applies it only after your yes. It uses only `config` commands and never
+  edits a settings, hook or instruction file by hand.
+- **A numbered menu in the terminal:** `node .claude/workspace-kit/bin/cli.mjs config menu`. Every change shows its plan
+  and asks `Apply this? [y/N]`; an empty answer changes nothing.
+- **Single commands:** `config list`, `config feature list`, `config feature factory on pr`,
+  `config feature pr-protection off [--cascade] [--prune]`, `config on|off <option>`, `config set docs.check strict`,
+  `config unset docs.check` and `config profile team [--install-defaults]`. Add `--dry-run` to any change to see it first.
+
+Turning something off removes only what the kit installed for it (a file you edited since is kept and reported); turning
+it on installs it again from the kit folder, with no network. A change that other things depend on is refused with the
+list, unless you add `--cascade`. Pieces a feature pulled in stay on, and the plan names them (`--prune` turns them off
+too). The level of a feature is a name, not a mode: the factory is `on` for local, `pr` or `pr-watch`.
+
+**Running the setup again** starts from your recorded choices (`choices.json`), not from the defaults, so it keeps what
+you turned off with the manager and turns on again only what your answers include, saying so in a NOTE. It never turns
+anything off by itself.
+
+Files you own keep their line endings (a CRLF `workflow.json`, `settings.json` or `package.json` stays CRLF). What was
+checked and what was not: [design-and-evidence.md](design-and-evidence.md#11-how-it-was-checked-and-what-is-not-proven).
+
 ### Day to day: the commands
 
 | Command | What it does | Needs Claude? |
 |---|---|---|
+| `node .claude/workspace-kit/bin/cli.mjs config list` / `config menu` | The features, options and controls with their state; the menu changes them | No |
 | `node scripts/workflow-config.mjs` | Prints the resolved profile and where each control came from | No |
 | `node scripts/check-config.mjs` | Skill lint, `@` import check, doc-size report | No |
 | `node scripts/overview-check.mjs` | Lists lines of `AGENTS.md` that no longer match the project | No |
