@@ -15,8 +15,9 @@
 //   node check-review-gate.mjs --commit <sha>  check the content of that commit; the pre-push hook runs this for the
 //                                              tip of every ref being pushed (only the tip is checked, not each commit)
 //   node check-review-gate.mjs --staged        check the staged content (what the next commit will contain)
-//   node check-review-gate.mjs record --blocking <number> --summary "<one line>" [--findings-file <path>] [--self-review]
-//                                              record a finished review of the staged content. --self-review marks a
+//   node check-review-gate.mjs record --blocking <number> --summary "<one line>" [--findings-file <path>|-] [--self-review]
+//                                              record a finished review of the staged content (`-` reads the findings
+//                                              from standard input). --self-review marks a
 //                                              review written by the agent that made the change (no subagent was
 //                                              available): `required` mode does not accept it as the second reader
 // Environment: REVIEW_MODE=off|advisory|required overrides the profile for one command.
@@ -139,7 +140,8 @@ function runRecord(root, argv) {
     return 2;
   }
   const findingsFile = valueOf(argv, '--findings-file');
-  const findings = findingsFile ? readFileSync(findingsFile, 'utf8') : '';
+  // `-` reads the findings from standard input, so an unattended Claude Code run need not save them under `.claude/` first.
+  const findings = findingsFile === '-' ? readFileSync(0, 'utf8') : findingsFile ? readFileSync(findingsFile, 'utf8') : '';
   const tree = readTree(root, { staged: true });
   const path = recordPathFor(root, tree);
   mkdirSync(join(root, RECORDS_FOLDER), { recursive: true });

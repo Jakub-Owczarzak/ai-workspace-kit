@@ -21,6 +21,17 @@ has the output) or **not proven** (written from documentation, or never run).
    `MSYS_NO_PATHCONV=1`, or the shell rewrites the leading `/` into a path such as `C:/Program Files/Git/wk-run-factory`
    and nothing runs (seen once in the same session).
 
+**Unattended runs (`claude -p`).** Nobody can answer a permission prompt, and Claude Code treats everything under
+`.claude/` as sensitive: a file-writing tool is refused there, and allow rules for `.claude/factory/**` did not change
+that in `acceptEdits` mode (seen in a real run, 2026-11-14). The factory therefore writes its own files through
+`scripts/factory-guard.mjs` (`handoff-write`, `pr-write`) and records the review with `--findings-file -`, so a run needs
+no bypass. A scripted run needs `--permission-mode acceptEdits` and the shell commands allowed that the skill uses
+(`--allowedTools "Bash(git *)" "Bash(node *)" "Bash(npm *)"` plus the file and agent tools); do not switch on
+`bypassPermissions` for it, which is meant for a container or a VM (see [permissions.md](permissions.md)).
+One real run with these settings (2026-11-16, Claude Code 2.1.322, a small test project, local mode, no remote) built the
+bucket, passed `handoff-check`, got an independent review from the `reviewer` subagent, committed through the hooks and
+wrote the pull request text. Not proven: `pr` mode in an unattended run, and a bucket with end-to-end tests.
+
 The skill runs `node scripts/factory-guard.mjs preflight` first. If it says `not ready`, it shows the problems and
 stops without changing anything (a dirty tree, a bucket without "Done when", an unsupported host).
 

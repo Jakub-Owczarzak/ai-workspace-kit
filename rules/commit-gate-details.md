@@ -24,9 +24,11 @@ Resolve every blocking finding. How strict comes from `review.mode`: its value i
 - `off`: review only when asked.
 - `advisory` or `required`: stage the change and run `node scripts/check-review-gate.mjs --staged`. If it reports a clean
   record (its output contains a line starting `review-gate: ok`; its exit code is 0 for a reminder too, so read the
-  output), go on. Otherwise start the `reviewer` subagent on the staged diff and fix its blocking findings. Save its
-  report as `.claude/reviews/report.md` and record the final result with
-  `node scripts/check-review-gate.mjs record --blocking <number> --summary "<one line>" --findings-file .claude/reviews/report.md`.
+  output), go on. Otherwise start the `reviewer` subagent on the staged diff and fix its blocking findings. Record the
+  final result by piping its report into
+  `node scripts/check-review-gate.mjs record --blocking <number> --summary "<one line>" --findings-file -`
+  (a here-document in a POSIX shell, a here-string in PowerShell). Do not save the report under `.claude/` with a
+  file-writing tool first: Claude Code refuses that in an unattended run.
   Review again after a fix, because changed content needs a new record. If blocking findings remain that you decide not
   to fix, record the real number (never 0) and tell the user. In `required` mode the pre-push hook blocks a push whose
   content has no clean record. If your tool cannot start a reviewer subagent, review the staged change yourself in a

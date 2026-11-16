@@ -130,7 +130,9 @@ Never change an existing test to make it pass (see the test-discipline rule). If
 ## 2. After the last bucket
 
 **`factory.mode` is `local`:** for each branch write the pull request text to `.claude/factory/pr-<id>.md`, following
-the `pr-description` rules and the real diff against the branch below. Stop and tell the user the branches and
+the `pr-description` rules and the real diff against the branch below. Write it with
+`node scripts/factory-guard.mjs pr-write --branch <id>` and the text on standard input, not with a file-writing tool
+(Claude Code refuses that tool under `.claude/` in an unattended run). Stop and tell the user the branches and
 files. Screenshots stay in `.claude/factory/shots/<id>/`: tell the user where. You are done; nothing was pushed.
 
 **`factory.mode` is `pr`:**
@@ -228,7 +230,7 @@ separate passes, and be plain about what that costs: there is no fresh context a
   do not rely on what you remember writing. Write the report in that file's format, start it with "SELF-REVIEW:
   written by the agent that built the change", and record it with the `--self-review` flag:
   `node scripts/check-review-gate.mjs record --blocking <n> --summary "self-review: no fresh reader" --self-review
-  --findings-file <file>`. Say the same in the PR body.
+  --findings-file -` with the report on standard input. Say the same in the PR body.
 - **Under `review.mode` `required`** a self-review is not the second reader that mode promises. The gate itself does
   not count a record made with `--self-review`, so the pre-push hook blocks until an independent review is recorded
   or a person decides otherwise. Do not work around that: stop before any push, as section 2 step 2 says, and ask the

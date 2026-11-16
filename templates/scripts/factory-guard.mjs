@@ -10,6 +10,10 @@
 //   node scripts/factory-guard.mjs plan-excerpt [--bucket <id>]   The Intent Anchor and the pending buckets' plans (or one
 //                                                         bucket's), so a run does not read the whole PLAN.md
 //   node scripts/factory-guard.mjs handoff-check --bucket <id>   Is .claude/factory/handoff/<id>.md complete and done? 0/1
+//   node scripts/factory-guard.mjs handoff-write --bucket <id>   Store the handoff text read from standard input as
+//                                                         .claude/factory/handoff/<id>.md (use this, not a file-writing tool:
+//                                                         Claude Code refuses that tool under .claude/ in an unattended run)
+//   node scripts/factory-guard.mjs pr-write --branch <id>        The same for the pull request text: .claude/factory/pr-<id>.md
 //   node scripts/factory-guard.mjs attempt --key <layer>  Count one CI fix attempt; exit 0 = fix it, 1 = stop
 //   node scripts/factory-guard.mjs push-check --branch <b> [--default-branch <d>]   Exit 1 for a protected branch
 //   node scripts/factory-guard.mjs report --reason <text> [--details-file <file>]   Write .claude/factory/report.md
@@ -243,6 +247,23 @@ export function planExcerpt(planText, only = null) {
 /** Where the handoff file of a bucket lives (the id is reduced to safe characters). */
 export function handoffPath(root, id) {
   return join(root, FACTORY_DIR, 'handoff', `${String(id).replace(/[^\w.-]+/g, '-')}.md`);
+}
+
+/** Where the pull request text of a branch lives, `.claude/factory/pr-<id>.md` (the id is reduced to safe characters). */
+export function prTextPath(root, id) {
+  return join(root, FACTORY_DIR, `pr-${String(id).replace(/[^\w.-]+/g, '-')}.md`);
+}
+
+/**
+ * Writes a text file inside the factory folder and returns its path. The handoff and the pull request text go through
+ * here, not through an assistant's file-writing tool: Claude Code refuses that tool for paths under `.claude/` in a run
+ * nobody can answer, while a script is not subject to the check. The caller passes a path built by `handoffPath` or
+ * `prTextPath`, which only produce names inside the factory folder.
+ */
+export function writeFactoryText(path, text) {
+  mkdirSync(dirname(path), { recursive: true });
+  writeFileSync(path, text.endsWith('\n') ? text : `${text}\n`);
+  return path;
 }
 
 /** What is wrong with a handoff text, as sentences; an empty list means it is complete and says `Status: done`. */
@@ -745,6 +766,30 @@ function main(argv) {
       console.log(`ok: handoff for bucket ${options.bucket} is complete (${path})`);
       return 0;
     }
+    case 'handoff-write':
+    case 'pr-write': {
+      const isHandoff = options.command === 'handoff-write';
+      const id = isHandoff ? options.bucket : options.branch;
+      if (!id) {
+        console.error(isHandoff ? 'handoff-write needs --bucket <id> and the handoff text on standard input' : 'pr-write needs --branch <id> and the pull request text on standard input');
+        return 2;
+      }
+      let text = '';
+      try {
+        text = readFileSync(0, 'utf8');
+      } catch {
+        // No standard input: nothing to write.
+      }
+      if (!text.trim()) {
+        console.error(`${options.command} got no text on standard input; nothing was written`);
+        return 2;
+      }
+      const path = writeFactoryText(isHandoff ? handoffPath(options.root, id) : prTextPath(options.root, id), text);
+      console.log(`wrote ${isHandoff ? 'handoff' : 'pull request text'}: ${path}`);
+      // A blocked handoff is a legitimate result, so a problem here is information, not a failure: run handoff-check for the verdict.
+      if (isHandoff) for (const problem of handoffProblems(text)) console.log(`problem: ${problem}`);
+      return 0;
+    }
     case 'reset':
       resetState(options.root);
       console.log('attempt counts cleared');
@@ -761,7 +806,7 @@ function main(argv) {
       return 0;
     }
     default:
-      console.error('usage: factory-guard.mjs preflight | baseline | fast-check | plan-excerpt [--bucket <id>] | handoff-check --bucket <id> | attempt --key <name> | push-check --branch <name> | report --reason <text> | reset | clean-log [--lines <n>] < log  [--root <dir>]');
+      console.error('usage: factory-guard.mjs preflight | baseline | fast-check | plan-excerpt [--bucket <id>] | handoff-check --bucket <id> | handoff-write --bucket <id> < text | pr-write --branch <id> < text | attempt --key <name> | push-check --branch <name> | report --reason <text> | reset | clean-log [--lines <n>] < log  [--root <dir>]');
       return 2;
   }
 }
