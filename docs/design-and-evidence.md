@@ -21,6 +21,23 @@ Sections 10 to 12 of the former README: the principles, what was proven and what
   more than it protects.
 - **Local only.** No CI calls to Claude, no API key, no GitHub calls from the kit's scripts.
 
+### Decisions behind the config manager
+
+Three choices that change what you see after `config` has edited files. Each came from a real run that went wrong the
+other way, and a test holds each one.
+
+- **A file you edited is kept, and stays on the kit's list.** When `config off` finds that you changed a kit file, it keeps
+  the file and names it. It does not drop the file from the kit's record ("it is yours now"): `uninstall` then still deals
+  with it, removing an edited `wk-` skill file with an `EDITED` line and listing any other edited file as `KEPT`. With the
+  other choice a later `uninstall` left such a file behind in silence.
+- **`workflow.json` stays the kit's after the kit's own edit.** `config set` and `config profile` change keys in a file
+  the kit wrote. If you never edited it by hand, it is still the kit's, so `uninstall` removes it. If you did edit it, it
+  stays yours and is kept. With the other choice an untouched file was left behind after `uninstall`.
+- **The record follows `workflow.json`.** `choices.json` keeps the setup answers. When a valid `workflow.json` exists, the
+  profile and overrides in the record mirror it, because that is the file the scripts read. Running the setup again with
+  its old answers no longer leaves a record that says "solo, no overrides" next to a file that says "team plus four
+  overrides".
+
 ## 11. How it was checked, and what is not proven
 
 Numbers are from 2026-11-10 unless a line says otherwise; they change as the kit does.
