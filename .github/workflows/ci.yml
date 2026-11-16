@@ -27,3 +27,6 @@ jobs:
       - name: Install smoke test (pack, npx init, apply, apply again)
         timeout-minutes: 5
         run: node scripts/ci-smoke.mjs
+      - name: Install matrix (profiles x tools x options, apply twice, uninstall restores the project exactly)
+        timeout-minutes: 8
+        run: node scripts/matrix-install.mjs

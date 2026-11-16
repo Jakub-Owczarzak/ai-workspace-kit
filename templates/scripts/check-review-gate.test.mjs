@@ -272,6 +272,24 @@ describe('real runs in a throw-away git repository', () => {
     });
   });
 
+  // Claude Code refuses a file-writing tool for a path under `.claude/` in an unattended run, so the findings can be
+  // piped in instead of saved first: `--findings-file -` reads them from standard input.
+  it('reads the findings from standard input when --findings-file is -', () => {
+    withRepository(({ root, git }) => {
+      writeFileSync(join(root, 'code.txt'), 'two\n');
+      git('add', 'code.txt');
+      const result = spawnSync(process.execPath, [scriptPath, 'record', '--blocking', '1', '--findings-file', '-'], {
+        cwd: root,
+        encoding: 'utf8',
+        input: '- code.txt:1 piped finding\n',
+        env: { ...process.env, REVIEW_MODE: '' },
+      });
+      assert.equal(result.status, 0, result.stderr);
+      const tree = git('write-tree').trim();
+      assert.match(readFileSync(recordPathFor(root, tree), 'utf8'), /code\.txt:1 piped finding/);
+    });
+  });
+
   it('stays silent in off mode and reminds without a profile file (solo is advisory)', () => {
     withRepository(({ root }) => {
       const off = run(root, [], 'off');

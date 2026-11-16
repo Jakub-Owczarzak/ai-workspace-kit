@@ -424,7 +424,19 @@
       "installAs": null,
       "title": "Setup (this questionnaire)",
       "what": "The installer prompt. It stays inside the kit folder and is not copied into the project's own skills.",
-      "impact": "Run it again to change your choices; it is safe to repeat.",
+      "impact": "Run it again to add pieces or change tools and stack packs; it is safe to repeat. To turn things off later, use the manage-workspace prompt or `config menu`.",
+      "default": true,
+      "touches": []
+    },
+    {
+      "id": "skill.manage-workspace",
+      "kind": "skill",
+      "since": "0.5.0",
+      "source": "skills/manage-workspace",
+      "installAs": null,
+      "title": "Manage the setup (this prompt)",
+      "what": "The prompt for changing an installed setup: features on or off, the profile, single controls. It stays inside the kit folder and is not copied into the project's own skills.",
+      "impact": "Run it any time after the first setup. Every change is shown as a dry run first. The same thing is available in a terminal: `config menu`.",
       "default": true,
       "touches": []
     },
@@ -470,8 +482,8 @@
       "what": "A reviewer subagent, the REVIEW.md checklist and a review-record check, so a second reader examines every change.",
       "impact": "Adds one review step per change; how hard it is enforced is set by review.mode.",
       "default": true,
-      "installs": ["templates/agents/reviewer.md", "templates/REVIEW.md", "templates/scripts/check-review-gate.mjs"],
-      "touches": [".claude/agents/reviewer.md", "REVIEW.md", "scripts/check-review-gate.mjs", ".claude/reviews/ (git-ignored)"]
+      "installs": ["templates/agents/reviewer.md", "templates/REVIEW.md", "templates/scripts/check-review-gate.mjs", "templates/scripts/workflow-config.mjs"],
+      "touches": [".claude/agents/reviewer.md", "REVIEW.md", "scripts/check-review-gate.mjs", "scripts/workflow-config.mjs", ".claude/reviews/ (git-ignored)"]
     },
     {
       "id": "check.reviewer-guard",
@@ -566,8 +578,8 @@
       "impact": "Installed only when tests.guard is on (default in team and org).",
       "default": { "solo": false, "team": true, "org": true },
       "requires": ["control.tests.guard"],
-      "installs": ["templates/scripts/test-edit-guard.mjs"],
-      "touches": ["scripts/test-edit-guard.mjs", ".claude/settings.json (a marked entry)", ".claude/state/ (git-ignored)"]
+      "installs": ["templates/scripts/test-edit-guard.mjs", "templates/scripts/workflow-config.mjs"],
+      "touches": ["scripts/test-edit-guard.mjs", "scripts/workflow-config.mjs", ".claude/settings.json (a marked entry)", ".claude/state/ (git-ignored)"]
     },
     {
       "id": "setting.plan-mode-default",
@@ -577,6 +589,16 @@
       "impact": "A hard stop behind the planning gate. Every session starts in plan mode, even trivial ones. Does not apply in the VS Code extension.",
       "default": { "solo": false, "team": true, "org": true },
       "touches": [".claude/settings.json (merged, never overwritten)"]
+    },
+    {
+      "id": "setting.search-ignore",
+      "kind": "setting",
+      "since": "0.5.0",
+      "title": "Keep the kit folder out of searches",
+      "what": "A marked block in .ignore, so searches (ripgrep and the tools built on it, Claude Code's among them) skip .claude/workspace-kit/, the kit's own storage of about 100 files.",
+      "impact": "Without it a search for a word the kit also uses returns kit files and their text goes into the assistant's context. Your own rg searches skip that folder too; the folder stays committed and any file can still be opened by its path.",
+      "default": true,
+      "touches": [".ignore (a marked block)"]
     },
 
     {

@@ -44,7 +44,7 @@ describe('looksLikePath', () => {
   });
 
   it('rejects commands, placeholders, patterns, calls, urls and plain words', () => {
-    for (const code of ['npm run lint', 'feat/<short-name>', 'tabs.*', 'useTheme()', 'DOCS_CHECK=strict', 'https://x.dev/a', 'typedRoutes', 'main', 'haptic.tap/selection/success/error']) {
+    for (const code of ['npm run lint', 'feat/<short-name>', 'tabs.*', 'useTheme()', 'DOCS_CHECK=strict', 'https://x.dev/a', 'typedRoutes', 'main', 'haptic.tap/selection/success/error', 'node:assert/strict', 'node:test', 'node:fs/promises']) {
       assert.equal(looksLikePath(code), false, code);
     }
   });
@@ -94,6 +94,27 @@ describe('checkOverview', () => {
     const findings = checkOverview({ text: '`src/app/index.tsx` and `src/gone/file.ts`', entries: baseEntries });
     assert.deepEqual(kindsOf(findings), ['missing-path']);
     assert.match(findings[0].message, /src\/gone\/file\.ts/);
+  });
+
+  it('does not check the kit\'s own marked block, but still counts its lines so the report points at the right line', () => {
+    // The block is rewritten from the kit's source on every apply and names paths of other tools (`.claude/agents/`),
+    // so a project cannot fix a finding inside it.
+    const text = [
+      '# Overview',
+      '<!-- workspace-kit:start rules -->',
+      'Subagents live in `.claude/agents/`, or run `/` then the skill name.',
+      '<!-- workspace-kit:end rules -->',
+      'Real stale path: `src/gone/file.ts`.',
+    ].join('\n');
+    const findings = checkOverview({ text, entries: baseEntries });
+    assert.equal(findings.length, 1);
+    assert.equal(findings[0].line, 5);
+    assert.match(findings[0].message, /src\/gone\/file\.ts/);
+  });
+
+  it('still checks text after an unclosed kit marker line is not a block (only a start with its end counts)', () => {
+    const text = ['<!-- workspace-kit:start rules -->', 'Mentions `src/gone/file.ts` and the block never ends.'].join('\n');
+    assert.equal(checkOverview({ text, entries: baseEntries }).length, 1);
   });
 
   it('does not report a missing path that git ignores, or a dependency import path', () => {

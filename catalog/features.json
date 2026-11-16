@@ -1,0 +1,162 @@
+{
+  "_comment": "Named features for `config feature`: a short name over the options (installed pieces) and control values that belong together. `options` are switches turned on and off with the feature; `controls` give the value for on and for off; a `levels` entry is a stronger or different way to be on (it can add options and change control values, 'default' removes the override); `note` is printed when that level is turned on. Features that cannot work apart are one feature. `notFeatures` lists every option and control that is deliberately not a feature (still reachable with `config on|off|set`); a test requires every catalog option to be in exactly one place.",
+  "groups": ["quality", "delivery", "factory", "planning", "design"],
+  "features": [
+    {
+      "id": "tdd",
+      "group": "quality",
+      "title": "Test-first development",
+      "what": "A failing test comes before the fix or the new logic.",
+      "impact": "on: new logic and bug fixes start with a failing test. bugs: only bug fixes do. off: no test-first rule (the rule against skipping or weakening a failing test stays).",
+      "options": [],
+      "controls": { "tests.tdd": { "on": "on", "off": "off" } },
+      "levels": { "bugs": { "controls": { "tests.tdd": "bugs" } } }
+    },
+    {
+      "id": "test-guard",
+      "group": "quality",
+      "title": "Test-edit guard",
+      "what": "Blocks edits to existing test files while a bug fix is in progress, so a fix cannot be made by changing the test.",
+      "impact": "Installs a script and a Claude Code hook (a settings entry). Off removes both.",
+      "options": ["check.test-edit-guard"],
+      "controls": { "tests.guard": { "on": "on", "off": "off" } }
+    },
+    {
+      "id": "static-checks",
+      "group": "quality",
+      "title": "Static config checks",
+      "what": "Cheap checks that need no AI: skill lint and the @-import resolver, run with npm run check:config.",
+      "impact": "Installs the check scripts and a check:config script in package.json. Other pieces (the factory, the Claude checks) need them.",
+      "options": ["check.static"],
+      "controls": { "static.checks": { "on": true, "off": false } }
+    },
+    {
+      "id": "claude-checks",
+      "group": "quality",
+      "title": "Checks that run Claude locally",
+      "what": "Import check and trigger runner that call claude -p on your machine.",
+      "impact": "They use Claude usage. They are never run by hooks or CI.",
+      "options": ["check.claude"],
+      "controls": { "claude.runChecks": { "on": true, "off": false } }
+    },
+    {
+      "id": "e2e",
+      "group": "quality",
+      "title": "End-to-end UI tests and screenshots",
+      "what": "Playwright tests in a headless browser, with screenshots the assistant looks at.",
+      "impact": "Installs the e2e skill and a screenshot helper. Level native uses Maestro against a platform you supply.",
+      "options": ["skill.e2e-tests", "check.e2e-shots"],
+      "controls": { "tests.e2e": { "on": "browser", "off": "off" } },
+      "levels": { "native": { "controls": { "tests.e2e": "native" }, "note": "native e2e is experimental: Maestro runs against a platform you supply and start (Expo, Android Studio, Xcode or a device)" } }
+    },
+    {
+      "id": "commit-checks",
+      "group": "delivery",
+      "title": "Checks at commit, including the docs-fresh check",
+      "what": "A git pre-commit hook that runs your lint, type check and tests, the overview-is-fresh check and the changelog step.",
+      "impact": "on: a stale overview prints a warning. strict: it blocks the commit. Off removes the kit's block from the hook (your own hook lines stay).",
+      "options": ["hook.pre-commit"],
+      "controls": { "docs.check": { "on": "warn", "off": "off" } },
+      "levels": { "strict": { "controls": { "docs.check": "strict" } } }
+    },
+    {
+      "id": "pr-protection",
+      "group": "delivery",
+      "title": "Review gate and push protection",
+      "what": "A reviewer subagent that cannot change files, the REVIEW.md checklist, and a pre-push hook that blocks pushing to the protected branch and checks the review record.",
+      "impact": "on: the reviewer runs and a push is reminded. required: a push whose content has no clean review record is blocked. Installs a git hook and a Claude Code settings entry.",
+      "options": ["review-gate", "check.reviewer-guard", "hook.pre-push"],
+      "controls": { "review.mode": { "on": "advisory", "off": "off" } },
+      "levels": { "required": { "controls": { "review.mode": "required" } } }
+    },
+    {
+      "id": "changelog",
+      "group": "delivery",
+      "title": "Changelog and version bump",
+      "what": "A skill and a commit step that add a changelog line for every change and bump the version.",
+      "impact": "Level release also installs a GitHub workflow that bumps the version on the protected branch.",
+      "options": ["skill.changelog-bump"],
+      "controls": {},
+      "levels": { "release": { "options": ["workflow.release-bump"], "note": "the release workflow needs the protected branch and the version files from the setup; without them it is left as a manual step" } }
+    },
+    {
+      "id": "factory",
+      "group": "factory",
+      "title": "The factory: automatic delivery after the plan",
+      "what": "After you approve the plan, agents build, test, review and commit it without further prompts, one fresh builder per bucket.",
+      "impact": "on: runs locally and stops before any push. pr: also pushes feature branches, opens the pull request or a stack, watches CI and fixes a red run up to the CI fix limit. pr-watch: the same, but it only watches CI and reports. Nothing is ever merged or deployed.",
+      "options": ["factory-core", "skill.run-factory"],
+      "controls": { "factory.mode": { "on": "local", "off": "off" } },
+      "levels": {
+        "pr": { "controls": { "factory.mode": "pr", "factory.ciFixAttempts": "default" }, "note": "pr mode pushes feature branches and opens pull requests on your code host, and fixes red CI runs up to the CI fix limit. It never merges or deploys. factory.pushConfirm decides whether it asks before each push" },
+        "pr-watch": { "controls": { "factory.mode": "pr", "factory.ciFixAttempts": 0 }, "note": "pr mode pushes feature branches and opens pull requests on your code host. With the CI fixer off it only watches CI and reports. It never merges or deploys" }
+      }
+    },
+    {
+      "id": "planning-gate",
+      "group": "planning",
+      "title": "Goal agreed before non-trivial work",
+      "what": "The assistant must write down the goal (the Intent Anchor) and get your approval before it builds anything non-trivial.",
+      "impact": "on: no code for non-trivial work until you approve the goal. full: also records success measurements. off: the planner is used only when you ask.",
+      "options": [],
+      "controls": { "planning.gates": { "on": "anchor", "off": "off" } },
+      "levels": { "full": { "controls": { "planning.gates": "full" } } }
+    },
+    {
+      "id": "plan-mode",
+      "group": "planning",
+      "title": "Plan mode as the session default",
+      "what": "Claude Code starts every session in plan mode, where it cannot edit files until you accept a plan.",
+      "impact": "A settings entry. Claude Code only: it does nothing in other tools, and not in the VS Code extension.",
+      "options": ["setting.plan-mode-default"],
+      "controls": {},
+      "note": "plan mode is a Claude Code setting; it has no effect in other tools or in the VS Code extension"
+    },
+    {
+      "id": "figma-sync",
+      "group": "design",
+      "title": "Figma design sync",
+      "what": "A skill that keeps the code and the Figma file in step, and a rule that flags user-visible UI changes.",
+      "impact": "Installs one skill and one rule.",
+      "options": ["skill.figma-sync", "rule.ui-change-flagging"],
+      "controls": {}
+    }
+  ],
+  "presets": [
+    {
+      "id": "protection",
+      "title": "Commit and PR protection",
+      "what": "The checks at commit and the review gate with push protection, turned on or off together.",
+      "features": ["commit-checks", "pr-protection"]
+    }
+  ],
+  "notFeatures": [
+    "control.docs.sizeWarnChars",
+    "control.factory.prLayout",
+    "control.factory.host",
+    "control.factory.pushConfirm",
+    "control.factory.fastFix",
+    "control.factory.untrustedText",
+    "rule.readable-code",
+    "rule.repo-tidiness",
+    "rule.docs-fresh",
+    "rule.commit-gate",
+    "rule.verification",
+    "rule.test-discipline",
+    "rule.skill-routing",
+    "rule.expo-docs-first",
+    "skill.workspace-router",
+    "skill.goal-first-planner",
+    "skill.pr-description",
+    "skill.readable-fix-plan",
+    "skill.ultra-code-quality-review",
+    "skill.write-project-overview",
+    "skill.setup-workspace",
+    "skill.manage-workspace",
+    "setting.search-ignore",
+    "template.plan-file",
+    "template.backlog",
+    "template.claude-md",
+    "stack.expo-react-native"
+  ]
+}

@@ -17,7 +17,7 @@ A **variant** is a profile (**Solo**, **Team** or **Org**), with or without the 
 
 **How you change things.** Every ✅ and ⬜ row is yours to switch. A *feature* (option) is chosen in the setup questions, or later by editing the `enabled` list in `.claude/workspace-kit/choices.json` and running `node .claude/workspace-kit/bin/cli.mjs apply --choices .claude/workspace-kit/choices.json`. A *setting* (control) is changed with `overrides` in `.claude/workflow.json` (for example `"factory.mode": "pr"`), or for one command with the environment variable in the last column (for example `FACTORY_MODE=pr`). The *fixed safeguards* below are not settings.
 
-<details><summary>Features you can switch on or off (35)</summary>
+<details><summary>Features you can switch on or off (37)</summary>
 
 **Rules**
 
@@ -46,6 +46,7 @@ A **variant** is a profile (**Solo**, **Team** or **Org**), with or without the 
 | Changelog and version bump (`skill.changelog-bump`) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |   |
 | Figma design sync (`skill.figma-sync`) | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |   |
 | Setup (this questionnaire) (`skill.setup-workspace`) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |   |
+| Manage the setup (this prompt) (`skill.manage-workspace`) *new in 0.5.0* | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |   |
 | End-to-end tests and screenshots (`skill.e2e-tests`) | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | `check.e2e-shots` |
 | Run the factory (`skill.run-factory`) | ⬜ | ⬜ | ⬜ | ✅ | ✅ | ✅ | `factory-core`, `review-gate`, `skill.pr-description` |
 
@@ -74,6 +75,7 @@ A **variant** is a profile (**Solo**, **Team** or **Org**), with or without the 
 | Feature | Solo | Team | Org | Factory Solo | Factory Team | Factory Org | Needs |
 |---|:-:|:-:|:-:|:-:|:-:|:-:|---|
 | Plan mode as the session default (`setting.plan-mode-default`) | ⬜ | ✅ | ✅ | ⬜ | ✅ | ✅ |   |
+| Keep the kit folder out of searches (`setting.search-ignore`) *new in 0.5.0* | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |   |
 | PLAN.md (`template.plan-file`) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |   |
 | BACKLOG.md (`template.backlog`) | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |   |
 | CLAUDE.md starter (`template.claude-md`) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |   |

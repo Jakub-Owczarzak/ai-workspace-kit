@@ -1,6 +1,6 @@
 ---
 name: setup-workspace
-description: Set up the workspace kit in this project after `npx ai-workspace-kit init`. Asks which AI tools and which profile (solo, team, org) the project uses, explains every switchable rule, skill, hook and check in a line or two with its effect on the workflow, then installs only what was chosen. Use once per project, or again to change the choices. Never overwrites an existing file.
+description: Set up the workspace kit in this project after `npx ai-workspace-kit init`. Asks which AI tools and which profile (solo, team, org) the project uses, explains every switchable rule, skill, hook and check in a line or two with its effect on the workflow, then installs only what was chosen. Use once per project, or again to add pieces or change tools and stack packs; to turn things off later use the manage-workspace skill. Never overwrites an existing file.
 disable-model-invocation: true
 ---
 
@@ -40,6 +40,12 @@ framework that has a stack pack in `<KIT>/stacks/` (for example an `expo` depend
 what you found so they can correct it.
 
 ## Step 2: the questionnaire (from the catalog, in rounds of at most four questions)
+
+**Re-running the setup:** if `<KIT>/choices.json` exists, this is not a first install. Preselect from that recorded
+choice (its `profile`, `enabled`, `overrides`, `tools`), not from the profile's defaults, and tell the user which
+options are off now although the profile enables them by default (they were turned off earlier, with the manager or by
+an answer of no). Leave those off unless the user says otherwise: `apply` turns on again whatever the choices include,
+and says so. The profile in `<KIT>/choices.json` follows `.claude/workflow.json`; to change it afterwards use the manager.
 
 Read `<KIT>/catalog/options.json`. **Use its `title`, `what` and `impact` text as written**; do not invent
 explanations. Show each option as one line `title: what (effect: impact)`. Preselect each option's `default`

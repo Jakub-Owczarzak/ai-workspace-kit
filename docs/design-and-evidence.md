@@ -26,7 +26,8 @@ Sections 10 to 12 of the former README: the principles, what was proven and what
 Numbers are from 2026-11-10 unless a line says otherwise; they change as the kit does.
 
 - **Tests:** `npm test` runs every `*.test.mjs` file in its own process, with a time limit and closed stdin:
-  473 tests, all pass (2026-11-11), in CI on Ubuntu, macOS and Windows with Node 18 and Node 22, and locally on Windows.
+  762 tests pass locally on Windows with Node 22 (2026-11-16); the CI runs below were last read at 473 tests
+  (2026-11-11), on Ubuntu, macOS and Windows with Node 18 and Node 22.
   None calls Claude. They include real runs in
   throw-away git repositories, a hook run through a symlink, and the installer's collision cases: a skill with
   the same name, a hand-written `CLAUDE.md`, a `settings.json` with comments, a `git-lfs` pre-push hook, and an
@@ -57,6 +58,34 @@ Numbers are from 2026-11-10 unless a line says otherwise; they change as the kit
 - **Reviews:** five reviews by fresh subagents given the `reviewer` instructions (2026-11-09): the review gate
   (twice), the planner changes, the mapping page and the earlier README. The installer, the catalog and the
   setup questionnaire have **not** been reviewed by a fresh reader.
+- **The config manager** (`config list|on|off|set|unset|profile|feature|menu`, the `manage-workspace` prompt; not yet
+  released, its options are labelled `since 0.5.0`). Checked on 2026-11-13 to 2026-11-16, Windows 11:
+  - 762 tests pass on Node 22 (Windows); the 12-combination install matrix and the tarball smoke test pass. Node 18 passed
+    the suite, the smoke test and the matrix on Windows on 2026-11-14, **before** the last additions; it was not run again.
+  - CI on the pull request, first run (2026-11-14): Ubuntu and Windows (Node 18 and 22) and macOS Node 22 passed;
+    **macOS Node 18 failed** a CLI test with "Unexpected end of JSON input". The cause was real: the CLI called
+    `process.exit()` right after printing 10 to 30 KB of `--json`, and a pipe on macOS dropped what was still queued. It
+    cannot be reproduced on Windows. Fixed (the CLI waits for stdout; `factory-guard` ends without `process.exit()`); the
+    other scripts still use `process.exit()` after short output. The CI run of the fix is not read here.
+  - Real runs on throw-away projects: a profile round trip, all 12 features on and off with their levels, every single
+    piece off and on, setup run again after changes, and `uninstall`. After each step a fresh setup from the same
+    recorded choices gave an identical tree (35 of 35 steps), `apply` changed nothing, and the checks passed.
+  - A real terminal: `config menu` 13 of 13 checks. The upgrade of a real 0.2.0 install worked.
+  - Models following the `manage-workspace` prompt (dry run first, no hand edits, stop at a refusal): three Claude
+    models, and a local Qwen3.8-27B in OpenCode 2.3.0 (one change and one refusal, one run each).
+  - The whole path on that local model in a scratch project: setup, manager, plan, factory (local, then `pr`), a pull
+    request opened by the factory with CI green. Details and limits:
+    [other-tools-checklist.md](other-tools-checklist.md#5-results-so-far).
+  - **Not proven:** Linux and macOS (CI runs them only after a push); Cursor, Codex and Cline following the manager;
+    the menu, a profile switch and `--prune` driven by a non-Claude model; native e2e; Ctrl-C inside `config menu`.
+  - Bugs those runs found, now fixed: a hand-edited kit file kept by `config off` was dropped from the manifest;
+    `config` made `workflow.json` look edited; a re-run of the setup could disagree with `workflow.json`; the kit folder
+    showed up in repository searches (now the `.ignore` option); CRLF files were rewritten with LF.
+- **The factory, unattended Claude Code run** (2026-11-14 and 2026-11-16, Claude Code 2.1.322): with the default
+  permissions a headless `claude -p` run stopped because Claude Code refuses file-writing tools under `.claude/`. The
+  handoff, the pull request text and the review findings now go through the guard scripts; one headless run in local
+  mode then finished (independent review, commit, PR text). **Not run:** `pr` mode unattended, a bucket with e2e, and the
+  stdin findings change headless. See [factory.md](factory.md#starting-it).
 - **Not yet run:** the setup questionnaire in Claude Code (it was run once in OpenCode 1.19.5 on 2026-11-13: it asked
   in rounds, waited, and showed a dry run before writing anything; the installer behind it is tested); plan mode; a real `git push` through the pre-push hook; the
   installer against a real project on macOS or Linux (CI covers it on throw-away projects only); a release made

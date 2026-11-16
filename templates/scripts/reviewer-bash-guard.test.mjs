@@ -104,6 +104,8 @@ test('every other factory script subcommand, and any extra argument or other scr
     'node scripts/factory-guard.mjs plan-excerpt --bucket 1; touch x',
     'node scripts/factory-guard.mjs plan-excerpt --bucket $(touch x)',
     'node scripts/factory-guard.mjs handoff-check',
+    'node scripts/factory-guard.mjs handoff-write --bucket 1',
+    'node scripts/factory-guard.mjs pr-write --branch 1',
     'node scripts/check-review-gate.mjs record --blocking 0',
     'node ../scripts/factory-guard.mjs plan-excerpt',
     'node /tmp/factory-guard.mjs plan-excerpt',

@@ -60,6 +60,7 @@ export function looksLikePath(code) {
   if (/\s/.test(code) || /[<>*{}$=,;|]/.test(code) || /^https?:/.test(code)) return false;
   if (/\w\(.*\)$/.test(code)) return false; // a call such as useTheme(), not a path; a route group "(tabs)/x" still passes
   if (/\w\.\w+\//.test(code)) return false; // object access such as "haptic.tap/selection", not a folder
+  if (/^node:/.test(code)) return false; // a Node built-in module such as "node:assert/strict", not a file
   const extension = code.match(/\.([a-z0-9]+)$/i)?.[1]?.toLowerCase();
   return code.includes('/') || FILE_EXTENSIONS.has(extension);
 }
@@ -252,12 +253,32 @@ function findUndocumentedChildren({ lines, spans, entries }) {
   return findings;
 }
 
+const KIT_BLOCK_START = /^\s*<!-- workspace-kit:start\b.*-->\s*$/;
+const KIT_BLOCK_END = /^\s*<!-- workspace-kit:end\b.*-->\s*$/;
+
+/**
+ * The lines with the content of the kit's own marked blocks emptied (the line count stays, so findings keep their line
+ * numbers). The kit rewrites such a block from its source on every apply and it names paths of other tools, such as
+ * `.claude/agents/`, so a project cannot fix a finding inside it. A start marker with no end marker is not a block.
+ */
+function withoutKitBlocks(lines) {
+  const result = [...lines];
+  for (let start = 0; start < result.length; start += 1) {
+    if (!KIT_BLOCK_START.test(result[start])) continue;
+    const end = result.findIndex((line, index) => index > start && KIT_BLOCK_END.test(line));
+    if (end === -1) continue;
+    for (let index = start; index <= end; index += 1) result[index] = '';
+    start = end;
+  }
+  return result;
+}
+
 /**
  * Checks the overview text against the project. Inputs: `text`; `entries` (see listProjectEntries);
  * `packageJson` (parsed, or null); `gitignoreText`. Returns findings `{ line, kind, message }`, in line order.
  */
 export function checkOverview({ text, entries, packageJson = null, gitignoreText = '' }) {
-  const lines = text.split('\n');
+  const lines = withoutKitBlocks(text.split('\n'));
   const spans = extractInlineCode(lines);
   const dependencies = { ...packageJson?.devDependencies, ...packageJson?.dependencies };
   const context = { lines, spans, entries, dependencies, ignoredNames: readIgnoredNames(gitignoreText), scripts: packageJson?.scripts };

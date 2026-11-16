@@ -24,6 +24,7 @@ import {
   planExcerpt,
   planProblems,
   preflight,
+  prTextPath,
   projectCommands,
   readState,
   recordAttempt,
@@ -870,6 +871,64 @@ describe('command line', () => {
       assert.match(run(['handoff-check', '--bucket', '2'], root).stdout, /not done/);
       writeFileSync(join(dir, '2.md'), 'Changed: a.js\nRan: npm test: 3 of 3\nDone when:\n- x: done\n\nStatus: done\n');
       assert.equal(run(['handoff-check', '--bucket', '2'], root).status, 0);
+    });
+  });
+
+  // Claude Code refuses a Write-tool call under `.claude/` in an unattended run, so the handoff and the pull request
+  // text go through this script instead (a script is not subject to that check). The text arrives on stdin.
+  const runWithInput = (args, root, input) => {
+    try {
+      const stdout = execFileSync(process.execPath, [GUARD, ...args, '--root', root], { encoding: 'utf8', input, stdio: ['pipe', 'pipe', 'pipe'] });
+      return { status: 0, stdout };
+    } catch (error) {
+      return { status: error.status, stdout: String(error.stdout ?? ''), stderr: String(error.stderr ?? '') };
+    }
+  };
+  const DONE_HANDOFF = 'Changed: a.js\nRan: npm test: 3 of 3\nDone when:\n- x: done\n\nStatus: done\n';
+
+  it('prTextPath keeps the id to safe characters inside the factory folder', () => {
+    const path = prTextPath('/p', '../x y').replaceAll('\\', '/');
+    assert.match(path, /\/\.claude\/factory\/pr-[^/]+\.md$/, 'one file name, no separator, in the factory folder');
+  });
+
+  it('handoff-write stores the text from stdin where handoff-check looks for it', () => {
+    withProject((root) => {
+      const result = runWithInput(['handoff-write', '--bucket', '2'], root, DONE_HANDOFF);
+      assert.equal(result.status, 0);
+      assert.match(result.stdout, /handoff/);
+      assert.equal(readFileSync(join(root, '.claude', 'factory', 'handoff', '2.md'), 'utf8'), DONE_HANDOFF);
+      assert.equal(run(['handoff-check', '--bucket', '2'], root).status, 0);
+    });
+  });
+
+  it('handoff-write replaces an older handoff and names what is missing, but still writes it', () => {
+    withProject((root) => {
+      runWithInput(['handoff-write', '--bucket', '2'], root, DONE_HANDOFF);
+      const result = runWithInput(['handoff-write', '--bucket', '2'], root, 'Changed: a.js\nStatus: blocked: which database?\n');
+      assert.equal(result.status, 0, 'a blocked handoff is a legitimate result, not an error');
+      assert.match(result.stdout, /problem: .*"Ran:"/);
+      assert.match(readFileSync(join(root, '.claude', 'factory', 'handoff', '2.md'), 'utf8'), /which database/);
+    });
+  });
+
+  it('handoff-write and pr-write need their id and some text, and write nothing otherwise', () => {
+    withProject((root) => {
+      assert.equal(runWithInput(['handoff-write'], root, DONE_HANDOFF).status, 2, 'needs --bucket');
+      assert.equal(runWithInput(['handoff-write', '--bucket', '2'], root, '  \n').status, 2, 'needs text');
+      assert.equal(runWithInput(['pr-write'], root, 'text').status, 2, 'needs --branch');
+      assert.equal(runWithInput(['pr-write', '--branch', '2'], root, '').status, 2, 'needs text');
+      assert.equal(existsSync(join(root, '.claude', 'factory', 'handoff', '2.md')), false);
+      assert.equal(existsSync(join(root, '.claude', 'factory', 'pr-2.md')), false);
+    });
+  });
+
+  it('pr-write stores the pull request text and an id cannot lead outside the factory folder', () => {
+    withProject((root) => {
+      assert.equal(runWithInput(['pr-write', '--branch', '1'], root, '## Bucket 1\n\nAdds clamp.\n').status, 0);
+      assert.match(readFileSync(join(root, '.claude', 'factory', 'pr-1.md'), 'utf8'), /Adds clamp/);
+      assert.equal(runWithInput(['pr-write', '--branch', '../../evil'], root, 'x').status, 0);
+      assert.equal(existsSync(join(root, 'evil.md')), false);
+      assert.equal(existsSync(join(root, '..', 'evil.md')), false);
     });
   });
 

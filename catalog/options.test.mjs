@@ -66,7 +66,8 @@ test('every skill folder has an option, installed under the wk- prefix', () => {
   assert.deepEqual(skillOptions.map((option) => option.source).sort(), skillDirs.sort());
   for (const option of skillOptions) {
     const name = option.source.split('/')[1];
-    const expected = name === 'setup-workspace' ? null : `wk-${name}`;
+    // The setup and the manager are prompts that stay in the kit folder; every other skill is installed as wk-<name>.
+    const expected = ['setup-workspace', 'manage-workspace'].includes(name) ? null : `wk-${name}`;
     assert.equal(option.installAs, expected, `${option.id}: installAs`);
   }
 });
@@ -106,4 +107,26 @@ test('every installs path exists, and every shippable template file is claimed b
   ].map(kitRelative);
   const unclaimed = shippable.filter((file) => !claimed.has(file));
   assert.deepEqual(unclaimed, [], 'template files no option installs');
+});
+
+test('an option that installs a script reading the profile resolver also gets the resolver', () => {
+  const RESOLVER = 'templates/scripts/workflow-config.mjs';
+  const READS_RESOLVER = /(?:from\s*|import\s*\(\s*)['"]\.\/workflow-config\.mjs['"]/;
+  /** The option itself and everything it needs, directly or not. */
+  const closure = (option, seen = new Set()) => {
+    if (seen.has(option.id)) return seen;
+    seen.add(option.id);
+    for (const id of option.requires ?? []) closure(byId.get(id), seen);
+    return seen;
+  };
+  const without = [];
+  for (const option of options) {
+    const readers = (option.installs ?? []).filter(
+      (file) => /^templates\/scripts\/[^/]+\.mjs$/.test(file) && READS_RESOLVER.test(readFileSync(join(root, file), 'utf8'))
+    );
+    if (!readers.length) continue;
+    const gets = [...closure(option)].some((id) => (byId.get(id).installs ?? []).includes(RESOLVER));
+    if (!gets) without.push(`${option.id} (${readers.join(', ')})`);
+  }
+  assert.deepEqual(without, [], 'these options install a script that needs workflow-config.mjs, which nothing they install or need provides');
 });
