@@ -825,5 +825,7 @@ function startedDirectly() {
 }
 
 if (process.argv[1] && startedDirectly()) {
-  process.exit(main(process.argv.slice(2)));
+  // Not process.exit(): straight after a large console.log (plan-excerpt prints a whole plan) it can drop the part of the
+  // output still queued when stdout is a pipe, as seen on macOS. Nothing keeps the process alive, so it ends by itself.
+  process.exitCode = main(process.argv.slice(2));
 }

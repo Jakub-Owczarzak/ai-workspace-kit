@@ -26,7 +26,7 @@ Sections 10 to 12 of the former README: the principles, what was proven and what
 Numbers are from 2026-11-10 unless a line says otherwise; they change as the kit does.
 
 - **Tests:** `npm test` runs every `*.test.mjs` file in its own process, with a time limit and closed stdin:
-  757 tests pass locally on Windows with Node 22 (2026-11-16); the CI runs below were last read at 473 tests
+  762 tests pass locally on Windows with Node 22 (2026-11-16); the CI runs below were last read at 473 tests
   (2026-11-11), on Ubuntu, macOS and Windows with Node 18 and Node 22.
   None calls Claude. They include real runs in
   throw-away git repositories, a hook run through a symlink, and the installer's collision cases: a skill with
@@ -60,8 +60,13 @@ Numbers are from 2026-11-10 unless a line says otherwise; they change as the kit
   setup questionnaire have **not** been reviewed by a fresh reader.
 - **The config manager** (`config list|on|off|set|unset|profile|feature|menu`, the `manage-workspace` prompt; not yet
   released, its options are labelled `since 0.5.0`). Checked on 2026-11-13 to 2026-11-16, Windows 11:
-  - 757 tests pass on Node 22; the 12-combination install matrix and the tarball smoke test pass. Node 18 passed the
-    suite, the smoke test and the matrix on 2026-11-14, **before** the last additions; it was not run again.
+  - 762 tests pass on Node 22 (Windows); the 12-combination install matrix and the tarball smoke test pass. Node 18 passed
+    the suite, the smoke test and the matrix on Windows on 2026-11-14, **before** the last additions; it was not run again.
+  - CI on the pull request, first run (2026-11-14): Ubuntu and Windows (Node 18 and 22) and macOS Node 22 passed;
+    **macOS Node 18 failed** a CLI test with "Unexpected end of JSON input". The cause was real: the CLI called
+    `process.exit()` right after printing 10 to 30 KB of `--json`, and a pipe on macOS dropped what was still queued. It
+    cannot be reproduced on Windows. Fixed (the CLI waits for stdout; `factory-guard` ends without `process.exit()`); the
+    other scripts still use `process.exit()` after short output. The CI run of the fix is not read here.
   - Real runs on throw-away projects: a profile round trip, all 12 features on and off with their levels, every single
     piece off and on, setup run again after changes, and `uninstall`. After each step a fresh setup from the same
     recorded choices gave an identical tree (35 of 35 steps), `apply` changed nothing, and the checks passed.

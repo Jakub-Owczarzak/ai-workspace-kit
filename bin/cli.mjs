@@ -59,6 +59,14 @@ if (command !== 'init' && command !== 'apply' && command !== 'uninstall' && comm
   process.exit(1);
 }
 
+// Leaves once stdout has taken everything written so far. `process.exit()` straight after a large console.log can drop
+// the part of the output that is still queued when stdout is a pipe (seen on macOS with Node 18: `config feature list
+// --json` came out cut off, and the manage-workspace skill parses that JSON).
+const leave = async (code) => {
+  await new Promise((done) => process.stdout.write('', done));
+  process.exit(code);
+};
+
 const flag = (name) => args.includes(name);
 const valueOf = (name) => {
   const index = args.indexOf(name);
@@ -127,41 +135,41 @@ if (command === 'init') {
       throw new Error('config needs "menu", "list", "get <id>", "on <id>...", "off <id>...", "set <control> <value>", "unset <control>", "profile <name>" or "feature ..."');
     }
     // A change prints its plan, then a reminder that these commands edit tracked files. The big nested reports are left out of --json.
-    const finish = (plan, text) => {
+    const finish = async (plan, text) => {
       console.log(flag('--json') ? JSON.stringify(plan, (key, value) => (key === 'apply' || key === 'requirements' ? undefined : value), 2) : text);
       if (plan.changed && !plan.dryRun && !flag('--json')) console.log('\nReview the changes with "git status" and "git diff".');
-      process.exit(0);
+      await leave(0);
     };
     if (sub === 'get' && !id) throw new Error('config get needs an option id');
     if ((sub === 'on' || sub === 'off') && !ids.length) throw new Error(`config ${sub} needs at least one option id`);
     if (sub === 'set' || sub === 'unset') {
       if (!id || (sub === 'set' && ids[1] === undefined)) throw new Error(sub === 'set' ? 'config set needs a control and a value: config set docs.check strict' : 'config unset needs a control');
       const plan = setControl({ dir, name: id, value: sub === 'set' ? ids[1] : 'default', dryRun });
-      finish(plan, formatControlPlan(plan));
+      await finish(plan, formatControlPlan(plan));
     }
     if (sub === 'profile') {
       if (!id) throw new Error('config profile needs a name: solo, team or org');
       const plan = setProfile({ dir, profile: id, installDefaults: flag('--install-defaults'), dryRun });
-      finish(plan, formatProfilePlan(plan));
+      await finish(plan, formatProfilePlan(plan));
     }
     if (sub === 'on' || sub === 'off') {
       const plan = setOptions({ dir, [sub]: ids, cascade: flag('--cascade'), prune: flag('--prune'), dryRun });
-      finish(plan, formatPlan(plan));
+      await finish(plan, formatPlan(plan));
     }
     if (sub === 'feature') {
       const data = readFeatures(dir);
       if (!id || id === 'list') {
         console.log(flag('--json') ? JSON.stringify(data, null, 2) : formatFeatureList(data));
-        process.exit(0);
+        await leave(0);
       }
       const item = getFeature(data, id);
       if (!ids[1]) {
         console.log(flag('--json') ? JSON.stringify(item, null, 2) : formatFeature(item));
-        process.exit(0);
+        await leave(0);
       }
       if (ids[1] !== 'on' && ids[1] !== 'off') throw new Error(`config feature ${id} needs "on" or "off"`);
       const plan = setFeature({ dir, name: id, state: ids[1], level: ids[2], cascade: flag('--cascade'), prune: flag('--prune'), dryRun });
-      finish(plan, formatFeaturePlan(plan));
+      await finish(plan, formatFeaturePlan(plan));
     }
     const setup = readSetup(dir);
     if (sub === 'list') {
