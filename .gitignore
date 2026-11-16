@@ -1,2 +1,5 @@
 node_modules/
 *.tgz
+
+# Local notes for an article about building this kit (ARTICLE-PLAN.md and the session index): not part of the package
+article-notes/
